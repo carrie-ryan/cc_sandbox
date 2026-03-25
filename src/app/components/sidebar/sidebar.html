@@ -1,0 +1,24 @@
+<aside class="w-52 bg-white border-r border-gray-200 flex flex-col pt-5 shrink-0">
+  <p class="px-4 text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-3">Provider Setup Guide</p>
+
+  <nav class="flex flex-col gap-0.5 px-2">
+    @for (item of navItems; track item.label) {
+      <a
+        [routerLink]="item.route"
+        routerLinkActive="bg-blue-50 text-blue-600 font-medium"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="flex items-center gap-2.5 px-3 py-2 rounded text-gray-500 hover:bg-gray-50 text-sm w-full text-left no-underline"
+        #rla="routerLinkActive"
+      >
+        <span [class]="rla.isActive
+          ? 'w-4 h-4 rounded-full bg-blue-600 flex items-center justify-center shrink-0'
+          : 'w-4 h-4 rounded-full border-2 border-gray-300 shrink-0'">
+          @if (rla.isActive) {
+            <span class="w-1.5 h-1.5 rounded-full bg-white block"></span>
+          }
+        </span>
+        {{ item.label }}
+      </a>
+    }
+  </nav>
+</aside>
