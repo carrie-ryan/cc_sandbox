@@ -43,6 +43,10 @@ export class HeaderComponent {
     this.router.navigate(['/customer-dashboard']);
   }
 
+  get isCustomerDashboard(): boolean {
+    return this.router.url.startsWith('/customer-dashboard');
+  }
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     const target = event.target as HTMLElement;

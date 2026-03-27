@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CustomerService, Customer } from '../../services/customer.service';
 
-type Tab = 'summary' | 'connections' | 'locations' | 'connectors' | 'identities' | 'users' | 'alerts';
+type Tab = 'summary' | 'connections' | 'locations' | 'connectors' | 'users' | 'alerts';
 
 @Component({
   selector: 'app-customer-detail',
@@ -22,7 +22,6 @@ export class CustomerDetailComponent {
     { key: 'connections', label: 'Connections' },
     { key: 'locations', label: 'Locations' },
     { key: 'connectors', label: 'Connectors' },
-    { key: 'identities', label: 'Identities' },
     { key: 'users', label: 'Users' },
     { key: 'alerts', label: 'Recent Alerts' },
   ];

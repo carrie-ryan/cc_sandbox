@@ -43,14 +43,25 @@
       }
     </div>
 
-    <!-- NetFoundry "N" logo -->
-    <div class="flex items-center gap-2">
-      <div class="w-8 h-8 bg-blue-600 rounded flex items-center justify-center text-white font-bold text-sm" style="font-family: 'Russo One', sans-serif;">N</div>
-      <div class="flex flex-col leading-tight">
-        <span class="font-bold text-gray-900 text-sm" style="font-family: 'Russo One', sans-serif;">Customer Connect</span>
-        <span class="text-[10px] text-gray-500">By NetFoundry</span>
+    <!-- Logo / branding -->
+    @if (isCustomerDashboard) {
+      <!-- Acme Corp branding -->
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-semibold shrink-0">AC</div>
+        <div class="flex flex-col leading-tight">
+          <span class="font-bold text-gray-900 text-sm" style="font-family: 'Russo One', sans-serif;">Acme Corp</span>
+        </div>
       </div>
-    </div>
+    } @else {
+      <!-- NetFoundry "N" logo -->
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 bg-blue-600 rounded flex items-center justify-center text-white font-bold text-sm" style="font-family: 'Russo One', sans-serif;">N</div>
+        <div class="flex flex-col leading-tight">
+          <span class="font-bold text-gray-900 text-sm" style="font-family: 'Russo One', sans-serif;">Customer Connect</span>
+          <span class="text-[10px] text-gray-500">By NetFoundry</span>
+        </div>
+      </div>
+    }
   </div>
 
   <!-- Right: actions -->

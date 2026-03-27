@@ -24,6 +24,16 @@ export interface AccessTimer {
   status: 'active' | 'expired' | 'revoked';
 }
 
+export interface LicenseEntry {
+  id: string;
+  name: string;
+  type: 'user' | 'device';
+  application: string;
+  enrolledAt: string;
+  lastActive: string;
+  status: 'active' | 'inactive';
+}
+
 export interface TrafficFilter {
   id: string;
   name: string;
@@ -423,8 +433,74 @@ export class CustomerDashboardComponent implements OnDestroy {
     setTimeout(() => this.exporting = null, 2500);
   }
 
+  // Licenses
+  enrolledLicenses: LicenseEntry[] = [
+    { id: 'lic-001', name: 'Alice Monroe',        type: 'user',   application: 'Corporate VPN',   enrolledAt: 'Jan 12, 2025', lastActive: '2 min ago',    status: 'active'   },
+    { id: 'lic-002', name: 'Bob Carter',           type: 'user',   application: 'Remote Desktop',  enrolledAt: 'Jan 15, 2025', lastActive: '5 min ago',    status: 'active'   },
+    { id: 'lic-003', name: 'Carol Singh',          type: 'user',   application: 'Web Portal',      enrolledAt: 'Feb 3, 2025',  lastActive: '12 min ago',   status: 'active'   },
+    { id: 'lic-004', name: 'Dave Kim',             type: 'user',   application: 'SSH Tunnel',      enrolledAt: 'Feb 8, 2025',  lastActive: '8 min ago',    status: 'active'   },
+    { id: 'lic-005', name: 'Eva Torres',           type: 'user',   application: 'Corporate VPN',   enrolledAt: 'Feb 14, 2025', lastActive: '3 days ago',   status: 'inactive' },
+    { id: 'lic-006', name: 'MacBook-Ops-01',       type: 'device', application: 'Corporate VPN',   enrolledAt: 'Mar 1, 2025',  lastActive: 'Just now',     status: 'active'   },
+    { id: 'lic-007', name: 'WinDesk-Finance-03',   type: 'device', application: 'Finance Portal',  enrolledAt: 'Mar 5, 2025',  lastActive: '1 hour ago',   status: 'active'   },
+    { id: 'lic-008', name: 'iPad-Sales-12',        type: 'device', application: 'Web Portal',      enrolledAt: 'Mar 10, 2025', lastActive: '2 hours ago',  status: 'active'   },
+    { id: 'lic-009', name: 'WinDesk-HR-07',        type: 'device', application: 'HR Connect',      enrolledAt: 'Mar 12, 2025', lastActive: '47 days ago',  status: 'inactive' },
+    { id: 'lic-010', name: 'MacBook-Dev-09',       type: 'device', application: 'Dev Tools',       enrolledAt: 'Mar 15, 2025', lastActive: '30 min ago',   status: 'active'   },
+    { id: 'lic-011', name: 'Frank Nguyen',         type: 'user',   application: 'Corporate VPN',   enrolledAt: 'Mar 16, 2025', lastActive: '45 min ago',   status: 'active'   },
+    { id: 'lic-012', name: 'Grace Patel',          type: 'user',   application: 'Dev Tools',       enrolledAt: 'Mar 17, 2025', lastActive: '1 hour ago',   status: 'active'   },
+    { id: 'lic-013', name: 'WinDesk-Legal-02',     type: 'device', application: 'Corporate VPN',   enrolledAt: 'Mar 18, 2025', lastActive: '20 min ago',   status: 'active'   },
+    { id: 'lic-014', name: 'Henry Walsh',          type: 'user',   application: 'SSH Tunnel',      enrolledAt: 'Mar 19, 2025', lastActive: '6 hours ago',  status: 'active'   },
+    { id: 'lic-015', name: 'iPad-Exec-03',         type: 'device', application: 'Finance Portal',  enrolledAt: 'Mar 19, 2025', lastActive: '4 days ago',   status: 'inactive' },
+    { id: 'lic-016', name: 'Iris Chen',            type: 'user',   application: 'Web Portal',      enrolledAt: 'Mar 20, 2025', lastActive: '3 min ago',    status: 'active'   },
+    { id: 'lic-017', name: 'MacBook-Sales-07',     type: 'device', application: 'Corporate VPN',   enrolledAt: 'Mar 21, 2025', lastActive: 'Just now',     status: 'active'   },
+    { id: 'lic-018', name: 'James O\'Brien',       type: 'user',   application: 'Remote Desktop',  enrolledAt: 'Mar 21, 2025', lastActive: '2 hours ago',  status: 'active'   },
+    { id: 'lic-019', name: 'WinDesk-Ops-11',       type: 'device', application: 'SSH Tunnel',      enrolledAt: 'Mar 22, 2025', lastActive: '15 min ago',   status: 'active'   },
+    { id: 'lic-020', name: 'Karen Liu',            type: 'user',   application: 'HR Connect',      enrolledAt: 'Mar 22, 2025', lastActive: '31 days ago',  status: 'inactive' },
+    { id: 'lic-021', name: 'MacBook-Eng-14',       type: 'device', application: 'Dev Tools',       enrolledAt: 'Mar 23, 2025', lastActive: '10 min ago',   status: 'active'   },
+    { id: 'lic-022', name: 'Liam Foster',          type: 'user',   application: 'Corporate VPN',   enrolledAt: 'Mar 23, 2025', lastActive: '55 min ago',   status: 'active'   },
+    { id: 'lic-023', name: 'WinDesk-Marketing-04', type: 'device', application: 'Web Portal',      enrolledAt: 'Mar 24, 2025', lastActive: '3 hours ago',  status: 'active'   },
+    { id: 'lic-024', name: 'Mia Rossi',            type: 'user',   application: 'Finance Portal',  enrolledAt: 'Mar 24, 2025', lastActive: 'Just now',     status: 'active'   },
+    { id: 'lic-025', name: 'iPad-Field-08',        type: 'device', application: 'Corporate VPN',   enrolledAt: 'Mar 25, 2025', lastActive: '58 days ago',  status: 'inactive' },
+  ];
+  revokingLicenses = new Set<string>();
+  licensesPage = 1;
+  readonly licensesPageSize = 10;
+
+  get licenseWarning(): boolean {
+    return this.customer.licensesUsed / this.customer.licensesTotal >= 0.8;
+  }
+
+  get licensesPct(): number {
+    return Math.round((this.customer.licensesUsed / this.customer.licensesTotal) * 100);
+  }
+
+  get pagedLicenses(): LicenseEntry[] {
+    const start = (this.licensesPage - 1) * this.licensesPageSize;
+    return this.enrolledLicenses.slice(start, start + this.licensesPageSize);
+  }
+
+  get licensesTotalPages(): number {
+    return Math.ceil(this.enrolledLicenses.length / this.licensesPageSize);
+  }
+
+  prevLicensePage() {
+    if (this.licensesPage > 1) this.licensesPage--;
+  }
+
+  nextLicensePage() {
+    if (this.licensesPage < this.licensesTotalPages) this.licensesPage++;
+  }
+
+  revokeLicense(id: string) {
+    this.revokingLicenses.add(id);
+    setTimeout(() => {
+      this.enrolledLicenses = this.enrolledLicenses.filter(l => l.id !== id);
+      if (this.licensesPage > this.licensesTotalPages) this.licensesPage = this.licensesTotalPages;
+      this.revokingLicenses.delete(id);
+    }, 1500);
+  }
+
   // Navigation
-  activeSection: 'overview' | 'connectors' | 'audit' | 'alerts' | 'access' | 'locations' = 'overview';
+  activeSection: 'overview' | 'connectors' | 'audit' | 'alerts' | 'access' | 'licenses' | 'locations' = 'overview';
 
   get alertBadge(): number { return this.visibleAlerts.length; }
   get connectorBadge(): number { return this.degradedConnectors + this.offlineConnectors; }
