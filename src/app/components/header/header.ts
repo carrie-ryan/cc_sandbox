@@ -43,6 +43,11 @@ export class HeaderComponent {
     this.router.navigate(['/customer-dashboard']);
   }
 
+  navigateToOnboarding() {
+    this.appSwitcherOpen = false;
+    this.router.navigate(['/customer-portal/onboarding']);
+  }
+
   get isCustomerDashboard(): boolean {
     return this.router.url.startsWith('/customer-dashboard');
   }

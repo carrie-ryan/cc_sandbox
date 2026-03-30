@@ -213,28 +213,36 @@
             </div>
           </div>
         </div>
-        <svg viewBox="0 0 760 180" class="w-full" preserveAspectRatio="none">
-          <!-- Y grid lines + labels -->
+        <!-- Chart wrapper: aspect ratio matches SVG viewBox (180/760) so HTML labels can be positioned by percentage -->
+        <div class="relative w-full" style="padding-bottom: 23.68%">
+          <svg viewBox="0 0 760 180" class="absolute inset-0 w-full h-full" preserveAspectRatio="none">
+            <!-- Y grid lines -->
+            @for (g of bandwidthChart.gridLines; track g.y) {
+              <line [attr.x1]="52" [attr.y1]="g.y" [attr.x2]="748" [attr.y2]="g.y"
+                    stroke="#f0f0f0" stroke-width="1"/>
+            }
+            <!-- RX area (behind) -->
+            <path [attr.d]="bandwidthChart.rxArea" fill="#10b981" fill-opacity="0.08"/>
+            <!-- TX area (behind) -->
+            <path [attr.d]="bandwidthChart.txArea" fill="#3b82f6" fill-opacity="0.10"/>
+            <!-- RX line -->
+            <path [attr.d]="bandwidthChart.rxLine" fill="none" stroke="#10b981" stroke-width="1.5" stroke-linejoin="round"/>
+            <!-- TX line -->
+            <path [attr.d]="bandwidthChart.txLine" fill="none" stroke="#3b82f6" stroke-width="1.5" stroke-linejoin="round"/>
+          </svg>
+          <!-- Y-axis labels: HTML text at fixed 0.75rem, positioned by SVG coordinate percentage -->
           @for (g of bandwidthChart.gridLines; track g.y) {
-            <line [attr.x1]="52" [attr.y1]="g.y" [attr.x2]="748" [attr.y2]="g.y"
-                  stroke="#f0f0f0" stroke-width="1"/>
-            <text [attr.x]="48" [attr.y]="g.y" text-anchor="end" dominant-baseline="middle"
-                  class="text-[9px]" fill="#9ca3af" font-size="9">{{ g.label }}</text>
+            <span class="absolute text-xs text-gray-400 -translate-y-1/2 text-right leading-none pointer-events-none"
+                  [style.top.%]="(+g.y / 180) * 100"
+                  style="left: 0; width: 6.32%; padding-right: 4px">{{ g.label }}</span>
           }
-          <!-- X axis labels -->
+          <!-- X-axis labels: HTML text at fixed 0.75rem, positioned by SVG coordinate percentage -->
           @for (x of bandwidthChart.xLabels; track x.x) {
-            <text [attr.x]="x.x" y="168" text-anchor="middle"
-                  fill="#9ca3af" font-size="9">{{ x.label }}</text>
+            <span class="absolute text-xs text-gray-400 -translate-x-1/2 leading-none pointer-events-none"
+                  [style.left.%]="(+x.x / 760) * 100"
+                  style="top: 93.33%">{{ x.label }}</span>
           }
-          <!-- RX area (behind) -->
-          <path [attr.d]="bandwidthChart.rxArea" fill="#10b981" fill-opacity="0.08"/>
-          <!-- TX area (behind) -->
-          <path [attr.d]="bandwidthChart.txArea" fill="#3b82f6" fill-opacity="0.10"/>
-          <!-- RX line -->
-          <path [attr.d]="bandwidthChart.rxLine" fill="none" stroke="#10b981" stroke-width="1.5" stroke-linejoin="round"/>
-          <!-- TX line -->
-          <path [attr.d]="bandwidthChart.txLine" fill="none" stroke="#3b82f6" stroke-width="1.5" stroke-linejoin="round"/>
-        </svg>
+        </div>
       </div>
     }
     </div>

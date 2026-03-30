@@ -11,32 +11,26 @@ export class OverviewPageComponent {
     {
       number: 1,
       icon: 'templates',
-      title: 'Define Templates',
-      description: 'Reusable configurations for creating network components',
+      title: 'Define Connector Templates',
+      description: 'Reusable connector templates for your customers.',
     },
     {
       number: 2,
-      icon: 'locations',
-      title: 'Add Locations',
-      description: 'Map your physical or logical network locations',
+      icon: 'connections',
+      title: 'Define Connections',
+      description: 'Create connections to enable access between connectors.',
     },
     {
       number: 3,
-      icon: 'connectors',
-      title: 'Add Connectors',
-      description: 'Attach software agents to your provider locations',
+      icon: 'locations',
+      title: 'Define Locations & Connectors',
+      description: 'Define provider network locations that can access customer resources.',
     },
     {
       number: 4,
-      icon: 'connections',
-      title: 'Define Connections',
-      description: 'Define Zero Trust connections to segment network traffic',
-    },
-    {
-      number: 5,
       icon: 'users',
       title: 'Invite Users',
-      description: 'Invite and assign roles to your team members',
+      description: 'Define provider users who can manage and access customer resources.',
     },
   ];
 }

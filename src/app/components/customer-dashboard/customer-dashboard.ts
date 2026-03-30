@@ -1,8 +1,11 @@
 import { Component, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { UpperCasePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { CustomerLocationsComponent } from '../customer-locations/customer-locations';
 import { CustomerService, Customer } from '../../services/customer.service';
 import { PersonaService } from '../../services/persona.service';
+import { OnboardingService } from '../../services/onboarding.service';
 
 export interface PendingApproval {
   id: string;
@@ -75,7 +78,7 @@ export interface MayaConnection {
 @Component({
   selector: 'app-customer-dashboard',
   templateUrl: './customer-dashboard.html',
-  imports: [FormsModule, UpperCasePipe],
+  imports: [FormsModule, UpperCasePipe, RouterLink, CustomerLocationsComponent],
   host: { class: 'flex-1 min-h-0 overflow-hidden' },
 })
 export class CustomerDashboardComponent implements OnDestroy {
@@ -465,6 +468,15 @@ export class CustomerDashboardComponent implements OnDestroy {
   licensesPage = 1;
   readonly licensesPageSize = 10;
 
+  get checklistCompletedCount(): number {
+    return [
+      true,
+      this.onboardingService.setupReviewed(),
+      this.onboardingService.connectorsAdded(),
+      this.onboardingService.hostedAppsConfigured(),
+    ].filter(Boolean).length;
+  }
+
   get licenseWarning(): boolean {
     return this.customer.licensesUsed / this.customer.licensesTotal >= 0.8;
   }
@@ -507,7 +519,7 @@ export class CustomerDashboardComponent implements OnDestroy {
   get accessBadge(): number { return this.visibleApprovals.length; }
 
   // Shared helpers
-  constructor(private customerService: CustomerService, public personaService: PersonaService) {
+  constructor(private customerService: CustomerService, public personaService: PersonaService, public onboardingService: OnboardingService) {
     this.customer = this.customerService.getById('acme-corp')!;
     this.timerInterval = setInterval(() => {
       this.accessTimers.forEach(t => {

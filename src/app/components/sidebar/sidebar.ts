@@ -9,9 +9,9 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 export class SidebarComponent {
   navItems = [
     { label: 'Overview', route: '/provider-setup/overview' },
-    { label: 'Connector Templates', route: '/provider-setup/connector-templates' },
+    { label: 'Define Connector Templates', route: '/provider-setup/connector-templates' },
     { label: 'Define Connections', route: '/provider-setup/define-connections' },
-    { label: 'Locations & Connectors', route: '/provider-setup/locations-connectors' },
+    { label: 'Define Locations & Connectors', route: '/provider-setup/locations' },
     { label: 'Invite Users', route: '/provider-setup/invite-users' },
   ];
 }
