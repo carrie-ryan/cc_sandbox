@@ -48,8 +48,20 @@ export class HeaderComponent {
     this.router.navigate(['/customer-portal/onboarding']);
   }
 
+  navigateToCustomerSetup() {
+    this.appSwitcherOpen = false;
+    this.router.navigate(['/customer-setup']);
+  }
+
   get isCustomerDashboard(): boolean {
     return this.router.url.startsWith('/customer-dashboard');
+  }
+
+  get isProviderContext(): boolean {
+    const url = this.router.url;
+    return url.startsWith('/provider-setup') ||
+           url.startsWith('/customer-setup') ||
+           url.startsWith('/dashboard');
   }
 
   @HostListener('document:click', ['$event'])

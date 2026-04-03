@@ -51,7 +51,8 @@ export interface MayaDevice {
   type: 'laptop' | 'phone' | 'tablet';
   os: string;
   lastSeen: string;
-  status: 'active' | 'inactive';
+  status: 'active' | 'inactive' | 'pending';
+  token?: string;
 }
 
 export interface MayaApp {
@@ -92,35 +93,44 @@ export class CustomerDashboardComponent implements OnDestroy {
   ];
 
   showAddDevice = false;
-  newDeviceName = '';
-  newDeviceType: 'laptop' | 'phone' | 'tablet' = 'laptop';
-  addDeviceStep: 'form' | 'waiting' | 'done' = 'form';
+  activationToken = '';
   removingDeviceId: string | null = null;
 
   openAddDevice() {
-    this.newDeviceName = '';
-    this.newDeviceType = 'laptop';
-    this.addDeviceStep = 'form';
+    this.activationToken = '';
     this.showAddDevice = true;
   }
 
-  sendEnrollmentLink() {
-    if (!this.newDeviceName) return;
-    this.addDeviceStep = 'waiting';
-    setTimeout(() => {
-      this.mayaDevices = [
-        ...this.mayaDevices,
-        {
-          id: 'dev-' + Date.now(),
-          name: this.newDeviceName,
-          type: this.newDeviceType,
-          os: this.newDeviceType === 'laptop' ? 'Pending enrollment' : 'Pending enrollment',
-          lastSeen: 'Just enrolled',
-          status: 'active',
-        },
-      ];
-      this.addDeviceStep = 'done';
-    }, 3000);
+  submitActivationToken() {
+    if (!this.activationToken.trim()) return;
+    this.mayaDevices = [
+      ...this.mayaDevices,
+      {
+        id: 'dev-' + Date.now(),
+        name: 'New Device',
+        type: 'laptop',
+        os: 'Pending activation',
+        lastSeen: 'Just now',
+        status: 'pending',
+        token: this.activationToken.trim(),
+      },
+    ];
+    this.showAddDevice = false;
+    this.activationToken = '';
+  }
+
+  acceptDevice(id: string) {
+    const device = this.mayaDevices.find(d => d.id === id);
+    if (device) {
+      device.status = 'active';
+      device.os = device.type === 'phone' ? 'iOS 18'
+                : device.type === 'tablet' ? 'iPadOS 18'
+                : 'macOS Sequoia';
+    }
+  }
+
+  rejectDevice(id: string) {
+    this.mayaDevices = this.mayaDevices.filter(d => d.id !== id);
   }
 
   confirmRemoveDevice(id: string) { this.removingDeviceId = id; }
@@ -137,7 +147,6 @@ export class CustomerDashboardComponent implements OnDestroy {
     { id: 'app-003', name: 'HR Connect',          description: 'Benefits, time-off, and HR self-service',  category: 'Web App',       iconColor: 'text-pink-600',   iconBg: 'bg-pink-50',   status: 'available'  },
     { id: 'app-004', name: 'Dev Tools',           description: 'Code repos, project tracking, and CI/CD',  category: 'Developer',     iconColor: 'text-teal-600',   iconBg: 'bg-teal-50',   status: 'available'  },
     { id: 'app-005', name: 'Shared Drives',       description: 'Team file storage and document sharing',   category: 'Files',         iconColor: 'text-amber-600',  iconBg: 'bg-amber-50',  status: 'available'  },
-    { id: 'app-006', name: 'Finance Portal',      description: 'Expense reports and budget dashboards',    category: 'Web App',       iconColor: 'text-green-600',  iconBg: 'bg-green-50',  status: 'unavailable'},
   ];
 
   // Maya's personal connection state

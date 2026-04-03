@@ -1,0 +1,207 @@
+<div class="px-8 py-6 max-w-5xl">
+
+  <!-- Breadcrumb -->
+  <nav class="flex items-center gap-1.5 text-sm text-gray-400 mb-4">
+    <span>Customer Setup</span>
+    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+    </svg>
+    <span class="text-gray-700 font-medium">Overview</span>
+  </nav>
+
+  <!-- Page title -->
+  <h1 class="text-2xl font-bold text-gray-900 mb-1">Customer Setup Overview</h1>
+  <p class="text-gray-500 text-sm mb-6">Onboard a new customer onto your Zero Trust network by configuring their profile, locations, connections, and admin access.</p>
+
+  <!-- Setup Roadmap Card -->
+  <div class="bg-white rounded-lg border border-gray-200 p-6 mb-5">
+    <!-- Card header -->
+    <div class="flex items-start gap-3 mb-4">
+      <div class="w-9 h-9 bg-amber-100 rounded-lg flex items-center justify-center shrink-0">
+        <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
+        </svg>
+      </div>
+      <div>
+        <h2 class="font-semibold text-gray-900 text-base">Setup Roadmap</h2>
+        <p class="text-sm text-gray-500">Configure a customer's environment on your Zero Trust network</p>
+      </div>
+    </div>
+
+    <!-- Description box with left border -->
+    <div class="border-l-4 border-amber-500 pl-4 py-1 mb-6 bg-amber-50/30 rounded-r">
+      <p class="text-sm text-gray-700 mb-3">
+        This setup guide walks you through onboarding a new customer organization onto your provider network.
+      </p>
+      <p class="text-sm text-gray-700 mb-2">
+        <span class="font-semibold">The objective:</span> Provision a customer with secure, segmented access to their resources
+      </p>
+      <p class="text-sm text-gray-700">
+        <span class="font-semibold">The end result:</span> A fully configured customer tenant with locations, connectors, and an admin ready to manage their network
+      </p>
+    </div>
+
+    <!-- Key Steps -->
+    <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-4">Key Steps</p>
+
+    <div class="flex items-stretch gap-0">
+      @for (step of keySteps; track step.number; let last = $last) {
+        <!-- Step card -->
+        <div class="flex-1 border border-gray-200 rounded-lg p-2 flex flex-col items-center text-center relative">
+          <!-- Number badge -->
+          <div class="w-5 h-5 rounded-full bg-amber-500 text-white text-[10px] font-bold flex items-center justify-center absolute -top-2.5 left-1/2 -translate-x-1/2">
+            {{ step.number }}
+          </div>
+
+          <!-- Icon -->
+          <div class="mt-2 mb-2 w-9 h-9 flex items-center justify-center">
+            @if (step.icon === 'profile') {
+              <svg class="w-7 h-7 text-amber-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
+              </svg>
+            }
+            @if (step.icon === 'locations') {
+              <svg class="w-7 h-7 text-green-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/>
+              </svg>
+            }
+            @if (step.icon === 'connections') {
+              <svg class="w-7 h-7 text-purple-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/>
+              </svg>
+            }
+            @if (step.icon === 'summary') {
+              <svg class="w-7 h-7 text-teal-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z"/>
+              </svg>
+            }
+            @if (step.icon === 'users') {
+              <svg class="w-7 h-7 text-blue-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>
+              </svg>
+            }
+          </div>
+
+          <p class="text-xs font-semibold text-gray-800 mb-1">{{ step.title }}</p>
+          <p class="text-[11px] text-gray-500 leading-snug">{{ step.description }}</p>
+        </div>
+
+        <!-- Arrow between steps -->
+        @if (!last) {
+          <div class="flex items-center justify-center px-1 text-gray-300 shrink-0">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+            </svg>
+          </div>
+        }
+      }
+    </div>
+  </div>
+
+  <!-- How It Works Card -->
+  <div class="bg-white rounded-lg border border-gray-200 p-6 mb-16">
+    <!-- Card header -->
+    <div class="flex items-start gap-3 mb-5">
+      <div class="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
+        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/>
+        </svg>
+      </div>
+      <div>
+        <h2 class="font-semibold text-gray-900 text-base">How It Works</h2>
+        <p class="text-sm text-gray-500">The setup flow is the same for all customers — but what happens after depends on the management model you choose.</p>
+      </div>
+    </div>
+
+    <!-- Shared first step -->
+    <div class="flex items-start gap-3 px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg mb-4">
+      <div class="w-7 h-7 bg-amber-100 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
+        <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z"/>
+        </svg>
+      </div>
+      <div>
+        <p class="text-sm font-semibold text-gray-800">You always configure first</p>
+        <p class="text-xs text-gray-500 mt-0.5 leading-relaxed">Regardless of model, you create the customer profile, assign locations, allocate connector pools, and define connections. This setup wizard walks you through each step.</p>
+      </div>
+    </div>
+
+    <!-- Then diverges -->
+    <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">Then, depending on the management model…</p>
+
+    <div class="grid grid-cols-2 gap-4">
+
+      <!-- Provider Managed -->
+      <div class="border border-amber-200 rounded-lg p-4 bg-amber-50/40">
+        <div class="flex items-center gap-2 mb-3">
+          <div class="w-7 h-7 bg-amber-100 rounded-lg flex items-center justify-center shrink-0">
+            <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-gray-900">Provider Managed</p>
+            <span class="text-[10px] font-semibold uppercase tracking-wide text-amber-700">You stay in control</span>
+          </div>
+        </div>
+        <div class="flex flex-col gap-2.5">
+          <div class="flex items-start gap-2">
+            <span class="w-4 h-4 rounded-full bg-amber-200 text-amber-800 text-[9px] font-bold flex items-center justify-center shrink-0 mt-0.5">2</span>
+            <p class="text-xs text-gray-600 leading-relaxed">You deploy and manage all connectors and configurations on behalf of the customer.</p>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="w-4 h-4 rounded-full bg-amber-200 text-amber-800 text-[9px] font-bold flex items-center justify-center shrink-0 mt-0.5">3</span>
+            <p class="text-xs text-gray-600 leading-relaxed">The customer can view their devices and activate them using codes you provide — no IT knowledge required on their end.</p>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="w-4 h-4 rounded-full bg-amber-200 text-amber-800 text-[9px] font-bold flex items-center justify-center shrink-0 mt-0.5">4</span>
+            <p class="text-xs text-gray-600 leading-relaxed">Ongoing changes, troubleshooting, and access management run through you.</p>
+          </div>
+        </div>
+        <p class="text-[10px] text-amber-700 mt-3 font-medium">Best for customers without dedicated IT staff.</p>
+      </div>
+
+      <!-- Customer Self-Managed -->
+      <div class="border border-blue-200 rounded-lg p-4 bg-blue-50/40">
+        <div class="flex items-center gap-2 mb-3">
+          <div class="w-7 h-7 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
+            <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-gray-900">Customer Self-Managed</p>
+            <span class="text-[10px] font-semibold uppercase tracking-wide text-blue-700">They take the wheel</span>
+          </div>
+        </div>
+        <div class="flex flex-col gap-2.5">
+          <div class="flex items-start gap-2">
+            <span class="w-4 h-4 rounded-full bg-blue-200 text-blue-800 text-[9px] font-bold flex items-center justify-center shrink-0 mt-0.5">2</span>
+            <p class="text-xs text-gray-600 leading-relaxed">The customer's admin is invited to their portal to review the resources you've allocated.</p>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="w-4 h-4 rounded-full bg-blue-200 text-blue-800 text-[9px] font-bold flex items-center justify-center shrink-0 mt-0.5">3</span>
+            <p class="text-xs text-gray-600 leading-relaxed">Their admin installs connectors, configures hosted apps, and manages day-to-day access for their sites.</p>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="w-4 h-4 rounded-full bg-blue-200 text-blue-800 text-[9px] font-bold flex items-center justify-center shrink-0 mt-0.5">4</span>
+            <p class="text-xs text-gray-600 leading-relaxed">You remain the resource owner and can step in or reallocate at any time, but routine management stays with them.</p>
+          </div>
+        </div>
+        <p class="text-[10px] text-blue-700 mt-3 font-medium">Best for customers with an IT manager or site admin.</p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Continue Setup footer -->
+<div class="fixed bottom-0 right-0 left-52 bg-white border-t border-gray-200 px-8 py-4 flex justify-end">
+  <button class="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
+    Start Customer Setup
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+    </svg>
+  </button>
+</div>

@@ -17,7 +17,8 @@ export class App {
     this.router.events.pipe(
       filter((e): e is NavigationEnd => e instanceof NavigationEnd)
     ).subscribe(e => {
-      this.showSidebar = e.urlAfterRedirects.startsWith(`/provider-setup`);
+      const url = e.urlAfterRedirects;
+      this.showSidebar = url.startsWith('/provider-setup') || url.startsWith('/customer-setup');
     });
   }
 }

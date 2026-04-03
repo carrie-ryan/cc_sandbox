@@ -97,7 +97,7 @@
         <tr class="border-b border-gray-200 bg-gray-50/50">
           <th class="text-left text-[10px] font-bold uppercase tracking-wider text-gray-400 px-5 py-3 w-[28%]">Location Name</th>
           <th class="text-left text-[10px] font-bold uppercase tracking-wider text-gray-400 px-4 py-3 w-[22%]">Details</th>
-          <th class="text-left text-[10px] font-bold uppercase tracking-wider text-gray-400 px-4 py-3 w-[35%]">Connectors</th>
+          <th class="text-left text-[10px] font-bold uppercase tracking-wider text-gray-400 px-4 py-3 w-[35%]">Total Allocated Connectors</th>
           <th class="text-right text-[10px] font-bold uppercase tracking-wider text-gray-400 px-5 py-3 w-[15%]">Actions</th>
         </tr>
       </thead>
@@ -136,25 +136,17 @@
               </div>
             </td>
 
-            <!-- Connectors -->
+            <!-- Total Allocated Connectors -->
             <td class="px-4 py-3.5">
               <div class="flex items-center gap-2.5">
-                <!-- Connector count badge -->
-                <span class="flex items-center gap-1 bg-blue-50 text-blue-600 text-xs font-medium px-2 py-1 rounded-full border border-blue-100">
-                  <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25"/>
-                  </svg>
-                  {{ loc.connectors.length }}
-                </span>
-                <!-- License usage -->
-                <span class="text-xs text-gray-400">{{ loc.connectors.length }} of {{ loc.licensesAllocated }} licenses used</span>
-                <!-- Add Connector CTA -->
-                @if (loc.connectors.length < loc.licensesAllocated) {
-                  <button
-                    (click)="openAddConnector(loc.id)"
-                    class="flex items-center gap-1 border border-dashed border-gray-300 text-gray-400 text-xs px-2.5 py-1 rounded hover:border-blue-400 hover:text-blue-500 transition-colors">
-                    + Add Connector
-                  </button>
+                <span class="text-sm font-medium" [class]="locationUsagePct(loc) >= 0.8 ? 'text-amber-600' : 'text-gray-700'">{{ locationAllocation(loc) }}</span>
+                @if (locationUsagePct(loc) >= 0.8) {
+                  <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                    <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+                    </svg>
+                    Near capacity
+                  </span>
                 }
               </div>
             </td>
@@ -187,21 +179,18 @@
               <td colspan="4" class="p-0">
 
                 <!-- Connector sub-header -->
-                <div class="grid grid-cols-[3rem_2fr_1fr_1fr_1fr_1fr_1.5fr_1fr_5rem] bg-gray-50 border-b border-gray-200 px-2 py-2">
+                <div class="grid grid-cols-[3rem_2fr_1fr_1fr_1fr_1fr_5rem] bg-gray-50 border-b border-gray-200 px-2 py-2">
                   <div></div>
                   <div class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Connector</div>
                   <div class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Type</div>
                   <div class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Hosted Apps</div>
-                  <div class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Status</div>
-                  <div class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Uptime</div>
-                  <div class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Last Connected</div>
-                  <div class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Access</div>
+                  <div class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Connector Allocations</div>
+                  <div class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Deploy</div>
                   <div class="text-[10px] font-bold uppercase tracking-wider text-gray-400 text-right pr-3">Actions</div>
                 </div>
 
                 @for (conn of loc.connectors; track conn.id) {
-                  <div class="grid grid-cols-[3rem_2fr_1fr_1fr_1fr_1fr_1.5fr_1fr_5rem] items-center px-2 py-3 border-b border-gray-100 last:border-0 hover:bg-gray-50/50"
-                    [class.opacity-50]="isConnectorPaused(conn.id)">
+                  <div class="grid grid-cols-[3rem_2fr_1fr_1fr_1fr_1fr_5rem] items-center px-2 py-3 border-b border-gray-100 last:border-0 hover:bg-gray-50/50">
                     <div></div>
                     <!-- Connector name -->
                     <div class="text-sm text-gray-800 font-medium">{{ conn.name }}</div>
@@ -218,71 +207,22 @@
                         {{ conn.hostedApps }}
                       </span>
                     </div>
-                    <!-- Status pill -->
+                    <!-- Connector Allocations -->
+                    <div class="text-sm font-medium text-gray-700">{{ conn.allocation }}</div>
+                    <!-- Deploy -->
                     <div>
-                      @if (conn.status === 'Online') {
-                        <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full bg-green-100 text-green-700">
-                          <span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>
-                          Online
-                        </span>
-                      } @else if (conn.status === 'Degraded') {
-                        <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
-                          <span class="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block"></span>
-                          Degraded
-                        </span>
-                      } @else {
-                        <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full bg-red-100 text-red-600">
-                          <span class="w-1.5 h-1.5 rounded-full bg-red-500 inline-block"></span>
-                          Offline
-                        </span>
-                      }
-                    </div>
-                    <!-- Uptime -->
-                    <div class="text-sm"
-                      [class.text-red-500]="conn.uptime === '0%'"
-                      [class.text-amber-600]="conn.status === 'Degraded' && conn.uptime !== '0%'"
-                      [class.text-gray-500]="conn.status === 'Online'">
-                      {{ conn.uptime }}
-                    </div>
-                    <!-- Last Connected -->
-                    <div class="text-sm text-gray-500">{{ conn.lastConnected }}</div>
-                    <!-- Access (Pause/Resume) -->
-                    <div>
-                      @if (isConnectorPaused(conn.id)) {
-                        <button
-                          (click)="toggleConnectorPause(conn.id)"
-                          class="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded border border-green-300 text-green-600 bg-green-50 hover:bg-green-100 transition-colors">
-                          <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 010 1.972l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z"/>
-                          </svg>
-                          Resume
-                        </button>
-                      } @else {
-                        <button
-                          (click)="toggleConnectorPause(conn.id)"
-                          class="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded border border-gray-200 text-gray-500 bg-white hover:bg-gray-50 transition-colors">
-                          <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5"/>
-                          </svg>
-                          Pause
-                        </button>
-                      }
+                      <button (click)="openDeployModal(); $event.stopPropagation()" class="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded border border-blue-200 text-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+                        </svg>
+                        Deploy
+                      </button>
                     </div>
                     <!-- Actions -->
-                    <div class="flex items-center justify-end gap-2 pr-3">
-                      <button class="text-gray-300 hover:text-gray-500 transition-colors">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/>
-                        </svg>
-                      </button>
-                      <button class="text-gray-300 hover:text-gray-500 transition-colors">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75"/>
-                        </svg>
-                      </button>
-                      <button class="text-gray-300 hover:text-red-400 transition-colors">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
+                    <div class="flex items-center justify-end pr-3">
+                      <button (click)="openConnectorDrawer(conn); $event.stopPropagation()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
                         </svg>
                       </button>
                     </div>
@@ -299,6 +239,212 @@
 
   </div>
 </div>
+
+<!-- ===================== CONNECTOR DRAWER ===================== -->
+@if (showConnectorDrawer && activeConnector) {
+  <div class="fixed inset-0 z-50 flex justify-end">
+    <div class="absolute inset-0 bg-black/30" (click)="closeConnectorDrawer()"></div>
+    <div class="relative w-[680px] h-full bg-white shadow-2xl flex flex-col overflow-hidden">
+
+      <!-- Header -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 bg-blue-500 rounded-lg flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-base font-semibold text-gray-900">{{ activeConnector.name }}</h2>
+            <p class="text-xs text-gray-500">{{ activeConnector.type }}</p>
+          </div>
+        </div>
+        <button (click)="closeConnectorDrawer()" class="text-gray-400 hover:text-gray-600 p-1 rounded transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Content -->
+      <div class="flex-1 overflow-y-auto py-5 flex flex-col">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="border-b border-gray-200 bg-gray-100">
+                <th class="text-[10px] font-bold uppercase tracking-wider text-gray-600 px-4 py-2.5">Label</th>
+                <th class="text-[10px] font-bold uppercase tracking-wider text-gray-600 px-4 py-2.5">Connection</th>
+                <th class="text-[10px] font-bold uppercase tracking-wider text-gray-600 px-4 py-2.5">Uptime</th>
+                <th class="text-[10px] font-bold uppercase tracking-wider text-gray-600 px-4 py-2.5">Activated</th>
+                <th class="text-[10px] font-bold uppercase tracking-wider text-gray-600 px-4 py-2.5">Last Connected</th>
+                <th class="text-[10px] font-bold uppercase tracking-wider text-gray-600 px-4 py-2.5 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (entry of drawerEntries; track entry.id) {
+                <tr class="border-b border-gray-100">
+                  <td class="px-4 py-3">
+                    <div class="text-sm font-medium text-gray-800">{{ entry.label }}</div>
+                    <div class="text-xs text-gray-400 font-mono mt-0.5">{{ entry.token }}</div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full"
+                      [class]="entry.status === 'Active' ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'">
+                      <span class="w-1.5 h-1.5 rounded-full"
+                        [class]="entry.status === 'Active' ? 'bg-green-500' : 'bg-amber-400'"></span>
+                      {{ entry.status }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 text-sm" [class]="entry.uptime === '--' ? 'text-gray-400' : 'text-gray-600'">{{ entry.uptime }}</td>
+                  <td class="px-4 py-3 text-sm" [class]="entry.activated === '--' ? 'text-gray-400' : 'text-gray-600'">{{ entry.activated }}</td>
+                  <td class="px-4 py-3 text-sm" [class]="entry.lastConnected === '--' ? 'text-gray-400' : 'text-gray-600'">{{ entry.lastConnected }}</td>
+                  <td class="px-4 py-3 text-right">
+                    <div class="relative inline-block">
+                      <button (click)="connectorMenuOpenId = connectorMenuOpenId === entry.id ? null : entry.id; $event.stopPropagation()"
+                        class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z"/>
+                        </svg>
+                      </button>
+                      @if (connectorMenuOpenId === entry.id) {
+                        <div class="absolute right-0 top-6 z-10 w-32 bg-white rounded-lg shadow-lg border border-gray-100 py-1" (click)="$event.stopPropagation()">
+                          @if (entry.status === 'Active') {
+                            <button (click)="connectorMenuOpenId = null" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">Pause</button>
+                          } @else {
+                            <button (click)="connectorMenuOpenId = null" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">Resend</button>
+                          }
+                          <button (click)="connectorMenuOpenId = null" class="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">Revoke</button>
+                        </div>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+}
+
+<!-- ===================== DEPLOY MODAL ===================== -->
+@if (showDeployModal) {
+  <div class="fixed inset-0 z-[60] flex items-center justify-center bg-black/40">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 flex flex-col">
+
+      <!-- Header -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center">
+            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-base font-semibold text-gray-900">Deploy Connector</h2>
+            <p class="text-xs text-gray-500">Generate an activation token and email it directly or copy it to share with the end user manually.</p>
+          </div>
+        </div>
+        <button (click)="showDeployModal = false" class="text-gray-400 hover:text-gray-600 p-1 rounded transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="px-6 py-5 flex flex-col gap-5">
+
+        <!-- Label -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="text-sm font-medium text-gray-700">Label</label>
+            <span class="text-xs text-gray-400">Optional</span>
+          </div>
+          <input
+            [(ngModel)]="deployLabel"
+            type="text"
+            placeholder="e.g. John Smith's Mobile"
+            class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+
+        <!-- Activation Token -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">Activation Token</label>
+          <div class="flex items-center gap-2">
+            <input
+              [value]="deployToken"
+              readonly
+              placeholder="Click 'Generate Token' to create"
+              class="flex-1 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 placeholder-gray-400 bg-gray-50 font-mono focus:outline-none"
+            />
+            <button
+              (click)="generateToken()"
+              [disabled]="!!deployToken"
+              class="shrink-0 px-3 py-2.5 text-sm font-medium text-white rounded-lg transition-colors"
+              [class]="deployToken ? 'bg-blue-200 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'">
+              Generate
+            </button>
+          </div>
+        </div>
+
+        <!-- Copy action — only shown once token exists -->
+        @if (deployToken) {
+          <button
+            (click)="copyToken()"
+            class="flex items-center gap-2 justify-center w-full px-3 py-2 text-sm font-medium rounded-lg border transition-colors"
+            [class]="tokenCopied ? 'border-green-300 text-green-700 bg-green-50' : 'border-gray-200 text-gray-700 bg-white hover:bg-gray-50'">
+            @if (tokenCopied) {
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+              </svg>
+              Copied!
+            } @else {
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75"/>
+              </svg>
+              Copy Token
+            }
+          </button>
+        }
+
+        <!-- Email -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="text-sm font-medium text-gray-700">Email Token To</label>
+            <span class="text-xs text-gray-400">Optional</span>
+          </div>
+          <input
+            [(ngModel)]="deployEmail"
+            type="email"
+            placeholder="e.g. jsmith@acme.com"
+            class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <p class="text-xs text-gray-400 mt-1.5">If provided, the activation token will be emailed on confirm.</p>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200">
+        <button (click)="showDeployModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+          Cancel
+        </button>
+        <button
+          (click)="confirmDeploy()"
+          [disabled]="!deployToken"
+          class="px-5 py-2 text-sm font-medium text-white rounded-lg transition-colors"
+          [class]="deployToken ? 'bg-blue-500 hover:bg-blue-600' : 'bg-blue-200 cursor-not-allowed'">
+          Confirm Deploy
+        </button>
+      </div>
+
+    </div>
+  </div>
+}
 
 <!-- ===================== ADD CONNECTOR MODAL ===================== -->
 @if (showAddConnectorModal) {

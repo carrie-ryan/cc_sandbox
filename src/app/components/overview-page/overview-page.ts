@@ -16,15 +16,15 @@ export class OverviewPageComponent {
     },
     {
       number: 2,
-      icon: 'connections',
-      title: 'Define Connections',
-      description: 'Create connections to enable access between connectors.',
-    },
-    {
-      number: 3,
       icon: 'locations',
       title: 'Define Locations & Connectors',
       description: 'Define provider network locations that can access customer resources.',
+    },
+    {
+      number: 3,
+      icon: 'connections',
+      title: 'Define Connections',
+      description: 'Create connections to enable access between connectors.',
     },
     {
       number: 4,

@@ -120,218 +120,431 @@
 
   <!-- ── SUMMARY TAB ── -->
   @if (activeTab === 'summary') {
-    <div class="flex flex-col gap-5">
-    <div class="grid grid-cols-3 gap-5">
-      <!-- Health card -->
-      <div class="bg-white border border-gray-200 rounded-xl p-5">
-        <h3 class="text-sm font-semibold text-gray-700 mb-4">Network Health</h3>
-        <div class="flex flex-col gap-3">
-          <div class="flex items-center justify-between text-sm">
-            <span class="text-gray-500">Uptime (30d)</span>
-            <span class="font-semibold" [class.text-green-600]="customer.uptime !== '—'" [class.text-gray-400]="customer.uptime === '—'">{{ customer.uptime }}</span>
-          </div>
-          <div class="flex items-center justify-between text-sm">
-            <span class="text-gray-500">Active Connections</span>
-            <span class="font-semibold text-gray-900">{{ customer.activeConnections }}</span>
-          </div>
-          <div class="flex items-center justify-between text-sm">
-            <span class="text-gray-500">Bandwidth Used</span>
-            <span class="font-semibold text-gray-900">{{ scaleBw(customer.bandwidthUsed) }}</span>
-          </div>
-          <div class="flex items-center justify-between text-sm">
-            <span class="text-gray-500">Open Alerts</span>
-            @if (customer.alerts.length === 0) {
-              <span class="text-gray-400">None</span>
-            } @else {
-              <span class="font-semibold"
-                [class.text-red-600]="customer.alertSeverity === 'Critical'"
-                [class.text-amber-600]="customer.alertSeverity === 'Warning'">
-                {{ customer.alerts.length }} {{ customer.alertSeverity }}
-              </span>
-            }
-          </div>
+
+    <!-- Customize panel backdrop -->
+    @if (showCustomizePanel) {
+      <div class="fixed inset-0 bg-black/20 z-30" (click)="showCustomizePanel = false"></div>
+    }
+
+    <!-- Customize slide-in panel -->
+    <div class="fixed top-0 right-0 h-full w-80 bg-white border-l border-gray-200 shadow-xl z-40 flex flex-col transition-transform duration-300"
+         [class.translate-x-0]="showCustomizePanel"
+         [class.translate-x-full]="!showCustomizePanel">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200">
+        <div>
+          <h2 class="text-sm font-semibold text-gray-900">Customize Dashboard</h2>
+          <p class="text-xs text-gray-400 mt-0.5">Toggle widgets on or off and drag to reorder.</p>
         </div>
+        <button (click)="showCustomizePanel = false" class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
       </div>
 
-      <!-- Locations summary -->
-      <div class="bg-white border border-gray-200 rounded-xl p-5">
-        <h3 class="text-sm font-semibold text-gray-700 mb-4">Locations</h3>
-        <div class="flex flex-col gap-2.5">
-          @for (loc of customer.locationList; track loc.id) {
-            <div class="flex items-center justify-between text-sm">
-              <div class="flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full shrink-0"
-                  [class.bg-green-500]="loc.status === 'Online'"
-                  [class.bg-amber-400]="loc.status === 'Degraded'"
-                  [class.bg-gray-300]="loc.status === 'Offline'"></span>
-                <span class="text-gray-700">{{ loc.name }}</span>
+      <div class="flex-1 overflow-y-auto px-5 py-4">
+        <div class="flex flex-col gap-2">
+          @for (widget of widgets; track widget.id) {
+            <div
+              draggable="true"
+              (dragstart)="onWidgetDragStart(widget.id)"
+              (dragover)="onWidgetDragOver(widget.id, $event)"
+              (dragend)="onWidgetDragEnd()"
+              class="flex items-center gap-3 px-3 py-3 rounded-lg border transition-colors cursor-grab"
+              [class.border-blue-300]="widgetDragOverId === widget.id"
+              [class.bg-blue-50]="widgetDragOverId === widget.id"
+              [class.border-gray-200]="widgetDragOverId !== widget.id"
+              [class.bg-gray-50]="widgetDragOverId !== widget.id">
+              <!-- Drag handle -->
+              <svg class="w-4 h-4 text-gray-300 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                <circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
+                <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
+                <circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/>
+              </svg>
+              <!-- Label + description -->
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-gray-800">{{ widget.label }}</p>
+                <p class="text-xs text-gray-400 mt-0.5 leading-snug">{{ widget.description }}</p>
               </div>
-              <span class="text-gray-400 text-xs">{{ loc.city }}, {{ loc.country }}</span>
-            </div>
-          }
-        </div>
-      </div>
-
-      <!-- Connector summary -->
-      <div class="bg-white border border-gray-200 rounded-xl p-5">
-        <h3 class="text-sm font-semibold text-gray-700 mb-4">Connectors</h3>
-        <div class="flex flex-col gap-2.5">
-          @for (con of customer.connectorList; track con.id) {
-            <div class="flex items-center justify-between text-sm">
-              <div class="flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full shrink-0"
-                  [class.bg-green-500]="con.status === 'Online'"
-                  [class.bg-amber-400]="con.status === 'Degraded'"
-                  [class.bg-gray-300]="con.status === 'Offline'"></span>
-                <span class="text-gray-700 font-mono text-xs">{{ con.id }}</span>
-              </div>
-              <span class="text-gray-400 text-xs capitalize">{{ con.type }}</span>
+              <!-- Toggle -->
+              <button (click)="toggleWidget(widget.id)"
+                class="relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 transition-colors duration-200"
+                [class.bg-blue-600]="widget.enabled"
+                [class.border-blue-600]="widget.enabled"
+                [class.bg-gray-200]="!widget.enabled"
+                [class.border-gray-200]="!widget.enabled">
+                <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform duration-200"
+                  [class.translate-x-4]="widget.enabled"
+                  [class.translate-x-0]="!widget.enabled"></span>
+              </button>
             </div>
           }
         </div>
       </div>
     </div>
 
-    <!-- Bandwidth chart -->
-    @if (bandwidthChart) {
-      <div class="bg-white border border-gray-200 rounded-xl p-5">
-        <div class="flex items-start justify-between mb-4">
-          <div>
-            <h3 class="text-sm font-semibold text-gray-800">Data Usage</h3>
-            <p class="text-xs text-gray-400 mt-0.5">Total transmitted and received bandwidth per day</p>
-          </div>
-          <div class="flex items-center gap-4">
-            <div class="flex items-center gap-1.5">
-              <span class="w-3 h-0.5 bg-blue-500 rounded inline-block"></span>
-              <span class="text-xs text-gray-500">Transmitted</span>
-              <span class="text-xs font-semibold text-gray-800 ml-1">{{ bandwidthChart.txTotal }} GB</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <span class="w-3 h-0.5 bg-emerald-500 rounded inline-block"></span>
-              <span class="text-xs text-gray-500">Received</span>
-              <span class="text-xs font-semibold text-gray-800 ml-1">{{ bandwidthChart.rxTotal }} GB</span>
-            </div>
-          </div>
-        </div>
-        <!-- Chart wrapper: aspect ratio matches SVG viewBox (180/760) so HTML labels can be positioned by percentage -->
-        <div class="relative w-full" style="padding-bottom: 23.68%">
-          <svg viewBox="0 0 760 180" class="absolute inset-0 w-full h-full" preserveAspectRatio="none">
-            <!-- Y grid lines -->
-            @for (g of bandwidthChart.gridLines; track g.y) {
-              <line [attr.x1]="52" [attr.y1]="g.y" [attr.x2]="748" [attr.y2]="g.y"
-                    stroke="#f0f0f0" stroke-width="1"/>
+    <!-- Summary toolbar: customize button -->
+    <div class="flex items-center justify-end mb-4">
+      <button (click)="showCustomizePanel = true"
+        class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 border border-gray-200 bg-white hover:bg-gray-50 px-3 py-1.5 rounded-lg transition-colors shadow-sm">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/>
+        </svg>
+        Customize
+      </button>
+    </div>
+
+    <!-- Dynamic widget grid -->
+    @if (enabledWidgets.length === 0) {
+      <div class="flex flex-col items-center justify-center py-20 bg-white border border-gray-200 rounded-xl text-center">
+        <svg class="w-8 h-8 text-gray-300 mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/>
+        </svg>
+        <p class="text-sm font-medium text-gray-500">No widgets enabled</p>
+        <p class="text-xs text-gray-400 mt-1">Click <span class="font-medium">Customize</span> to add widgets to your dashboard.</p>
+      </div>
+    } @else {
+      <!-- Single CSS grid — 'third' widgets span 1 col, 'full' widgets span all 3, preserving array order -->
+      <div class="grid grid-cols-3 gap-5">
+        @for (widget of enabledWidgets; track widget.id) {
+          @switch (widget.id) {
+
+            @case ('network-health') {
+              <div class="bg-white border border-gray-200 rounded-xl p-5">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Network Health</h3>
+                <div class="flex flex-col gap-3">
+                  <div class="flex items-center justify-between text-sm">
+                    <span class="text-gray-500">Uptime (30d)</span>
+                    <span class="font-semibold" [class.text-green-600]="customer.uptime !== '—'" [class.text-gray-400]="customer.uptime === '—'">{{ customer.uptime }}</span>
+                  </div>
+                  <div class="flex items-center justify-between text-sm">
+                    <span class="text-gray-500">Active Connections</span>
+                    <span class="font-semibold text-gray-900">{{ customer.activeConnections }}</span>
+                  </div>
+                  <div class="flex items-center justify-between text-sm">
+                    <span class="text-gray-500">Bandwidth Used</span>
+                    <span class="font-semibold text-gray-900">{{ scaleBw(customer.bandwidthUsed) }}</span>
+                  </div>
+                  <div class="flex items-center justify-between text-sm">
+                    <span class="text-gray-500">Open Alerts</span>
+                    @if (customer.alerts.length === 0) {
+                      <span class="text-gray-400">None</span>
+                    } @else {
+                      <span class="font-semibold"
+                        [class.text-red-600]="customer.alertSeverity === 'Critical'"
+                        [class.text-amber-600]="customer.alertSeverity === 'Warning'">
+                        {{ customer.alerts.length }} {{ customer.alertSeverity }}
+                      </span>
+                    }
+                  </div>
+                </div>
+              </div>
             }
-            <!-- RX area (behind) -->
-            <path [attr.d]="bandwidthChart.rxArea" fill="#10b981" fill-opacity="0.08"/>
-            <!-- TX area (behind) -->
-            <path [attr.d]="bandwidthChart.txArea" fill="#3b82f6" fill-opacity="0.10"/>
-            <!-- RX line -->
-            <path [attr.d]="bandwidthChart.rxLine" fill="none" stroke="#10b981" stroke-width="1.5" stroke-linejoin="round"/>
-            <!-- TX line -->
-            <path [attr.d]="bandwidthChart.txLine" fill="none" stroke="#3b82f6" stroke-width="1.5" stroke-linejoin="round"/>
-          </svg>
-          <!-- Y-axis labels: HTML text at fixed 0.75rem, positioned by SVG coordinate percentage -->
-          @for (g of bandwidthChart.gridLines; track g.y) {
-            <span class="absolute text-xs text-gray-400 -translate-y-1/2 text-right leading-none pointer-events-none"
-                  [style.top.%]="(+g.y / 180) * 100"
-                  style="left: 0; width: 6.32%; padding-right: 4px">{{ g.label }}</span>
+
+            @case ('locations') {
+              <div class="bg-white border border-gray-200 rounded-xl p-5">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Locations</h3>
+                <div class="flex flex-col gap-2.5">
+                  @for (loc of customer.locationList; track loc.id) {
+                    <div class="flex items-center justify-between text-sm">
+                      <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full shrink-0"
+                          [class.bg-green-500]="loc.status === 'Online'"
+                          [class.bg-amber-400]="loc.status === 'Degraded'"
+                          [class.bg-gray-300]="loc.status === 'Offline'"></span>
+                        <span class="text-gray-700">{{ loc.name }}</span>
+                      </div>
+                      <span class="text-gray-400 text-xs">{{ loc.city }}, {{ loc.country }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            @case ('connectors') {
+              <div class="bg-white border border-gray-200 rounded-xl p-5">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Connectors</h3>
+                <div class="flex flex-col gap-2.5">
+                  @for (con of customer.connectorList; track con.id) {
+                    <div class="flex items-center justify-between text-sm">
+                      <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full shrink-0"
+                          [class.bg-green-500]="con.status === 'Online'"
+                          [class.bg-amber-400]="con.status === 'Degraded'"
+                          [class.bg-gray-300]="con.status === 'Offline'"></span>
+                        <span class="text-gray-700 font-mono text-xs">{{ con.id }}</span>
+                      </div>
+                      <span class="text-gray-400 text-xs capitalize">{{ con.type }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            @case ('data-usage') {
+              @if (bandwidthChart) {
+                <div class="col-span-3 bg-white border border-gray-200 rounded-xl p-5">
+                  <div class="flex items-start justify-between mb-4">
+                    <div>
+                      <h3 class="text-sm font-semibold text-gray-800">Data Usage</h3>
+                      <p class="text-xs text-gray-400 mt-0.5">Total transmitted and received bandwidth per day</p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                      <div class="flex items-center gap-1.5">
+                        <span class="w-3 h-0.5 bg-blue-500 rounded inline-block"></span>
+                        <span class="text-xs text-gray-500">Transmitted</span>
+                        <span class="text-xs font-semibold text-gray-800 ml-1">{{ bandwidthChart.txTotal }} GB</span>
+                      </div>
+                      <div class="flex items-center gap-1.5">
+                        <span class="w-3 h-0.5 bg-emerald-500 rounded inline-block"></span>
+                        <span class="text-xs text-gray-500">Received</span>
+                        <span class="text-xs font-semibold text-gray-800 ml-1">{{ bandwidthChart.rxTotal }} GB</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="relative w-full" style="padding-bottom: 23.68%">
+                    <svg viewBox="0 0 760 180" class="absolute inset-0 w-full h-full" preserveAspectRatio="none">
+                      @for (g of bandwidthChart.gridLines; track g.y) {
+                        <line [attr.x1]="52" [attr.y1]="g.y" [attr.x2]="748" [attr.y2]="g.y" stroke="#f0f0f0" stroke-width="1"/>
+                      }
+                      <path [attr.d]="bandwidthChart.rxArea" fill="#10b981" fill-opacity="0.08"/>
+                      <path [attr.d]="bandwidthChart.txArea" fill="#3b82f6" fill-opacity="0.10"/>
+                      <path [attr.d]="bandwidthChart.rxLine" fill="none" stroke="#10b981" stroke-width="1.5" stroke-linejoin="round"/>
+                      <path [attr.d]="bandwidthChart.txLine" fill="none" stroke="#3b82f6" stroke-width="1.5" stroke-linejoin="round"/>
+                    </svg>
+                    @for (g of bandwidthChart.gridLines; track g.y) {
+                      <span class="absolute text-xs text-gray-400 -translate-y-1/2 text-right leading-none pointer-events-none"
+                            [style.top.%]="(+g.y / 180) * 100"
+                            style="left: 0; width: 6.32%; padding-right: 4px">{{ g.label }}</span>
+                    }
+                    @for (x of bandwidthChart.xLabels; track x.x) {
+                      <span class="absolute text-xs text-gray-400 -translate-x-1/2 leading-none pointer-events-none"
+                            [style.left.%]="(+x.x / 760) * 100"
+                            style="top: 93.33%">{{ x.label }}</span>
+                    }
+                  </div>
+                </div>
+              }
+            }
+
+            @case ('active-connections') {
+              <div class="bg-white border border-gray-200 rounded-xl p-5">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Active Connections</h3>
+                <div class="flex flex-col items-center justify-center py-4 gap-1">
+                  <p class="text-4xl font-bold text-gray-900">{{ customer.activeConnections }}</p>
+                  <p class="text-xs text-gray-400">connections active now</p>
+                </div>
+                <div class="mt-3 flex flex-col gap-2">
+                  @for (conn of customer.connectionList.slice(0, 4); track conn.source) {
+                    <div class="flex items-center justify-between text-xs">
+                      <span class="font-mono text-gray-700 truncate max-w-[60%]">{{ conn.source }}</span>
+                      @if (conn.status === 'Connected') {
+                        <span class="text-green-600 font-medium">Connected</span>
+                      }
+                      @if (conn.status === 'Idle') {
+                        <span class="text-gray-400">Idle</span>
+                      }
+                      @if (conn.status === 'Disconnected') {
+                        <span class="text-red-500">Disconnected</span>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            @case ('recent-alerts') {
+              <div class="bg-white border border-gray-200 rounded-xl p-5">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Recent Alerts</h3>
+                @if (customer.alerts.length === 0) {
+                  <div class="flex flex-col items-center justify-center py-6 gap-1.5">
+                    <div class="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center">
+                      <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                    </div>
+                    <p class="text-sm font-medium text-gray-700">No active alerts</p>
+                    <p class="text-xs text-gray-400">Network is operating normally.</p>
+                  </div>
+                } @else {
+                  <div class="flex flex-col divide-y divide-gray-100">
+                    @for (alert of customer.alerts.slice(0, 4); track alert.resource) {
+                      <div class="py-3 first:pt-0 last:pb-0 flex flex-col gap-1.5">
+                        <!-- Resource + description -->
+                        <div class="flex items-start gap-2">
+                          @if (alert.resourceIcon === 'gateway') {
+                            <svg class="w-3.5 h-3.5 text-green-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z"/>
+                            </svg>
+                          }
+                          @if (alert.resourceIcon === 'device') {
+                            <svg class="w-3.5 h-3.5 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/>
+                            </svg>
+                          }
+                          @if (alert.resourceIcon === 'connector') {
+                            <svg class="w-3.5 h-3.5 text-purple-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/>
+                            </svg>
+                          }
+                          <p class="text-xs text-gray-700 leading-snug">
+                            <span class="font-semibold text-blue-600">{{ alert.resource }}</span>
+                            {{ ' ' + alert.description }}
+                          </p>
+                        </div>
+                        <!-- Type + date -->
+                        <div class="flex items-center justify-between pl-5">
+                          <span class="text-xs font-medium text-red-500">{{ alert.type }}</span>
+                          <span class="text-xs text-gray-400">{{ alert.createdAt }}</span>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                  @if (customer.alerts.length > 4) {
+                    <button (click)="setTab('alerts')" class="mt-3 w-full text-center text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors">
+                      View all {{ customer.alerts.length }} alerts
+                    </button>
+                  }
+                }
+              </div>
+            }
+
           }
-          <!-- X-axis labels: HTML text at fixed 0.75rem, positioned by SVG coordinate percentage -->
-          @for (x of bandwidthChart.xLabels; track x.x) {
-            <span class="absolute text-xs text-gray-400 -translate-x-1/2 leading-none pointer-events-none"
-                  [style.left.%]="(+x.x / 760) * 100"
-                  style="top: 93.33%">{{ x.label }}</span>
-          }
-        </div>
+        }
       </div>
     }
-    </div>
   }
 
   <!-- ── CONNECTIONS TAB ── -->
   @if (activeTab === 'connections') {
-    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden" (click)="showColumnPicker = null">
+      <!-- Columns toolbar -->
+      <div class="flex justify-end px-4 py-2 border-b border-gray-100">
+        <div class="relative">
+          <button (click)="showColumnPicker = showColumnPicker === 'connections' ? null : 'connections'; $event.stopPropagation()"
+            class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 border border-gray-200 bg-white hover:bg-gray-50 px-3 py-1.5 rounded-lg transition-colors">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125z"/>
+            </svg>
+            Columns
+          </button>
+          @if (showColumnPicker === 'connections') {
+            <div class="absolute right-0 top-full mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-20 py-1"
+                 (click)="$event.stopPropagation()">
+              @for (c of tableColumns['connections']; track c.id) {
+                <label class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 cursor-pointer"
+                  [class.opacity-50]="c.required" [class.cursor-not-allowed]="c.required">
+                  <input type="checkbox" [checked]="c.enabled" [disabled]="c.required"
+                    (change)="toggleTableColumn('connections', c.id)"
+                    class="rounded accent-blue-600"/>
+                  <span class="text-xs text-gray-700">{{ c.label }}</span>
+                </label>
+              }
+            </div>
+          }
+        </div>
+      </div>
       <table class="w-full text-sm">
         <thead class="bg-gray-50 border-b border-gray-200">
           <tr>
-            <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Source</th>
-            <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Destination</th>
-            <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Application</th>
-            <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Throughput</th>
-            <th class="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+            @if (col('connections', 'source')) {
+              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Source</th>
+            }
+            @if (col('connections', 'destination')) {
+              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Destination</th>
+            }
+            @if (col('connections', 'application')) {
+              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Application</th>
+            }
+            @if (col('connections', 'throughput')) {
+              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Throughput</th>
+            }
+            @if (col('connections', 'status')) {
+              <th class="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Connection</th>
+            }
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
           @for (conn of customer.connectionList; track conn.source) {
             <tr class="hover:bg-gray-50 transition-colors">
               <!-- Source -->
-              <td class="px-5 py-3">
-                <div class="flex items-center gap-2">
-                  @if (conn.sourceType === 'gateway') {
-                    <svg class="w-4 h-4 text-green-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z"/></svg>
-                  }
-                  @if (conn.sourceType === 'device') {
-                    <svg class="w-4 h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/></svg>
-                  }
-                  @if (conn.sourceType === 'clientless') {
-                    <svg class="w-4 h-4 text-purple-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"/></svg>
-                  }
-                  @if (conn.sourceType === 'sdk') {
-                    <svg class="w-4 h-4 text-orange-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/></svg>
-                  }
-                  <span class="font-mono text-xs font-semibold text-gray-800">{{ conn.source }}</span>
-                </div>
-              </td>
-              <!-- Destination -->
-              <td class="px-4 py-3">
-                <div class="flex items-center gap-2">
-                  @if (conn.destinationType === 'gateway') {
-                    <svg class="w-4 h-4 text-green-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z"/></svg>
-                  }
-                  @if (conn.destinationType === 'device') {
-                    <svg class="w-4 h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/></svg>
-                  }
-                  @if (conn.destinationType === 'clientless') {
-                    <svg class="w-4 h-4 text-purple-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"/></svg>
-                  }
-                  @if (conn.destinationType === 'sdk') {
-                    <svg class="w-4 h-4 text-orange-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/></svg>
-                  }
-                  <span class="font-mono text-xs font-semibold text-gray-800">{{ conn.destination }}</span>
-                </div>
-              </td>
-              <td class="px-4 py-3">
-                <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-md border text-blue-700 bg-blue-50 border-blue-200">{{ conn.app }}</span>
-              </td>
-              <!-- Throughput with bar -->
-              <td class="px-4 py-3 text-right">
-                <div class="flex flex-col items-end gap-1">
-                  <span class="text-sm font-semibold text-gray-800">{{ conn.throughput }}</span>
-                  <div class="w-20 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                    <div class="h-full bg-green-500 rounded-full" [style.width.%]="conn.throughputPct"></div>
+              @if (col('connections', 'source')) {
+                <td class="px-5 py-3">
+                  <div class="flex items-center gap-2">
+                    @if (conn.sourceType === 'gateway') {
+                      <svg class="w-4 h-4 text-green-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z"/></svg>
+                    }
+                    @if (conn.sourceType === 'device') {
+                      <svg class="w-4 h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/></svg>
+                    }
+                    @if (conn.sourceType === 'clientless') {
+                      <svg class="w-4 h-4 text-purple-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"/></svg>
+                    }
+                    @if (conn.sourceType === 'sdk') {
+                      <svg class="w-4 h-4 text-orange-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/></svg>
+                    }
+                    <span class="font-mono text-xs font-semibold text-gray-800">{{ conn.source }}</span>
                   </div>
-                </div>
-              </td>
-              <td class="px-5 py-3 text-right">
-                @if (conn.status === 'Connected') {
-                  <span class="inline-flex items-center gap-1.5 text-xs font-medium text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
-                    <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>Connected
-                  </span>
-                }
-                @if (conn.status === 'Idle') {
-                  <span class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-500 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded-full">
-                    <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>Idle
-                  </span>
-                }
-                @if (conn.status === 'Disconnected') {
-                  <span class="inline-flex items-center gap-1.5 text-xs font-medium text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full">
-                    <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>Disconnected
-                  </span>
-                }
-              </td>
+                </td>
+              }
+              <!-- Destination -->
+              @if (col('connections', 'destination')) {
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-2">
+                    @if (conn.destinationType === 'gateway') {
+                      <svg class="w-4 h-4 text-green-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z"/></svg>
+                    }
+                    @if (conn.destinationType === 'device') {
+                      <svg class="w-4 h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/></svg>
+                    }
+                    @if (conn.destinationType === 'clientless') {
+                      <svg class="w-4 h-4 text-purple-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"/></svg>
+                    }
+                    @if (conn.destinationType === 'sdk') {
+                      <svg class="w-4 h-4 text-orange-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/></svg>
+                    }
+                    <span class="font-mono text-xs font-semibold text-gray-800">{{ conn.destination }}</span>
+                  </div>
+                </td>
+              }
+              @if (col('connections', 'application')) {
+                <td class="px-4 py-3">
+                  <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-md border text-blue-700 bg-blue-50 border-blue-200">{{ conn.app }}</span>
+                </td>
+              }
+              <!-- Throughput with bar -->
+              @if (col('connections', 'throughput')) {
+                <td class="px-4 py-3 text-right">
+                  <div class="flex flex-col items-end gap-1">
+                    <span class="text-sm font-semibold text-gray-800">{{ conn.throughput }}</span>
+                    <div class="w-20 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                      <div class="h-full bg-green-500 rounded-full" [style.width.%]="conn.throughputPct"></div>
+                    </div>
+                  </div>
+                </td>
+              }
+              @if (col('connections', 'status')) {
+                <td class="px-5 py-3 text-right">
+                  @if (conn.status === 'Connected') {
+                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
+                      <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>Connected
+                    </span>
+                  }
+                  @if (conn.status === 'Idle') {
+                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-500 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded-full">
+                      <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>Idle
+                    </span>
+                  }
+                  @if (conn.status === 'Disconnected') {
+                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full">
+                      <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>Disconnected
+                    </span>
+                  }
+                </td>
+              }
             </tr>
           } @empty {
-            <tr><td colspan="5" class="px-5 py-12 text-center text-sm text-gray-400">No active connections.</td></tr>
+            <tr><td [attr.colspan]="visibleColCount('connections')" class="px-5 py-12 text-center text-sm text-gray-400">No active connections.</td></tr>
           }
         </tbody>
       </table>
@@ -341,17 +554,57 @@
 
   <!-- ── LOCATIONS TAB ── -->
   @if (activeTab === 'locations') {
-    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden" (click)="showColumnPicker = null">
+      <!-- Columns toolbar -->
+      <div class="flex justify-end px-4 py-2 border-b border-gray-100">
+        <div class="relative">
+          <button (click)="showColumnPicker = showColumnPicker === 'locations' ? null : 'locations'; $event.stopPropagation()"
+            class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 border border-gray-200 bg-white hover:bg-gray-50 px-3 py-1.5 rounded-lg transition-colors">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125z"/>
+            </svg>
+            Columns
+          </button>
+          @if (showColumnPicker === 'locations') {
+            <div class="absolute right-0 top-full mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-20 py-1"
+                 (click)="$event.stopPropagation()">
+              @for (c of tableColumns['locations']; track c.id) {
+                <label class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 cursor-pointer"
+                  [class.opacity-50]="c.required" [class.cursor-not-allowed]="c.required">
+                  <input type="checkbox" [checked]="c.enabled" [disabled]="c.required"
+                    (change)="toggleTableColumn('locations', c.id)"
+                    class="rounded accent-blue-600"/>
+                  <span class="text-xs text-gray-700">{{ c.label }}</span>
+                </label>
+              }
+            </div>
+          }
+        </div>
+      </div>
       <table class="w-full text-sm">
         <thead class="bg-gray-50 border-b border-gray-200">
           <tr>
-            <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Location</th>
-            <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">City</th>
-            <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Country</th>
-            <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Connectors</th>
-            <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Active Connections</th>
-            <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Usage</th>
-            <th class="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+            @if (col('locations', 'location')) {
+              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Location</th>
+            }
+            @if (col('locations', 'city')) {
+              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">City</th>
+            }
+            @if (col('locations', 'country')) {
+              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Country</th>
+            }
+            @if (col('locations', 'connectors')) {
+              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Connectors</th>
+            }
+            @if (col('locations', 'activeConnections')) {
+              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Active Connections</th>
+            }
+            @if (col('locations', 'usage')) {
+              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Usage</th>
+            }
+            @if (col('locations', 'status')) {
+              <th class="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Connection</th>
+            }
           </tr>
         </thead>
         <tbody>
@@ -359,55 +612,69 @@
             <!-- Location row -->
             <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
                 (click)="toggleLocation(loc.id)">
-              <td class="px-5 py-3">
-                <div class="flex items-center gap-2">
-                  <!-- Expand/collapse chevron -->
-                  <svg class="w-3.5 h-3.5 text-gray-400 shrink-0 transition-transform"
-                       [class.rotate-90]="expandedLocationIds.has(loc.id)"
-                       fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-                  </svg>
-                  <svg class="w-4 h-4 text-violet-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/>
-                  </svg>
-                  <span class="font-medium text-gray-900">{{ loc.name }}</span>
-                </div>
-              </td>
-              <td class="px-4 py-3 text-gray-700">{{ loc.city }}</td>
-              <td class="px-4 py-3 text-gray-700">{{ loc.country }}</td>
-              <td class="px-4 py-3 text-right text-gray-700">{{ loc.connectors }}</td>
-              <td class="px-4 py-3 text-right text-gray-700">{{ scaleNum(loc.activeConnections) }}</td>
-              <td class="px-4 py-3 text-right">
-                <div class="flex flex-col items-end gap-1">
-                  <span class="text-sm font-semibold text-gray-800">{{ scaleBw(loc.usageBandwidth) }}</span>
-                  <div class="w-24 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                    <div class="h-full bg-green-500 rounded-full" [style.width.%]="loc.usagePct"></div>
+              @if (col('locations', 'location')) {
+                <td class="px-5 py-3">
+                  <div class="flex items-center gap-2">
+                    <!-- Expand/collapse chevron -->
+                    <svg class="w-3.5 h-3.5 text-gray-400 shrink-0 transition-transform"
+                         [class.rotate-90]="expandedLocationIds.has(loc.id)"
+                         fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                    </svg>
+                    <svg class="w-4 h-4 text-violet-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/>
+                    </svg>
+                    <span class="font-medium text-gray-900">{{ loc.name }}</span>
                   </div>
-                </div>
-              </td>
-              <td class="px-5 py-3 text-right">
-                @if (loc.status === 'Online') {
-                  <span class="inline-flex items-center gap-1.5 text-xs font-medium text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
-                    <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>Online
-                  </span>
-                }
-                @if (loc.status === 'Degraded') {
-                  <span class="inline-flex items-center gap-1.5 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
-                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Degraded
-                  </span>
-                }
-                @if (loc.status === 'Offline') {
-                  <span class="inline-flex items-center gap-1.5 text-xs font-medium text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full">
-                    <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>Offline
-                  </span>
-                }
-              </td>
+                </td>
+              }
+              @if (col('locations', 'city')) {
+                <td class="px-4 py-3 text-gray-700">{{ loc.city }}</td>
+              }
+              @if (col('locations', 'country')) {
+                <td class="px-4 py-3 text-gray-700">{{ loc.country }}</td>
+              }
+              @if (col('locations', 'connectors')) {
+                <td class="px-4 py-3 text-right text-gray-700">{{ loc.connectors }}</td>
+              }
+              @if (col('locations', 'activeConnections')) {
+                <td class="px-4 py-3 text-right text-gray-700">{{ scaleNum(loc.activeConnections) }}</td>
+              }
+              @if (col('locations', 'usage')) {
+                <td class="px-4 py-3 text-right">
+                  <div class="flex flex-col items-end gap-1">
+                    <span class="text-sm font-semibold text-gray-800">{{ scaleBw(loc.usageBandwidth) }}</span>
+                    <div class="w-24 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                      <div class="h-full bg-green-500 rounded-full" [style.width.%]="loc.usagePct"></div>
+                    </div>
+                  </div>
+                </td>
+              }
+              @if (col('locations', 'status')) {
+                <td class="px-5 py-3 text-right">
+                  @if (loc.status === 'Online') {
+                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
+                      <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>Online
+                    </span>
+                  }
+                  @if (loc.status === 'Degraded') {
+                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                      <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Degraded
+                    </span>
+                  }
+                  @if (loc.status === 'Offline') {
+                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full">
+                      <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>Offline
+                    </span>
+                  }
+                </td>
+              }
             </tr>
             <!-- Expandable connector sub-table -->
             @if (expandedLocationIds.has(loc.id)) {
               <tr class="border-b border-gray-100">
-                <td colspan="7" class="px-0 py-0">
+                <td [attr.colspan]="visibleColCount('locations')" class="px-0 py-0">
                   <div class="bg-gray-50 border-l-4 border-blue-400 ml-8">
                     <!-- Sub-table header -->
                     <div class="grid grid-cols-[1fr_1fr_2fr_2fr] px-5 py-2 border-b border-gray-200">
@@ -487,111 +754,169 @@
 
   <!-- ── CONNECTORS TAB ── -->
   @if (activeTab === 'connectors') {
-    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+    <div class="relative bg-white border border-gray-200 rounded-xl overflow-visible" data-connector-card (click)="showColumnPicker = null; connectorMenuOpenId = null">
+      <!-- Columns toolbar -->
+      <div class="flex justify-end px-4 py-2 border-b border-gray-100">
+        <div class="relative">
+          <button (click)="showColumnPicker = showColumnPicker === 'connectors' ? null : 'connectors'; $event.stopPropagation()"
+            class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 border border-gray-200 bg-white hover:bg-gray-50 px-3 py-1.5 rounded-lg transition-colors">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125z"/>
+            </svg>
+            Columns
+          </button>
+          @if (showColumnPicker === 'connectors') {
+            <div class="absolute right-0 top-full mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-20 py-1"
+                 (click)="$event.stopPropagation()">
+              @for (c of tableColumns['connectors']; track c.id) {
+                <label class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 cursor-pointer"
+                  [class.opacity-50]="c.required" [class.cursor-not-allowed]="c.required">
+                  <input type="checkbox" [checked]="c.enabled" [disabled]="c.required"
+                    (change)="toggleTableColumn('connectors', c.id)"
+                    class="rounded accent-blue-600"/>
+                  <span class="text-xs text-gray-700">{{ c.label }}</span>
+                </label>
+              }
+            </div>
+          }
+        </div>
+      </div>
+      <div class="overflow-hidden rounded-b-xl">
       <table class="w-full text-sm">
         <thead class="bg-gray-50 border-b border-gray-200">
           <tr>
-            <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Identity</th>
-            <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Application</th>
-            <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Last Connected</th>
-            <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Requests ↑↓</th>
-            <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Bandwidth ↑↓</th>
-            <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Throughput ↑↓</th>
+            @if (col('connectors', 'identity')) {
+              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Identity</th>
+            }
+            @if (col('connectors', 'application')) {
+              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Application</th>
+            }
+            @if (col('connectors', 'lastConnected')) {
+              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Last Connected</th>
+            }
+            @if (col('connectors', 'requests')) {
+              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Requests ↑↓</th>
+            }
+            @if (col('connectors', 'bandwidth')) {
+              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Bandwidth ↑↓</th>
+            }
+            @if (col('connectors', 'throughput')) {
+              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Throughput ↑↓</th>
+            }
             <!-- <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Dropped Pkts</th> -->
             <!-- <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Dropped Conns</th> -->
-            <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Uptime</th>
-            <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Usage</th>
-            <th class="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+            @if (col('connectors', 'uptime')) {
+              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Uptime</th>
+            }
+            @if (col('connectors', 'usage')) {
+              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Usage</th>
+            }
+            @if (col('connectors', 'enrollmentStatus')) {
+              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+            }
+            <th class="px-5 py-3"></th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
           @for (identity of customer.identityList; track identity.id) {
             <tr class="hover:bg-gray-50 transition-colors">
               <!-- Identity name + type + status -->
-              <td class="px-5 py-3">
-                <div class="flex items-center gap-2.5">
-                  @if (identity.type === 'user') {
-                    <div class="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                      <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
-                      </svg>
-                    </div>
-                  }
-                  @if (identity.type === 'device') {
-                    <div class="w-7 h-7 rounded-full bg-violet-100 flex items-center justify-center shrink-0">
-                      <svg class="w-3.5 h-3.5 text-violet-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/>
-                      </svg>
-                    </div>
-                  }
-                  @if (identity.type === 'service') {
-                    <div class="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-                      <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z"/>
-                      </svg>
-                    </div>
-                  }
-                  <div class="flex flex-col">
-                    <span class="text-sm font-medium text-gray-900">{{ identity.name }}</span>
-                    <div class="flex items-center gap-1 mt-0.5">
-                      @if (identity.status === 'Connected') {
-                        <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                        <span class="text-xs text-green-600 font-medium">Connected</span>
-                      } @else {
-                        <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
-                        <span class="text-xs text-gray-400 font-medium">Disconnected</span>
-                      }
+              @if (col('connectors', 'identity')) {
+                <td class="px-5 py-3">
+                  <div class="flex items-center gap-2.5">
+                    @if (identity.type === 'user') {
+                      <div class="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                        <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
+                        </svg>
+                      </div>
+                    }
+                    @if (identity.type === 'device') {
+                      <div class="w-7 h-7 rounded-full bg-violet-100 flex items-center justify-center shrink-0">
+                        <svg class="w-3.5 h-3.5 text-violet-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/>
+                        </svg>
+                      </div>
+                    }
+                    @if (identity.type === 'service') {
+                      <div class="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+                        <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z"/>
+                        </svg>
+                      </div>
+                    }
+                    <div class="flex flex-col">
+                      <span class="text-sm font-medium text-gray-900">{{ identity.name }}</span>
+                      <div class="flex items-center gap-1 mt-0.5">
+                        @if (identity.status === 'Connected') {
+                          <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                          <span class="text-xs text-green-600 font-medium">Connected</span>
+                        } @else {
+                          <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
+                          <span class="text-xs text-gray-400 font-medium">Disconnected</span>
+                        }
+                      </div>
                     </div>
                   </div>
-                </div>
-              </td>
+                </td>
+              }
               <!-- Application (was Bound Services) -->
-              <td class="px-4 py-3">
-                <div class="flex flex-wrap gap-1">
-                  @for (svc of identity.boundServices; track svc.name) {
-                    <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-md border"
-                          [class]="svc.role === 'dial'
-                            ? 'text-blue-700 bg-blue-50 border-blue-200'
-                            : 'text-amber-700 bg-amber-50 border-amber-200'">
-                      <span class="font-mono text-[9px] font-bold uppercase">{{ svc.role }}</span>
-                      {{ svc.name }}
-                    </span>
-                  }
-                </div>
-              </td>
+              @if (col('connectors', 'application')) {
+                <td class="px-4 py-3">
+                  <div class="flex flex-wrap gap-1">
+                    @for (svc of identity.boundServices; track svc.name) {
+                      <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-md border"
+                            [class]="svc.role === 'dial'
+                              ? 'text-blue-700 bg-blue-50 border-blue-200'
+                              : 'text-amber-700 bg-amber-50 border-amber-200'">
+                        <span class="font-mono text-[9px] font-bold uppercase">{{ svc.role }}</span>
+                        {{ svc.name }}
+                      </span>
+                    }
+                  </div>
+                </td>
+              }
               <!-- Last connected -->
-              <td class="px-4 py-3 text-right text-xs text-gray-500">{{ identity.lastConnected }}</td>
+              @if (col('connectors', 'lastConnected')) {
+                <td class="px-4 py-3 text-right text-xs text-gray-500">{{ identity.lastConnected }}</td>
+              }
               <!-- Requests -->
-              <td class="px-4 py-3 text-right">
-                <div class="flex flex-col items-end gap-0.5">
-                  <span class="text-xs text-gray-700">↑ {{ scaleNum(identity.requestsSent).toLocaleString() }}</span>
-                  <span class="text-xs text-gray-500">↓ {{ scaleNum(identity.requestsReceived).toLocaleString() }}</span>
-                </div>
-              </td>
+              @if (col('connectors', 'requests')) {
+                <td class="px-4 py-3 text-right">
+                  <div class="flex flex-col items-end gap-0.5">
+                    <span class="text-xs text-gray-700">↑ {{ scaleNum(identity.requestsSent).toLocaleString() }}</span>
+                    <span class="text-xs text-gray-500">↓ {{ scaleNum(identity.requestsReceived).toLocaleString() }}</span>
+                  </div>
+                </td>
+              }
               <!-- Bandwidth -->
-              <td class="px-4 py-3">
-                <div class="flex flex-col items-end gap-1">
-                  <div class="flex items-center gap-1.5">
-                    <span class="text-xs text-gray-700">↑ {{ scaleBw(identity.bandwidthSent) }}</span>
-                    <div class="w-16 h-1 bg-gray-200 rounded-full overflow-hidden">
-                      <div class="h-full bg-blue-400 rounded-full" [style.width.%]="identity.bandwidthSentPct"></div>
+              @if (col('connectors', 'bandwidth')) {
+                <td class="px-4 py-3">
+                  <div class="flex flex-col items-end gap-1">
+                    <div class="flex items-center gap-1.5">
+                      <span class="text-xs text-gray-700">↑ {{ scaleBw(identity.bandwidthSent) }}</span>
+                      <div class="w-16 h-1 bg-gray-200 rounded-full overflow-hidden">
+                        <div class="h-full bg-blue-400 rounded-full" [style.width.%]="identity.bandwidthSentPct"></div>
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                      <span class="text-xs text-gray-500">↓ {{ scaleBw(identity.bandwidthReceived) }}</span>
+                      <div class="w-16 h-1 bg-gray-200 rounded-full overflow-hidden">
+                        <div class="h-full bg-green-400 rounded-full" [style.width.%]="identity.bandwidthReceivedPct"></div>
+                      </div>
                     </div>
                   </div>
-                  <div class="flex items-center gap-1.5">
-                    <span class="text-xs text-gray-500">↓ {{ scaleBw(identity.bandwidthReceived) }}</span>
-                    <div class="w-16 h-1 bg-gray-200 rounded-full overflow-hidden">
-                      <div class="h-full bg-green-400 rounded-full" [style.width.%]="identity.bandwidthReceivedPct"></div>
-                    </div>
-                  </div>
-                </div>
-              </td>
+                </td>
+              }
               <!-- Throughput -->
-              <td class="px-4 py-3 text-right">
-                <div class="flex flex-col items-end gap-0.5">
-                  <span class="text-xs text-gray-700">↑ {{ identity.throughputSent }}</span>
-                  <span class="text-xs text-gray-500">↓ {{ identity.throughputReceived }}</span>
-                </div>
-              </td>
+              @if (col('connectors', 'throughput')) {
+                <td class="px-4 py-3 text-right">
+                  <div class="flex flex-col items-end gap-0.5">
+                    <span class="text-xs text-gray-700">↑ {{ identity.throughputSent }}</span>
+                    <span class="text-xs text-gray-500">↓ {{ identity.throughputReceived }}</span>
+                  </div>
+                </td>
+              }
               <!-- Dropped packets -->
               <!-- <td class="px-4 py-3 text-right">
                 @if (scaleNum(identity.droppedPackets) > 0) {
@@ -609,136 +934,250 @@
                 }
               </td> -->
               <!-- Uptime -->
-              <td class="px-4 py-3 text-right">
-                @if (identity.uptime) {
-                  <span [class]="identity.uptime === '0%' ? 'text-red-500 font-medium' : isUptimeDegraded(identity.uptime) ? 'text-amber-600 font-medium' : 'text-gray-700'">
-                    {{ identity.uptime }}
-                  </span>
-                } @else {
-                  <span class="text-gray-400">—</span>
-                }
-              </td>
+              @if (col('connectors', 'uptime')) {
+                <td class="px-4 py-3 text-right">
+                  @if (identity.uptime) {
+                    <span [class]="identity.uptime === '0%' ? 'text-red-500 font-medium' : isUptimeDegraded(identity.uptime) ? 'text-amber-600 font-medium' : 'text-gray-700'">
+                      {{ identity.uptime }}
+                    </span>
+                  } @else {
+                    <span class="text-gray-400">—</span>
+                  }
+                </td>
+              }
               <!-- Usage -->
-              <td class="px-4 py-3">
-                @if (identity.usageBandwidth) {
-                  <div class="flex flex-col items-end gap-1">
-                    <span class="text-sm font-semibold text-gray-800">{{ scaleBw(identity.usageBandwidth) }}</span>
-                    <div class="w-24 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                      <div class="h-full bg-green-500 rounded-full" [style.width.%]="identity.usagePct"></div>
+              @if (col('connectors', 'usage')) {
+                <td class="px-4 py-3">
+                  @if (identity.usageBandwidth) {
+                    <div class="flex flex-col items-end gap-1">
+                      <span class="text-sm font-semibold text-gray-800">{{ scaleBw(identity.usageBandwidth) }}</span>
+                      <div class="w-24 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                        <div class="h-full bg-green-500 rounded-full" [style.width.%]="identity.usagePct"></div>
+                      </div>
                     </div>
-                  </div>
-                } @else {
-                  <span class="text-gray-400 text-right block">—</span>
-                }
-              </td>
+                  } @else {
+                    <span class="text-gray-400 text-right block">—</span>
+                  }
+                </td>
+              }
               <!-- Status -->
-              <td class="px-5 py-3 text-right">
-                @if (identity.connectorStatus === 'Online') {
-                  <span class="inline-flex items-center gap-1.5 text-xs font-medium text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
-                    <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>Online
-                  </span>
-                } @else if (identity.connectorStatus === 'Degraded') {
-                  <span class="inline-flex items-center gap-1.5 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
-                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Degraded
-                  </span>
-                } @else if (identity.connectorStatus === 'Offline') {
-                  <span class="inline-flex items-center gap-1.5 text-xs font-medium text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full">
-                    <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>Offline
-                  </span>
-                } @else {
-                  <span class="text-gray-400">—</span>
-                }
+              @if (col('connectors', 'enrollmentStatus')) {
+                <td class="px-4 py-3 text-right">
+                  @if (identity.status === 'Connected') {
+                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
+                      <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>Enrolled
+                    </span>
+                  } @else {
+                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full">
+                      <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>Expired Token
+                    </span>
+                  }
+                </td>
+              }
+              <!-- Three-dot actions menu trigger -->
+              <td class="px-5 py-3 text-right" (click)="$event.stopPropagation()">
+                <button (click)="openConnectorMenu(identity.id, $event)"
+                  class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                  [class.bg-gray-100]="connectorMenuOpenId === identity.id"
+                  [class.text-gray-600]="connectorMenuOpenId === identity.id">
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
+                  </svg>
+                </button>
               </td>
             </tr>
           }
         </tbody>
       </table>
+      </div>
+      <!-- Connector row action menu — rendered outside overflow-hidden so it isn't clipped -->
+      @if (connectorMenuOpenId) {
+        <div class="absolute right-4 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-20 py-1"
+             [style.top.px]="menuPositionTop" [style.bottom.px]="menuPositionBottom" (click)="$event.stopPropagation()">
+          @if (activeConnectorIdentity && activeConnectorIdentity.status !== 'Connected') {
+            <!-- Expired Token: only Reissue Token -->
+            <button (click)="connectorMenuOpenId = null"
+              class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors text-left">
+              <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"/>
+              </svg>
+              Reissue Token
+            </button>
+          } @else {
+            <!-- Enrolled: full menu -->
+            <button (click)="openLogs(connectorMenuOpenId!)"
+              class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors text-left">
+              <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+              </svg>
+              View Logs
+            </button>
+            <button (click)="connectorMenuOpenId = null"
+              class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors text-left">
+              <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/>
+              </svg>
+              Reset Enrollment
+            </button>
+            @if (connectorMenuOpenId) {
+              <button (click)="toggleIdentityEnabled(connectorMenuOpenId)"
+                class="w-full flex items-center gap-2.5 px-3 py-2 text-xs transition-colors text-left"
+                [class.text-gray-700]="!disabledIdentityIds.has(connectorMenuOpenId)"
+                [class.hover:bg-gray-50]="!disabledIdentityIds.has(connectorMenuOpenId)"
+                [class.text-amber-700]="disabledIdentityIds.has(connectorMenuOpenId)"
+                [class.hover:bg-amber-50]="disabledIdentityIds.has(connectorMenuOpenId)">
+                @if (disabledIdentityIds.has(connectorMenuOpenId)) {
+                  <svg class="w-3.5 h-3.5 text-amber-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5.636 5.636a9 9 0 1012.728 12.728M5.636 5.636L18.364 18.364"/>
+                  </svg>
+                  Enable
+                } @else {
+                  <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                  </svg>
+                  Disable
+                }
+              </button>
+            }
+            <div class="border-t border-gray-100 my-1"></div>
+            <button (click)="connectorMenuOpenId = null"
+              class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-red-600 hover:bg-red-50 transition-colors text-left">
+              <svg class="w-3.5 h-3.5 text-red-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
+              </svg>
+              Delete
+            </button>
+          }
+        </div>
+      }
     </div>
   }
 
   <!-- ── USERS TAB ── -->
   @if (activeTab === 'users') {
-    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden" (click)="showColumnPicker = null">
+      <!-- Columns toolbar -->
+      <div class="flex justify-end px-4 py-2 border-b border-gray-100">
+        <div class="relative">
+          <button (click)="showColumnPicker = showColumnPicker === 'users' ? null : 'users'; $event.stopPropagation()"
+            class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 border border-gray-200 bg-white hover:bg-gray-50 px-3 py-1.5 rounded-lg transition-colors">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125z"/>
+            </svg>
+            Columns
+          </button>
+          @if (showColumnPicker === 'users') {
+            <div class="absolute right-0 top-full mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-20 py-1"
+                 (click)="$event.stopPropagation()">
+              @for (c of tableColumns['users']; track c.id) {
+                <label class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 cursor-pointer"
+                  [class.opacity-50]="c.required" [class.cursor-not-allowed]="c.required">
+                  <input type="checkbox" [checked]="c.enabled" [disabled]="c.required"
+                    (change)="toggleTableColumn('users', c.id)"
+                    class="rounded accent-blue-600"/>
+                  <span class="text-xs text-gray-700">{{ c.label }}</span>
+                </label>
+              }
+            </div>
+          }
+        </div>
+      </div>
       <table class="w-full text-sm">
         <thead class="bg-gray-50 border-b border-gray-200">
           <tr>
-            <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">User</th>
-            <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Role</th>
-            <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Location</th>
-            <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Permissions</th>
+            @if (col('users', 'user')) {
+              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">User</th>
+            }
+            @if (col('users', 'role')) {
+              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Role</th>
+            }
+            @if (col('users', 'location')) {
+              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Location</th>
+            }
+            @if (col('users', 'permissions')) {
+              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Permissions</th>
+            }
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
           @for (user of customer.userList; track user.id) {
             <tr class="hover:bg-gray-50 transition-colors">
               <!-- Name + email -->
-              <td class="px-5 py-3">
-                <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-violet-500 flex items-center justify-center shrink-0">
-                    <span class="text-xs font-semibold text-white">{{ user.name.split(' ').map(n => n[0]).join('') }}</span>
+              @if (col('users', 'user')) {
+                <td class="px-5 py-3">
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-violet-500 flex items-center justify-center shrink-0">
+                      <span class="text-xs font-semibold text-white">{{ user.name.split(' ').map(n => n[0]).join('') }}</span>
+                    </div>
+                    <div>
+                      <div class="font-medium text-gray-900">{{ user.name }}</div>
+                      <div class="text-xs text-gray-400">{{ user.email }}</div>
+                    </div>
                   </div>
-                  <div>
-                    <div class="font-medium text-gray-900">{{ user.name }}</div>
-                    <div class="text-xs text-gray-400">{{ user.email }}</div>
-                  </div>
-                </div>
-              </td>
+                </td>
+              }
               <!-- Role -->
-              <td class="px-4 py-3">
-                @if (user.role === 'operator') {
-                  <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-violet-700 bg-violet-50 border border-violet-200 px-2.5 py-1 rounded-full">
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
-                    Operator
-                  </span>
-                }
-                @if (user.role === 'monitor') {
-                  <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-sky-700 bg-sky-50 border border-sky-200 px-2.5 py-1 rounded-full">
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    Monitor
-                  </span>
-                }
-                @if (user.role === 'custom') {
-                  <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full">
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    Custom
-                  </span>
-                }
-              </td>
+              @if (col('users', 'role')) {
+                <td class="px-4 py-3">
+                  @if (user.role === 'operator') {
+                    <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-violet-700 bg-violet-50 border border-violet-200 px-2.5 py-1 rounded-full">
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+                      Operator
+                    </span>
+                  }
+                  @if (user.role === 'monitor') {
+                    <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-sky-700 bg-sky-50 border border-sky-200 px-2.5 py-1 rounded-full">
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                      Monitor
+                    </span>
+                  }
+                  @if (user.role === 'custom') {
+                    <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full">
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                      Custom
+                    </span>
+                  }
+                </td>
+              }
               <!-- Location -->
-              <td class="px-4 py-3 text-sm text-gray-700">{{ user.location }}</td>
+              @if (col('users', 'location')) {
+                <td class="px-4 py-3 text-sm text-gray-700">{{ user.location }}</td>
+              }
               <!-- Permissions -->
-              <td class="px-5 py-3">
-                <div class="flex flex-wrap gap-1.5">
-                  @if (user.permissions.locations) {
-                    <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded border"
-                          [class]="user.permissions.locations === 'manage' ? 'text-indigo-700 bg-indigo-50 border-indigo-200' : 'text-gray-600 bg-gray-50 border-gray-200'">
-                      <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
-                      Locations · {{ user.permissions.locations === 'manage' ? 'Manage' : 'Read Only' }}
-                    </span>
-                  }
-                  @if (user.permissions.connectors) {
-                    <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded border"
-                          [class]="user.permissions.connectors === 'manage' ? 'text-indigo-700 bg-indigo-50 border-indigo-200' : 'text-gray-600 bg-gray-50 border-gray-200'">
-                      <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z"/></svg>
-                      Connectors · {{ user.permissions.connectors === 'manage' ? 'Manage' : 'Read Only' }}
-                    </span>
-                  }
-                  @if (user.permissions.workflows) {
-                    <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded border"
-                          [class]="user.permissions.workflows === 'manage' ? 'text-indigo-700 bg-indigo-50 border-indigo-200' : 'text-gray-600 bg-gray-50 border-gray-200'">
-                      <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z"/></svg>
-                      Workflows · {{ user.permissions.workflows === 'manage' ? 'Manage' : 'Read Only' }}
-                    </span>
-                  }
-                  @if (user.permissions.users) {
-                    <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded border"
-                          [class]="user.permissions.users === 'manage' ? 'text-indigo-700 bg-indigo-50 border-indigo-200' : 'text-gray-600 bg-gray-50 border-gray-200'">
-                      <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
-                      Users · {{ user.permissions.users === 'manage' ? 'Manage' : 'Read Only' }}
-                    </span>
-                  }
-                </div>
-              </td>
+              @if (col('users', 'permissions')) {
+                <td class="px-5 py-3">
+                  <div class="flex flex-wrap gap-1.5">
+                    @if (user.permissions.locations) {
+                      <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded border"
+                            [class]="user.permissions.locations === 'manage' ? 'text-indigo-700 bg-indigo-50 border-indigo-200' : 'text-gray-600 bg-gray-50 border-gray-200'">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+                        Locations · {{ user.permissions.locations === 'manage' ? 'Manage' : 'Read Only' }}
+                      </span>
+                    }
+                    @if (user.permissions.connectors) {
+                      <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded border"
+                            [class]="user.permissions.connectors === 'manage' ? 'text-indigo-700 bg-indigo-50 border-indigo-200' : 'text-gray-600 bg-gray-50 border-gray-200'">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z"/></svg>
+                        Connectors · {{ user.permissions.connectors === 'manage' ? 'Manage' : 'Read Only' }}
+                      </span>
+                    }
+                    @if (user.permissions.workflows) {
+                      <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded border"
+                            [class]="user.permissions.workflows === 'manage' ? 'text-indigo-700 bg-indigo-50 border-indigo-200' : 'text-gray-600 bg-gray-50 border-gray-200'">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z"/></svg>
+                        Workflows · {{ user.permissions.workflows === 'manage' ? 'Manage' : 'Read Only' }}
+                      </span>
+                    }
+                    @if (user.permissions.users) {
+                      <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded border"
+                            [class]="user.permissions.users === 'manage' ? 'text-indigo-700 bg-indigo-50 border-indigo-200' : 'text-gray-600 bg-gray-50 border-gray-200'">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+                        Users · {{ user.permissions.users === 'manage' ? 'Manage' : 'Read Only' }}
+                      </span>
+                    }
+                  </div>
+                </td>
+              }
             </tr>
           }
         </tbody>
@@ -759,73 +1198,115 @@
         <p class="text-xs text-gray-400">This customer's network is operating normally.</p>
       </div>
     } @else {
-      <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+      <div class="bg-white border border-gray-200 rounded-xl overflow-hidden" (click)="showColumnPicker = null">
+        <!-- Columns toolbar -->
+        <div class="flex justify-end px-4 py-2 border-b border-gray-100">
+          <div class="relative">
+            <button (click)="showColumnPicker = showColumnPicker === 'alerts' ? null : 'alerts'; $event.stopPropagation()"
+              class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 border border-gray-200 bg-white hover:bg-gray-50 px-3 py-1.5 rounded-lg transition-colors">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125z"/>
+              </svg>
+              Columns
+            </button>
+            @if (showColumnPicker === 'alerts') {
+              <div class="absolute right-0 top-full mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-20 py-1"
+                   (click)="$event.stopPropagation()">
+                @for (c of tableColumns['alerts']; track c.id) {
+                  <label class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 cursor-pointer"
+                    [class.opacity-50]="c.required" [class.cursor-not-allowed]="c.required">
+                    <input type="checkbox" [checked]="c.enabled" [disabled]="c.required"
+                      (change)="toggleTableColumn('alerts', c.id)"
+                      class="rounded accent-blue-600"/>
+                    <span class="text-xs text-gray-700">{{ c.label }}</span>
+                  </label>
+                }
+              </div>
+            }
+          </div>
+        </div>
         <!-- Sub-header -->
         <div class="grid grid-cols-[1fr_160px_180px_120px] bg-gray-50 border-b border-gray-200 px-5 py-3">
-          <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Alert Description</span>
-          <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Created</span>
-          <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Type</span>
-          <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 text-right">Actions</span>
+          @if (col('alerts', 'description')) {
+            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Alert Description</span>
+          }
+          @if (col('alerts', 'created')) {
+            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Created</span>
+          }
+          @if (col('alerts', 'type')) {
+            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Type</span>
+          }
+          @if (col('alerts', 'actions')) {
+            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 text-right">Actions</span>
+          }
         </div>
         @for (alert of customer.alerts; track alert.resource) {
           <div class="grid grid-cols-[1fr_160px_180px_120px] items-center px-5 py-4 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors">
             <!-- Description -->
-            <div class="flex items-center gap-2.5 pr-4">
-              @if (alert.resourceIcon === 'gateway') {
-                <svg class="w-4 h-4 text-green-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z"/>
-                </svg>
-              }
-              @if (alert.resourceIcon === 'device') {
-                <svg class="w-4 h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/>
-                </svg>
-              }
-              @if (alert.resourceIcon === 'connector') {
-                <svg class="w-4 h-4 text-purple-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/>
-                </svg>
-              }
-              <p class="text-sm text-gray-700">
-                <span class="font-semibold text-blue-600">{{ alert.resource }}</span>
-                {{ ' ' + alert.description }}
-              </p>
-            </div>
+            @if (col('alerts', 'description')) {
+              <div class="flex items-center gap-2.5 pr-4">
+                @if (alert.resourceIcon === 'gateway') {
+                  <svg class="w-4 h-4 text-green-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z"/>
+                  </svg>
+                }
+                @if (alert.resourceIcon === 'device') {
+                  <svg class="w-4 h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/>
+                  </svg>
+                }
+                @if (alert.resourceIcon === 'connector') {
+                  <svg class="w-4 h-4 text-purple-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/>
+                  </svg>
+                }
+                <p class="text-sm text-gray-700">
+                  <span class="font-semibold text-blue-600">{{ alert.resource }}</span>
+                  {{ ' ' + alert.description }}
+                </p>
+              </div>
+            }
             <!-- Created -->
-            <span class="text-sm text-gray-400">{{ alert.createdAt }}</span>
+            @if (col('alerts', 'created')) {
+              <span class="text-sm text-gray-400">{{ alert.createdAt }}</span>
+            }
             <!-- Type -->
-            <div class="flex items-center gap-1.5">
-              @if (alert.typeIcon === 'connectivity') {
-                <svg class="w-3.5 h-3.5 text-red-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z"/>
-                </svg>
-              }
-              @if (alert.typeIcon === 'certificate') {
-                <svg class="w-3.5 h-3.5 text-red-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"/>
-                </svg>
-              }
-              @if (alert.typeIcon === 'performance') {
-                <svg class="w-3.5 h-3.5 text-red-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/>
-                </svg>
-              }
-              @if (alert.typeIcon === 'auth') {
-                <svg class="w-3.5 h-3.5 text-red-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
-                </svg>
-              }
-              <span class="text-sm font-medium text-red-500">{{ alert.type }}</span>
-            </div>
+            @if (col('alerts', 'type')) {
+              <div class="flex items-center gap-1.5">
+                @if (alert.typeIcon === 'connectivity') {
+                  <svg class="w-3.5 h-3.5 text-red-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z"/>
+                  </svg>
+                }
+                @if (alert.typeIcon === 'certificate') {
+                  <svg class="w-3.5 h-3.5 text-red-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"/>
+                  </svg>
+                }
+                @if (alert.typeIcon === 'performance') {
+                  <svg class="w-3.5 h-3.5 text-red-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/>
+                  </svg>
+                }
+                @if (alert.typeIcon === 'auth') {
+                  <svg class="w-3.5 h-3.5 text-red-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
+                  </svg>
+                }
+                <span class="text-sm font-medium text-red-500">{{ alert.type }}</span>
+              </div>
+            }
             <!-- Actions -->
-            <div class="flex justify-end">
-              <button class="flex items-center gap-1 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg transition-colors">
-                View
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-                </svg>
-              </button>
-            </div>
+            @if (col('alerts', 'actions')) {
+              <div class="flex justify-end">
+                <button class="flex items-center gap-1 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg transition-colors">
+                  View
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                  </svg>
+                </button>
+              </div>
+            }
           </div>
         }
       </div>
@@ -833,4 +1314,107 @@
   }
 
 </div>
+}
+
+<!-- ── LOGS PANEL ── -->
+@if (showLogsPanel) {
+  <!-- Backdrop -->
+  <div class="fixed inset-0 bg-black/30 z-40" (click)="showLogsPanel = false"></div>
+
+  <!-- Panel -->
+  <div class="fixed top-0 right-0 h-full w-[680px] bg-white shadow-2xl z-50 flex flex-col">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 shrink-0">
+      <div>
+        <h2 class="text-base font-semibold text-gray-900">Activity Logs</h2>
+        @if (logsIdentity) {
+          <p class="text-xs text-gray-500 mt-0.5">{{ logsIdentity.name }}</p>
+        }
+      </div>
+      <button (click)="showLogsPanel = false" class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="flex items-center gap-3 px-6 py-3 border-b border-gray-100 shrink-0 flex-wrap">
+      <!-- Timeframe -->
+      <div class="flex rounded-lg border border-gray-200 overflow-hidden text-xs font-medium">
+        @for (tf of ([{v:'24h',l:'24h'},{v:'7d',l:'7d'},{v:'30d',l:'30d'}]); track tf.v) {
+          <button (click)="logsTimeframe = $any(tf.v)"
+            [class]="logsTimeframe === tf.v ? 'bg-blue-600 text-white px-3 py-1.5' : 'bg-white text-gray-600 hover:bg-gray-50 px-3 py-1.5 transition-colors'">
+            {{ tf.l }}
+          </button>
+        }
+      </div>
+
+      <!-- Status filter -->
+      <div class="flex rounded-lg border border-gray-200 overflow-hidden text-xs font-medium">
+        @for (f of ([{v:'all',l:'All'},{v:'success',l:'Success'},{v:'fail',l:'Failed'}]); track f.v) {
+          <button (click)="logsStatusFilter = $any(f.v)"
+            [class]="logsStatusFilter === f.v ? 'bg-blue-600 text-white px-3 py-1.5' : 'bg-white text-gray-600 hover:bg-gray-50 px-3 py-1.5 transition-colors'">
+            {{ f.l }}
+          </button>
+        }
+      </div>
+
+      <!-- Search -->
+      <div class="relative flex-1 min-w-[160px]">
+        <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
+        </svg>
+        <input [(ngModel)]="logsSearch" placeholder="Search URL or port…"
+          class="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400"/>
+      </div>
+
+      <!-- Count -->
+      <span class="text-xs text-gray-400 shrink-0">{{ filteredLogs.length }} entries</span>
+    </div>
+
+    <!-- Table -->
+    <div class="flex-1 overflow-y-auto">
+      @if (filteredLogs.length === 0) {
+        <div class="flex flex-col items-center justify-center h-40 text-gray-400">
+          <svg class="w-8 h-8 mb-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+          </svg>
+          <p class="text-sm">No log entries match your filters</p>
+        </div>
+      } @else {
+        <table class="w-full text-xs">
+          <thead class="bg-gray-50 border-b border-gray-200 sticky top-0">
+            <tr>
+              <th class="text-left px-6 py-2.5 font-semibold text-gray-500 uppercase tracking-wider">Timestamp</th>
+              <th class="text-left px-4 py-2.5 font-semibold text-gray-500 uppercase tracking-wider">URL</th>
+              <th class="text-right px-4 py-2.5 font-semibold text-gray-500 uppercase tracking-wider">Port</th>
+              <th class="text-right px-6 py-2.5 font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            @for (log of filteredLogs; track $index) {
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-2.5 text-gray-500 whitespace-nowrap">{{ formatLogTimestamp(log.timestamp) }}</td>
+                <td class="px-4 py-2.5 text-gray-700 font-medium">{{ log.url }}</td>
+                <td class="px-4 py-2.5 text-right text-gray-500 font-mono">{{ log.port }}</td>
+                <td class="px-6 py-2.5 text-right">
+                  @if (log.status === 'success') {
+                    <span class="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
+                      <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>Success
+                    </span>
+                  } @else {
+                    <span class="inline-flex items-center gap-1 text-xs font-medium text-red-700 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full">
+                      <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>Failed
+                    </span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  </div>
 }

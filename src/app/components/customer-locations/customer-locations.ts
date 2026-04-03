@@ -11,6 +11,17 @@ interface CustomerConnector {
   status: 'Online' | 'Degraded' | 'Offline';
   uptime: string;
   lastConnected: string;
+  allocation: string;
+}
+
+interface DeployedEntry {
+  id: string;
+  label: string;
+  token: string;
+  status: 'Active' | 'Pending';
+  uptime: string;
+  activated: string;
+  lastConnected: string;
 }
 
 interface CustomerLocation {
@@ -29,6 +40,63 @@ interface CustomerLocation {
 })
 export class CustomerLocationsComponent {
   showAddConnectorModal = false;
+  showConnectorDrawer = false;
+  showDeployModal = false;
+  activeConnector: CustomerConnector | null = null;
+  connectorMenuOpenId: string | null = null;
+
+  drawerEntries: DeployedEntry[] = [
+    { id: 'de-1', label: "John Smith's Mobile", token: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', status: 'Active',  uptime: '99%', activated: 'Jan 3, 2026',  lastConnected: '2 hrs ago' },
+    { id: 'de-2', label: "Sarah Lee's Laptop",  token: 'b2c3d4e5-f6a7-8901-bcde-f12345678901', status: 'Pending', uptime: '--',  activated: '--',           lastConnected: '--'        },
+  ];
+
+  deployLabel = '';
+  deployEmail = '';
+  deployToken = '';
+  tokenCopied = false;
+  tokenEmailSent = false;
+
+  openDeployModal(): void {
+    this.deployLabel = '';
+    this.deployEmail = '';
+    this.deployToken = '';
+    this.tokenCopied = false;
+    this.tokenEmailSent = false;
+    this.showDeployModal = true;
+  }
+
+  generateToken(): void {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const segment = (len: number) => Array.from({ length: len }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+    this.deployToken = `${segment(8)}-${segment(4)}-${segment(4)}-${segment(4)}-${segment(12)}`;
+    this.tokenCopied = false;
+  }
+
+  copyToken(): void {
+    navigator.clipboard.writeText(this.deployToken);
+    this.tokenCopied = true;
+    setTimeout(() => this.tokenCopied = false, 2000);
+  }
+
+  emailToken(): void {
+    this.tokenEmailSent = true;
+    setTimeout(() => this.tokenEmailSent = false, 2000);
+  }
+
+  confirmDeploy(): void {
+    if (!this.deployToken) return;
+    if (this.deployEmail) this.emailToken();
+    this.drawerEntries.push({
+      id: 'de-' + Date.now(),
+      label: this.deployLabel || 'Unnamed Device',
+      token: this.deployToken,
+      status: 'Pending',
+      uptime: '--',
+      activated: '--',
+      lastConnected: '--',
+    });
+    this.showDeployModal = false;
+  }
   activeLocationId: string | null = null;
   pausedConnectors = new Set<string>();
 
@@ -53,23 +121,10 @@ export class CustomerLocationsComponent {
       addressSub: 'Portland, OR 97201',
       licensesAllocated: 20,
       connectors: [
-        { id: 'c1',  name: 'Reception Workstation', type: 'Device',    template: '--',             hostedApps: 2, status: 'Online',   uptime: '99.9%', lastConnected: 'Just now' },
-        { id: 'c2',  name: 'Billing Terminal',       type: 'Device',    template: '--',             hostedApps: 1, status: 'Online',   uptime: '99.7%', lastConnected: '3 mins ago' },
-        { id: 'c3',  name: 'Clinic Gateway',         type: 'Gateway',   template: 'Secure Gateway', hostedApps: 4, status: 'Degraded', uptime: '97.2%', lastConnected: '12 mins ago' },
-        { id: 'c4',  name: 'Patient Portal',         type: 'Clientless',template: '--',             hostedApps: 1, status: 'Online',   uptime: '99.8%', lastConnected: '1 min ago' },
-        { id: 'c5',  name: 'Admin Workstation',      type: 'Device',    template: '--',             hostedApps: 2, status: 'Online',   uptime: '99.5%', lastConnected: '5 mins ago' },
-        { id: 'c6',  name: 'Lab Terminal',           type: 'Device',    template: '--',             hostedApps: 1, status: 'Online',   uptime: '99.9%', lastConnected: '2 mins ago' },
-        { id: 'c13', name: 'Pharmacy Terminal',      type: 'Device',    template: '--',             hostedApps: 1, status: 'Online',   uptime: '99.6%', lastConnected: '4 mins ago' },
-        { id: 'c14', name: 'Imaging Workstation',    type: 'Device',    template: '--',             hostedApps: 2, status: 'Online',   uptime: '99.8%', lastConnected: 'Just now' },
-        { id: 'c15', name: 'Scheduling Terminal',    type: 'Device',    template: '--',             hostedApps: 1, status: 'Offline',  uptime: '0%',    lastConnected: '2 hrs ago' },
-        { id: 'c16', name: 'EHR Workstation 1',      type: 'Device',    template: 'Standard Device',hostedApps: 3, status: 'Online',   uptime: '99.9%', lastConnected: 'Just now' },
-        { id: 'c17', name: 'EHR Workstation 2',      type: 'Device',    template: 'Standard Device',hostedApps: 3, status: 'Online',   uptime: '99.7%', lastConnected: '6 mins ago' },
-        { id: 'c18', name: 'Telehealth Kiosk',       type: 'Clientless',template: '--',             hostedApps: 2, status: 'Online',   uptime: '99.4%', lastConnected: '8 mins ago' },
-        { id: 'c19', name: 'Break Room Terminal',    type: 'Device',    template: '--',             hostedApps: 1, status: 'Online',   uptime: '98.9%', lastConnected: '11 mins ago' },
-        { id: 'c20', name: 'Nurses Station 1',       type: 'Device',    template: 'Standard Device',hostedApps: 2, status: 'Online',   uptime: '99.9%', lastConnected: 'Just now' },
-        { id: 'c21', name: 'Nurses Station 2',       type: 'Device',    template: 'Standard Device',hostedApps: 2, status: 'Online',   uptime: '99.8%', lastConnected: '2 mins ago' },
-        { id: 'c22', name: 'Supply Room Terminal',   type: 'Device',    template: '--',             hostedApps: 1, status: 'Online',   uptime: '99.3%', lastConnected: '15 mins ago' },
-        { id: 'c23', name: 'Security Workstation',   type: 'Device',    template: '--',             hostedApps: 1, status: 'Online',   uptime: '99.9%', lastConnected: 'Just now' },
+        { id: 'c1', name: 'Mobile Unit',    type: 'Device',  template: '--', hostedApps: 0, status: 'Offline', uptime: '--', lastConnected: '--', allocation: '0/25' },
+        { id: 'c2', name: 'Ticket Printer', type: 'Device',  template: '--', hostedApps: 0, status: 'Offline', uptime: '--', lastConnected: '--', allocation: '0/10' },
+        { id: 'c3', name: 'Workstation',    type: 'Device',  template: '--', hostedApps: 0, status: 'Offline', uptime: '--', lastConnected: '--', allocation: '0/30' },
+        { id: 'c4', name: 'Main Gateway',   type: 'Gateway', template: '--', hostedApps: 0, status: 'Offline', uptime: '--', lastConnected: '--', allocation: '0/5'  },
       ],
     },
     {
@@ -79,19 +134,10 @@ export class CustomerLocationsComponent {
       addressSub: 'Beaverton, OR 97005',
       licensesAllocated: 15,
       connectors: [
-        { id: 'c7',  name: 'Triage Station',       type: 'Device',     template: '--',             hostedApps: 2, status: 'Online',   uptime: '99.6%', lastConnected: '2 mins ago' },
-        { id: 'c8',  name: 'UC Gateway',            type: 'Gateway',    template: 'Secure Gateway', hostedApps: 3, status: 'Online',   uptime: '99.1%', lastConnected: '5 mins ago' },
-        { id: 'c9',  name: 'Check-in Kiosk',        type: 'Device',     template: '--',             hostedApps: 1, status: 'Online',   uptime: '98.8%', lastConnected: '3 mins ago' },
-        { id: 'c10', name: 'Nurse Station',         type: 'Device',     template: '--',             hostedApps: 2, status: 'Degraded', uptime: '96.4%', lastConnected: '18 mins ago' },
-        { id: 'c11', name: 'Radiology Terminal',    type: 'Device',     template: '--',             hostedApps: 1, status: 'Online',   uptime: '99.5%', lastConnected: 'Just now' },
-        { id: 'c24', name: 'Exam Room 1 Terminal',  type: 'Device',     template: 'Standard Device',hostedApps: 1, status: 'Online',   uptime: '99.9%', lastConnected: 'Just now' },
-        { id: 'c25', name: 'Exam Room 2 Terminal',  type: 'Device',     template: 'Standard Device',hostedApps: 1, status: 'Online',   uptime: '99.7%', lastConnected: '4 mins ago' },
-        { id: 'c26', name: 'Waiting Room Kiosk',    type: 'Clientless', template: '--',             hostedApps: 1, status: 'Online',   uptime: '99.3%', lastConnected: '7 mins ago' },
-        { id: 'c27', name: 'Lab Workstation',       type: 'Device',     template: '--',             hostedApps: 2, status: 'Online',   uptime: '99.8%', lastConnected: '1 min ago' },
-        { id: 'c28', name: 'Billing Terminal',      type: 'Device',     template: '--',             hostedApps: 1, status: 'Offline',  uptime: '0%',    lastConnected: '3 hrs ago' },
-        { id: 'c29', name: 'EHR Workstation',       type: 'Device',     template: 'Standard Device',hostedApps: 3, status: 'Online',   uptime: '99.9%', lastConnected: 'Just now' },
-        { id: 'c30', name: 'Pharmacy Terminal',     type: 'Device',     template: '--',             hostedApps: 1, status: 'Online',   uptime: '99.2%', lastConnected: '9 mins ago' },
-        { id: 'c31', name: 'Supply Terminal',       type: 'Device',     template: '--',             hostedApps: 1, status: 'Online',   uptime: '98.6%', lastConnected: '14 mins ago' },
+        { id: 'c7',  name: 'Mobile Unit',    type: 'Device',  template: '--', hostedApps: 0, status: 'Offline', uptime: '--', lastConnected: '--', allocation: '22/25' },
+        { id: 'c8',  name: 'Ticket Printer', type: 'Device',  template: '--', hostedApps: 0, status: 'Offline', uptime: '--', lastConnected: '--', allocation: '9/10'  },
+        { id: 'c9',  name: 'Workstation',    type: 'Device',  template: '--', hostedApps: 0, status: 'Offline', uptime: '--', lastConnected: '--', allocation: '25/30' },
+        { id: 'c10', name: 'Main Gateway',   type: 'Gateway', template: '--', hostedApps: 0, status: 'Offline', uptime: '--', lastConnected: '--', allocation: '4/5'   },
       ],
     },
     {
@@ -101,13 +147,33 @@ export class CustomerLocationsComponent {
       addressSub: 'Portland, OR 97201',
       licensesAllocated: 5,
       connectors: [
-        { id: 'c12', name: 'Admin Workstation',    type: 'Device', template: '--',             hostedApps: 3, status: 'Online', uptime: '99.7%', lastConnected: '3 mins ago' },
-        { id: 'c32', name: 'HR Terminal',          type: 'Device', template: '--',             hostedApps: 2, status: 'Online', uptime: '99.4%', lastConnected: '6 mins ago' },
-        { id: 'c33', name: 'Finance Workstation',  type: 'Device', template: 'Standard Device',hostedApps: 2, status: 'Online', uptime: '99.9%', lastConnected: 'Just now' },
-        { id: 'c34', name: 'Executive Workstation',type: 'Device', template: '--',             hostedApps: 1, status: 'Online', uptime: '99.1%', lastConnected: '10 mins ago' },
+        { id: 'c12', name: 'Mobile Unit',    type: 'Device',  template: '--', hostedApps: 0, status: 'Offline', uptime: '--', lastConnected: '--', allocation: '5/25'  },
+        { id: 'c32', name: 'Ticket Printer', type: 'Device',  template: '--', hostedApps: 0, status: 'Offline', uptime: '--', lastConnected: '--', allocation: '0/10'  },
+        { id: 'c33', name: 'Workstation',    type: 'Device',  template: '--', hostedApps: 0, status: 'Offline', uptime: '--', lastConnected: '--', allocation: '22/30' },
+        { id: 'c34', name: 'Main Gateway',   type: 'Gateway', template: '--', hostedApps: 0, status: 'Offline', uptime: '--', lastConnected: '--', allocation: '1/5'   },
       ],
     },
   ];
+
+  locationAllocation(loc: CustomerLocation): string {
+    let used = 0, total = 0;
+    for (const conn of loc.connectors) {
+      const [u, t] = conn.allocation.split('/').map(Number);
+      used += u;
+      total += t;
+    }
+    return `${used}/${total}`;
+  }
+
+  locationUsagePct(loc: CustomerLocation): number {
+    let used = 0, total = 0;
+    for (const conn of loc.connectors) {
+      const [u, t] = conn.allocation.split('/').map(Number);
+      used += u;
+      total += t;
+    }
+    return total > 0 ? used / total : 0;
+  }
 
   get totalLicenses(): number {
     return this.locations.reduce((sum, loc) => sum + loc.licensesAllocated, 0);
@@ -157,6 +223,16 @@ export class CustomerLocationsComponent {
 
   isConnectorPaused(id: string): boolean {
     return this.pausedConnectors.has(id);
+  }
+
+  openConnectorDrawer(conn: CustomerConnector): void {
+    this.activeConnector = conn;
+    this.showConnectorDrawer = true;
+  }
+
+  closeConnectorDrawer(): void {
+    this.showConnectorDrawer = false;
+    this.activeConnector = null;
   }
 
   openAddConnector(locationId: string): void {
