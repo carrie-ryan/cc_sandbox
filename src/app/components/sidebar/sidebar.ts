@@ -22,7 +22,6 @@ export class SidebarComponent {
   ];
 
   customerNavItems = [
-    { label: 'Overview', route: '/customer-setup' },
     { label: 'Create Customer Profile', route: '/customer-setup/profile' },
     { label: 'Assign Locations & Connectors', route: '/customer-setup/locations' },
     { label: 'Define Connections', route: '/customer-setup/connections' },

@@ -6,9 +6,10 @@ interface ConnectorPool {
   id: string;
   name: string;
   type: 'Device' | 'Gateway' | 'Clientless' | 'SDK Embedded';
-  remaining: number;
-  total: number;
   allocationInput: number | null;
+  unlimited: boolean;
+  template?: string;
+  hostedApps: string[];
 }
 
 interface Location {
@@ -40,6 +41,7 @@ export class CustomerSetupLocationsComponent {
   filters = ['All', 'Location', 'Template', 'Type', 'Owner'];
 
   expandedLocations = new Set<string>();
+  expandedHostedApps = new Set<string>();
 
   toggleExpanded(id: string): void {
     if (this.expandedLocations.has(id)) {
@@ -51,6 +53,18 @@ export class CustomerSetupLocationsComponent {
 
   isExpanded(id: string): boolean {
     return this.expandedLocations.has(id);
+  }
+
+  toggleHostedApps(id: string): void {
+    if (this.expandedHostedApps.has(id)) {
+      this.expandedHostedApps.delete(id);
+    } else {
+      this.expandedHostedApps.add(id);
+    }
+  }
+
+  isHostedAppsExpanded(id: string): boolean {
+    return this.expandedHostedApps.has(id);
   }
 
   connectorTypeStyle(type: string): string {
@@ -73,10 +87,10 @@ export class CustomerSetupLocationsComponent {
       addressSub: 'Portland, OR 97201',
       isCloud: false,
       connectors: [
-        { id: 'c-1', name: 'Mobile Unit', type: 'Device', remaining: 8, total: 12, allocationInput: null },
-        { id: 'c-2', name: 'Ticket Printer', type: 'Device', remaining: 12, total: 12, allocationInput: null },
-        { id: 'c-3', name: 'Workstation', type: 'Device', remaining: 5, total: 10, allocationInput: null },
-        { id: 'c-4', name: 'Main Gateway', type: 'Gateway', remaining: 2, total: 5, allocationInput: null },
+        { id: 'c-1', name: 'Mobile Unit',    type: 'Device',  allocationInput: null, unlimited: false, template: 'Mobile App',           hostedApps: ['Mobile Care App'] },
+        { id: 'c-2', name: 'Ticket Printer', type: 'Device',  allocationInput: null, unlimited: false, template: 'Ticket Printer Device', hostedApps: [] },
+        { id: 'c-3', name: 'Workstation',    type: 'Device',  allocationInput: null, unlimited: false, template: 'Clinical Workstation',  hostedApps: ['Epic EMR', 'Patient Portal'] },
+        { id: 'c-4', name: 'Main Gateway',   type: 'Gateway', allocationInput: null, unlimited: false, template: 'Access Gateway',        hostedApps: ['Epic EMR', 'Admin Portal'] },
       ],
     },
     {
@@ -88,8 +102,8 @@ export class CustomerSetupLocationsComponent {
       addressSub: 'Beaverton, OR 97005',
       isCloud: false,
       connectors: [
-        { id: 'c-5', name: 'Workstation', type: 'Device', remaining: 3, total: 5, allocationInput: null },
-        { id: 'c-6', name: 'Gateway Unit', type: 'Gateway', remaining: 1, total: 3, allocationInput: null },
+        { id: 'c-5', name: 'Workstation',  type: 'Device',  allocationInput: null, unlimited: false, hostedApps: [] },
+        { id: 'c-6', name: 'Gateway Unit', type: 'Gateway', allocationInput: null, unlimited: false, hostedApps: [] },
       ],
     },
     {
@@ -101,8 +115,8 @@ export class CustomerSetupLocationsComponent {
       addressSub: 'Portland, OR 97201',
       isCloud: false,
       connectors: [
-        { id: 'c-7', name: 'Workstation', type: 'Device', remaining: 2, total: 2, allocationInput: null },
-        { id: 'c-8', name: 'Admin Portal', type: 'Clientless', remaining: 1, total: 1, allocationInput: null },
+        { id: 'c-7', name: 'Workstation',  type: 'Device',     allocationInput: null, unlimited: false, hostedApps: [] },
+        { id: 'c-8', name: 'Admin Portal', type: 'Clientless', allocationInput: null, unlimited: false, hostedApps: [] },
       ],
     },
     {
@@ -114,10 +128,10 @@ export class CustomerSetupLocationsComponent {
       addressSub: 'Denver, CO 80204',
       isCloud: false,
       connectors: [
-        { id: 'c-9',  name: 'Mobile Unit', type: 'Device', remaining: 10, total: 15, allocationInput: null },
-        { id: 'c-10', name: 'Workstation', type: 'Device', remaining: 8, total: 10, allocationInput: null },
-        { id: 'c-11', name: 'Main Gateway', type: 'Gateway', remaining: 3, total: 5, allocationInput: null },
-        { id: 'c-12', name: 'Clientless Portal', type: 'Clientless', remaining: 1, total: 2, allocationInput: null },
+        { id: 'c-9',  name: 'Mobile Unit',       type: 'Device',     allocationInput: null, unlimited: false, hostedApps: [] },
+        { id: 'c-10', name: 'Workstation',        type: 'Device',     allocationInput: null, unlimited: false, hostedApps: [] },
+        { id: 'c-11', name: 'Main Gateway',       type: 'Gateway',    allocationInput: null, unlimited: false, hostedApps: [] },
+        { id: 'c-12', name: 'Clientless Portal',  type: 'Clientless', allocationInput: null, unlimited: false, hostedApps: [] },
       ],
     },
     {
@@ -129,8 +143,8 @@ export class CustomerSetupLocationsComponent {
       addressSub: 'Aurora, CO 80012',
       isCloud: false,
       connectors: [
-        { id: 'c-13', name: 'Workstation', type: 'Device', remaining: 5, total: 8, allocationInput: null },
-        { id: 'c-14', name: 'Gateway Unit', type: 'Gateway', remaining: 2, total: 4, allocationInput: null },
+        { id: 'c-13', name: 'Workstation', type: 'Device',  allocationInput: null, unlimited: false, hostedApps: [] },
+        { id: 'c-14', name: 'Gateway Unit', type: 'Gateway', allocationInput: null, unlimited: false, hostedApps: [] },
       ],
     },
     {
@@ -142,8 +156,8 @@ export class CustomerSetupLocationsComponent {
       addressSub: 'Denver, CO 80202',
       isCloud: false,
       connectors: [
-        { id: 'c-15', name: 'Server Connector', type: 'Gateway', remaining: 4, total: 5, allocationInput: null },
-        { id: 'c-16', name: 'SDK Integration', type: 'SDK Embedded', remaining: 2, total: 2, allocationInput: null },
+        { id: 'c-15', name: 'Server Connector', type: 'Gateway',      allocationInput: null, unlimited: false, hostedApps: [] },
+        { id: 'c-16', name: 'SDK Integration',  type: 'SDK Embedded', allocationInput: null, unlimited: false, hostedApps: [] },
       ],
     },
   ];

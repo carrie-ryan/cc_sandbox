@@ -50,7 +50,7 @@ export class HeaderComponent {
 
   navigateToCustomerSetup() {
     this.appSwitcherOpen = false;
-    this.router.navigate(['/customer-setup']);
+    this.router.navigate(['/customer-setup/profile']);
   }
 
   get isCustomerDashboard(): boolean {

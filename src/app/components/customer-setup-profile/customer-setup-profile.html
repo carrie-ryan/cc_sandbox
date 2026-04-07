@@ -2,7 +2,7 @@
 
   <!-- Breadcrumb -->
   <nav class="flex items-center gap-1.5 text-sm text-gray-400 mb-4">
-    <a routerLink="/customer-setup" class="hover:text-gray-600 no-underline text-gray-400">Customer Setup</a>
+    <span class="text-gray-400">Customer Setup</span>
     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
     </svg>
@@ -71,16 +71,16 @@
       </div>
 
       <!-- Divider -->
-      <div class="border-t border-gray-100"></div>
+      <!-- <div class="border-t border-gray-100"></div> -->
 
       <!-- Management model -->
+      <!--
       <div class="flex flex-col gap-3">
         <div>
           <label class="text-sm font-medium text-gray-700">Management Model <span class="text-red-400">*</span></label>
           <p class="text-xs text-gray-400 mt-0.5">Choose how this customer's network resources will be managed day-to-day.</p>
         </div>
 
-        <!-- Provider managed option -->
         <label class="flex items-start gap-4 border rounded-xl p-4 cursor-pointer transition-colors"
           [class.border-amber-400]="managementModel === 'provider'"
           [class.bg-amber-50]="managementModel === 'provider'"
@@ -96,7 +96,6 @@
           </div>
         </label>
 
-        <!-- Customer self-managed option -->
         <label class="flex items-start gap-4 border rounded-xl p-4 cursor-pointer transition-colors"
           [class.border-amber-400]="managementModel === 'self'"
           [class.bg-amber-50]="managementModel === 'self'"
@@ -110,6 +109,7 @@
         </label>
 
       </div>
+      -->
 
     </div>
   </div>
@@ -118,9 +118,7 @@
 
 <!-- Footer -->
 <div class="fixed bottom-0 right-0 left-52 bg-white border-t border-gray-200 px-8 py-4 flex items-center justify-between">
-  <a routerLink="/customer-setup" class="text-sm text-gray-500 hover:text-gray-700 transition-colors no-underline">
-    ← Back to Overview
-  </a>
+  <div></div>
   <button routerLink="/customer-setup/locations"
     [disabled]="!canContinue"
     class="flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
