@@ -1,11 +1,15 @@
-<div class="flex flex-col h-screen bg-gray-50">
-  <app-header></app-header>
-  <div class="flex flex-1 overflow-hidden">
-    @if (showSidebar) {
-      <app-sidebar></app-sidebar>
-    }
-    <main class="flex-1 overflow-y-auto flex flex-col">
-      <router-outlet></router-outlet>
-    </main>
+@if (showChrome) {
+  <div class="flex flex-col h-screen bg-gray-50">
+    <app-header></app-header>
+    <div class="flex flex-1 overflow-hidden">
+      @if (showSidebar) {
+        <app-sidebar></app-sidebar>
+      }
+      <main class="flex-1 overflow-y-auto flex flex-col">
+        <router-outlet></router-outlet>
+      </main>
+    </div>
   </div>
-</div>
+} @else {
+  <router-outlet></router-outlet>
+}

@@ -12,12 +12,14 @@ import { SidebarComponent } from './components/sidebar/sidebar';
 })
 export class App {
   showSidebar = true;
+  showChrome = true;
 
   constructor(private router: Router) {
     this.router.events.pipe(
       filter((e): e is NavigationEnd => e instanceof NavigationEnd)
     ).subscribe(e => {
       const url = e.urlAfterRedirects;
+      this.showChrome = !url.startsWith('/login') && !url.startsWith('/maya-setup');
       this.showSidebar = url.startsWith('/provider-setup') || url.startsWith('/customer-setup');
     });
   }

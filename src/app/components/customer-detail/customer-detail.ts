@@ -56,7 +56,7 @@ export class CustomerDetailComponent {
   private allLogs: LogEntry[] = [];
 
   get logsIdentity() {
-    return this.customer?.identityList.find(i => i.id === this.logsIdentityId) ?? null;
+    return this.customer?.connectorList.find(c => c.id === this.logsIdentityId) ?? null;
   }
 
   get filteredLogs(): LogEntry[] {
@@ -115,8 +115,8 @@ export class CustomerDetailComponent {
     return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' });
   }
 
-  get activeConnectorIdentity() {
-    return this.customer?.identityList.find(c => c.id === this.connectorMenuOpenId) ?? null;
+  get activeConnector() {
+    return this.customer?.connectorList.find(c => c.id === this.connectorMenuOpenId) ?? null;
   }
 
   openConnectorMenu(id: string, event: MouseEvent): void {
@@ -157,7 +157,7 @@ export class CustomerDetailComponent {
       { id: 'destination', label: 'Destination',  enabled: true },
       { id: 'application', label: 'Application',  enabled: true },
       { id: 'throughput',  label: 'Throughput',   enabled: true },
-      { id: 'status',      label: 'Connection',       enabled: true, required: true },
+      { id: 'status',      label: 'Status',           enabled: true, required: true },
     ],
     locations: [
       { id: 'location',          label: 'Location',           enabled: true, required: true },
@@ -166,7 +166,7 @@ export class CustomerDetailComponent {
       { id: 'connectors',        label: 'Connectors',         enabled: true },
       { id: 'activeConnections', label: 'Active Connections', enabled: true },
       { id: 'usage',             label: 'Usage',              enabled: true },
-      { id: 'status',            label: 'Connection',             enabled: true, required: true },
+      { id: 'status',            label: 'Status',                 enabled: true, required: true },
     ],
     connectors: [
       { id: 'identity',      label: 'Identity',       enabled: true, required: true },
@@ -177,13 +177,13 @@ export class CustomerDetailComponent {
       { id: 'throughput',    label: 'Throughput',     enabled: true },
       { id: 'uptime',        label: 'Uptime',         enabled: true },
       { id: 'usage',         label: 'Usage',          enabled: true },
-      { id: 'enrollmentStatus', label: 'Status',         enabled: true },
+      { id: 'enrollmentStatus', label: 'Status',           enabled: true },
     ],
     users: [
-      { id: 'user',        label: 'User',        enabled: true, required: true },
-      { id: 'role',        label: 'Role',        enabled: true },
-      { id: 'location',    label: 'Location',    enabled: true },
-      { id: 'permissions', label: 'Permissions', enabled: true },
+      { id: 'user',           label: 'User',           enabled: true, required: true },
+      { id: 'locationRoles',  label: 'Location Roles', enabled: true },
+      { id: 'permissions',    label: 'Permissions',    enabled: true },
+      { id: 'actions',        label: 'Actions',        enabled: true, required: true },
     ],
     alerts: [
       { id: 'description', label: 'Alert Description', enabled: true, required: true },

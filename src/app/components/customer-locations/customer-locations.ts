@@ -2,12 +2,20 @@ import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
+interface LogEntry {
+  timestamp: Date;
+  url: string;
+  port: number;
+  status: 'success' | 'fail';
+}
+
 interface CustomerConnector {
   id: string;
   name: string;
   type: string;
   template: string;
   hostedApps: number;
+  hostedAppNames: string[];
   status: 'Online' | 'Degraded' | 'Offline';
   uptime: string;
   lastConnected: string;
@@ -18,7 +26,8 @@ interface DeployedEntry {
   id: string;
   label: string;
   token: string;
-  status: 'Active' | 'Pending';
+  connection: 'Online' | 'Offline';
+  enrollmentStatus: 'Enrolled' | 'Pending' | 'Expired Token';
   uptime: string;
   activated: string;
   lastConnected: string;
@@ -45,10 +54,94 @@ export class CustomerLocationsComponent {
   activeConnector: CustomerConnector | null = null;
   connectorMenuOpenId: string | null = null;
 
+  // Logs view
+  showLogsView = false;
+  activeLogsEntry: DeployedEntry | null = null;
+  logsTimeframe: '24h' | '7d' | '30d' = '7d';
+  logsStatusFilter: 'all' | 'success' | 'fail' = 'all';
+  logsSearch = '';
+  private allLogs: LogEntry[] = [];
+
+  get filteredLogs(): LogEntry[] {
+    const cutoff = new Date();
+    if (this.logsTimeframe === '24h') cutoff.setHours(cutoff.getHours() - 24);
+    else if (this.logsTimeframe === '7d') cutoff.setDate(cutoff.getDate() - 7);
+    else cutoff.setDate(cutoff.getDate() - 30);
+    return this.allLogs.filter(l => {
+      if (l.timestamp < cutoff) return false;
+      if (this.logsStatusFilter !== 'all' && l.status !== this.logsStatusFilter) return false;
+      if (this.logsSearch) {
+        const q = this.logsSearch.toLowerCase();
+        return l.url.toLowerCase().includes(q) || String(l.port).includes(q);
+      }
+      return true;
+    });
+  }
+
+  openLogs(entry: DeployedEntry): void {
+    this.connectorMenuOpenId = null;
+    this.activeLogsEntry = entry;
+    this.logsTimeframe = '7d';
+    this.logsStatusFilter = 'all';
+    this.logsSearch = '';
+    this.allLogs = this.generateLogs(entry.id);
+    this.showLogsView = true;
+  }
+
+  closeLogs(): void {
+    this.showLogsView = false;
+    this.activeLogsEntry = null;
+  }
+
+  private generateLogs(seed: string): LogEntry[] {
+    const urls = [
+      'app.salesforce.com', 'mail.google.com', 'github.com',
+      'api.internal.corp', 'jira.company.io', 'confluence.company.io',
+      'vpn.corp.net', 's3.amazonaws.com', 'login.microsoftonline.com',
+      'slack.com', 'zoom.us', 'drive.google.com',
+    ];
+    const ports = [443, 443, 443, 8443, 80, 22, 3389, 5432, 8080];
+    const hash = (s: string) => s.split('').reduce((a, c) => a * 31 + c.charCodeAt(0), 7);
+    const rand = (n: number, i: number) => Math.abs(hash(seed + i)) % n;
+    const entries: LogEntry[] = [];
+    const now = Date.now();
+    for (let i = 0; i < 120; i++) {
+      const minsAgo = rand(43200, i * 3) + i * 2;
+      entries.push({
+        timestamp: new Date(now - minsAgo * 60000),
+        url: urls[rand(urls.length, i * 7)],
+        port: ports[rand(ports.length, i * 13)],
+        status: rand(10, i * 17) < 8 ? 'success' : 'fail',
+      });
+    }
+    return entries.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+  }
+
+  formatLogTimestamp(d: Date): string {
+    return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  }
+
   drawerEntries: DeployedEntry[] = [
-    { id: 'de-1', label: "John Smith's Mobile", token: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', status: 'Active',  uptime: '99%', activated: 'Jan 3, 2026',  lastConnected: '2 hrs ago' },
-    { id: 'de-2', label: "Sarah Lee's Laptop",  token: 'b2c3d4e5-f6a7-8901-bcde-f12345678901', status: 'Pending', uptime: '--',  activated: '--',           lastConnected: '--'        },
+    { id: 'de-1', label: "John Smith's Mobile",  token: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', connection: 'Online',  enrollmentStatus: 'Enrolled',       uptime: '99%', activated: 'Jan 3, 2026',  lastConnected: '2 hrs ago' },
+    { id: 'de-2', label: "Sarah Lee's Laptop",   token: 'b2c3d4e5-f6a7-8901-bcde-f12345678901', connection: 'Offline', enrollmentStatus: 'Pending',         uptime: '--',  activated: '--',           lastConnected: '--'        },
+    { id: 'de-3', label: "Marcus Webb's Desktop", token: 'c3d4e5f6-a7b8-9012-cdef-123456789012', connection: 'Offline', enrollmentStatus: 'Expired Token',   uptime: '--',  activated: 'Dec 10, 2025', lastConnected: '14 days ago' },
   ];
+
+  drawerSearch = '';
+  drawerConnectionFilter: 'all' | 'Online' | 'Offline' = 'all';
+  drawerStatusFilter: 'all' | 'Enrolled' | 'Pending' | 'Expired Token' = 'all';
+
+  get filteredDrawerEntries(): DeployedEntry[] {
+    return this.drawerEntries.filter(e => {
+      if (this.drawerConnectionFilter !== 'all' && e.connection !== this.drawerConnectionFilter) return false;
+      if (this.drawerStatusFilter !== 'all' && e.enrollmentStatus !== this.drawerStatusFilter) return false;
+      if (this.drawerSearch) {
+        const q = this.drawerSearch.toLowerCase();
+        return e.label.toLowerCase().includes(q) || e.token.toLowerCase().includes(q);
+      }
+      return true;
+    });
+  }
 
   deployLabel = '';
   deployEmail = '';
@@ -84,19 +177,21 @@ export class CustomerLocationsComponent {
   }
 
   confirmDeploy(): void {
-    if (!this.deployToken) return;
-    if (this.deployEmail) this.emailToken();
+    if (!this.deployLabel.trim() || !this.deployEmail.trim()) return;
     this.drawerEntries.push({
       id: 'de-' + Date.now(),
-      label: this.deployLabel || 'Unnamed Device',
-      token: this.deployToken,
-      status: 'Pending',
+      label: this.deployLabel,
+      token: '',
+      connection: 'Offline',
+      enrollmentStatus: 'Pending',
       uptime: '--',
       activated: '--',
       lastConnected: '--',
     });
     this.showDeployModal = false;
   }
+  rowMenuOpenId: string | null = null;
+  hostedAppsOpenId: string | null = null;
   activeLocationId: string | null = null;
   pausedConnectors = new Set<string>();
 
@@ -121,10 +216,9 @@ export class CustomerLocationsComponent {
       addressSub: 'Portland, OR 97201',
       licensesAllocated: 20,
       connectors: [
-        { id: 'c1', name: 'Mobile Unit',    type: 'Device',  template: '--', hostedApps: 0, status: 'Offline', uptime: '--', lastConnected: '--', allocation: '0/25' },
-        { id: 'c2', name: 'Ticket Printer', type: 'Device',  template: '--', hostedApps: 0, status: 'Offline', uptime: '--', lastConnected: '--', allocation: '0/10' },
-        { id: 'c3', name: 'Workstation',    type: 'Device',  template: '--', hostedApps: 0, status: 'Offline', uptime: '--', lastConnected: '--', allocation: '0/30' },
-        { id: 'c4', name: 'Main Gateway',   type: 'Gateway', template: '--', hostedApps: 0, status: 'Offline', uptime: '--', lastConnected: '--', allocation: '0/5'  },
+        { id: 'c1', name: 'Chicago Gateway 1', type: 'Gateway',    template: '--', hostedApps: 3, hostedAppNames: ['Patient Records Portal', 'Scheduling System', 'Imaging Viewer'],   status: 'Online',   uptime: '--', lastConnected: '--', allocation: '0/25' },
+        { id: 'c2', name: 'Chicago Gateway 2', type: 'Gateway',    template: '--', hostedApps: 2, hostedAppNames: ['Lab Results Portal', 'Pharmacy System'],                           status: 'Online',   uptime: '--', lastConnected: '--', allocation: '0/10' },
+        { id: 'c3', name: 'Chicago Device 1',  type: 'Device',     template: '--', hostedApps: 2, hostedAppNames: ['Remote Desktop', 'File Share'],                                   status: 'Offline',  uptime: '--', lastConnected: '--', allocation: '0/30' },
       ],
     },
     {
@@ -134,10 +228,8 @@ export class CustomerLocationsComponent {
       addressSub: 'Beaverton, OR 97005',
       licensesAllocated: 15,
       connectors: [
-        { id: 'c7',  name: 'Mobile Unit',    type: 'Device',  template: '--', hostedApps: 0, status: 'Offline', uptime: '--', lastConnected: '--', allocation: '22/25' },
-        { id: 'c8',  name: 'Ticket Printer', type: 'Device',  template: '--', hostedApps: 0, status: 'Offline', uptime: '--', lastConnected: '--', allocation: '9/10'  },
-        { id: 'c9',  name: 'Workstation',    type: 'Device',  template: '--', hostedApps: 0, status: 'Offline', uptime: '--', lastConnected: '--', allocation: '25/30' },
-        { id: 'c10', name: 'Main Gateway',   type: 'Gateway', template: '--', hostedApps: 0, status: 'Offline', uptime: '--', lastConnected: '--', allocation: '4/5'   },
+        { id: 'c7', name: 'Austin Host 3',          type: 'Device',     template: '--', hostedApps: 2, hostedAppNames: ['Patient Records Portal', 'Telehealth Platform'],                 status: 'Degraded', uptime: '--', lastConnected: '--', allocation: '22/25' },
+        { id: 'c8', name: 'New York Clientless 1',  type: 'Clientless', template: '--', hostedApps: 3, hostedAppNames: ['Web Portal', 'Patient Records Portal', 'Scheduling System'], status: 'Online',   uptime: '--', lastConnected: '--', allocation: '9/10'  },
       ],
     },
     {
@@ -147,10 +239,8 @@ export class CustomerLocationsComponent {
       addressSub: 'Portland, OR 97201',
       licensesAllocated: 5,
       connectors: [
-        { id: 'c12', name: 'Mobile Unit',    type: 'Device',  template: '--', hostedApps: 0, status: 'Offline', uptime: '--', lastConnected: '--', allocation: '5/25'  },
-        { id: 'c32', name: 'Ticket Printer', type: 'Device',  template: '--', hostedApps: 0, status: 'Offline', uptime: '--', lastConnected: '--', allocation: '0/10'  },
-        { id: 'c33', name: 'Workstation',    type: 'Device',  template: '--', hostedApps: 0, status: 'Offline', uptime: '--', lastConnected: '--', allocation: '22/30' },
-        { id: 'c34', name: 'Main Gateway',   type: 'Gateway', template: '--', hostedApps: 0, status: 'Offline', uptime: '--', lastConnected: '--', allocation: '1/5'   },
+        { id: 'c12', name: 'London Gateway 1', type: 'Gateway', template: '--', hostedApps: 2, hostedAppNames: ['Patient Records Portal', 'Imaging Viewer'], status: 'Online',  uptime: '--', lastConnected: '--', allocation: '5/25' },
+        { id: 'c32', name: 'London Device 1',  type: 'Device',  template: '--', hostedApps: 1, hostedAppNames: ['Remote Desktop'],                        status: 'Offline', uptime: '--', lastConnected: '--', allocation: '0/10' },
       ],
     },
   ];
@@ -227,12 +317,17 @@ export class CustomerLocationsComponent {
 
   openConnectorDrawer(conn: CustomerConnector): void {
     this.activeConnector = conn;
+    this.drawerSearch = '';
+    this.drawerConnectionFilter = 'all';
+    this.drawerStatusFilter = 'all';
     this.showConnectorDrawer = true;
   }
 
   closeConnectorDrawer(): void {
     this.showConnectorDrawer = false;
     this.activeConnector = null;
+    this.showLogsView = false;
+    this.activeLogsEntry = null;
   }
 
   openAddConnector(locationId: string): void {

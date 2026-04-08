@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+import { LoginComponent } from './components/login/login';
+import { MayaSetupComponent } from './components/maya-setup/maya-setup';
 import { OverviewPageComponent } from './components/overview-page/overview-page';
 import { ConnectorTemplatesComponent } from './components/connector-templates/connector-templates';
 import { LocationsComponent } from './components/locations/locations';
@@ -12,7 +14,9 @@ import { CustomerDetailComponent } from './components/customer-detail/customer-d
 import { CustomerDashboardComponent } from './components/customer-dashboard/customer-dashboard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'provider-setup/overview', pathMatch: 'full' },
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: 'login', component: LoginComponent },
+  { path: 'maya-setup', component: MayaSetupComponent },
   { path: 'dashboard', component: ProviderDashboardComponent },
   { path: 'customers/:id', component: CustomerDetailComponent },
   { path: 'customer-dashboard', component: CustomerDashboardComponent },

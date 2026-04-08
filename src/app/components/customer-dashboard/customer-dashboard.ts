@@ -93,16 +93,23 @@ export class CustomerDashboardComponent implements OnDestroy {
   ];
 
   showAddDevice = false;
-  activationToken = '';
   removingDeviceId: string | null = null;
 
   openAddDevice() {
-    this.activationToken = '';
     this.showAddDevice = true;
   }
 
+  downloadJwt() {
+    const blob = new Blob([''], { type: 'application/jwt' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'activation.jwt';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   submitActivationToken() {
-    if (!this.activationToken.trim()) return;
     this.mayaDevices = [
       ...this.mayaDevices,
       {
@@ -112,11 +119,9 @@ export class CustomerDashboardComponent implements OnDestroy {
         os: 'Pending activation',
         lastSeen: 'Just now',
         status: 'pending',
-        token: this.activationToken.trim(),
       },
     ];
     this.showAddDevice = false;
-    this.activationToken = '';
   }
 
   acceptDevice(id: string) {

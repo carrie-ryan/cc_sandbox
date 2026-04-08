@@ -162,11 +162,11 @@ export class CustomerService {
         { id: 'id-006', name: 'NY Web Portal', type: 'service', status: 'Connected', boundServices: [{ name: 'Web Portal', role: 'bind' }], lastConnected: 'Just now', requestsSent: 9240, requestsReceived: 4120, bandwidthSent: '12.4 GB', bandwidthReceived: '24.8 GB', bandwidthSentPct: 88, bandwidthReceivedPct: 94, throughputSent: '8.2 MB/s', throughputReceived: '16.4 MB/s', droppedPackets: 0, droppedConnections: 0, uptime: '99.98%', usageBandwidth: '198 GB', usagePct: 43, connectorStatus: 'Online' },
       ],
       userList: [
-        { id: 'usr-001', name: 'Alice Monroe', email: 'alice@acmecorp.com', role: 'operator', location: 'Chicago HQ', permissions: { locations: 'manage', connectors: 'manage', workflows: 'manage', users: 'manage' } },
-        { id: 'usr-002', name: 'Bob Carter', email: 'bob@acmecorp.com', role: 'monitor', location: 'Austin Office', permissions: { locations: 'read-only', connectors: 'read-only' } },
-        { id: 'usr-003', name: 'Carol Singh', email: 'carol@acmecorp.com', role: 'custom', location: 'New York DC', permissions: { connectors: 'manage', workflows: 'read-only' } },
-        { id: 'usr-004', name: 'Dave Kim', email: 'dave@acmecorp.com', role: 'custom', location: 'Chicago HQ', permissions: { locations: 'read-only', connectors: 'manage', workflows: 'manage' } },
-        { id: 'usr-005', name: 'Eva Torres', email: 'eva@acmecorp.com', role: 'monitor', location: 'London Office', permissions: { locations: 'read-only', connectors: 'read-only', workflows: 'read-only' } },
+        { id: 'usr-001', name: 'Alice Monroe', email: 'alice@provider.com', role: 'operator', location: 'Chicago HQ', permissions: { locations: 'manage', connectors: 'manage', workflows: 'manage', users: 'manage' } },
+        { id: 'usr-002', name: 'Bob Carter', email: 'bob@provider.com', role: 'monitor', location: 'Austin Office', permissions: { locations: 'read-only', connectors: 'read-only' } },
+        { id: 'usr-003', name: 'Carol Singh', email: 'carol@provider.com', role: 'custom', location: 'New York DC', permissions: { connectors: 'manage', workflows: 'read-only' } },
+        { id: 'usr-004', name: 'Dave Kim', email: 'dave@provider.com', role: 'custom', location: 'Chicago HQ', permissions: { locations: 'read-only', connectors: 'manage', workflows: 'manage' } },
+        { id: 'usr-005', name: 'Eva Torres', email: 'eva@provider.com', role: 'monitor', location: 'London Office', permissions: { locations: 'read-only', connectors: 'read-only', workflows: 'read-only' } },
       ],
       bandwidthHistory: {
         tx: [8,9,11,10,12,7,6,9,10,11,10,12,11,9,8,10,11,12,10,9,8,7,9,10,11,10,12,11,9,8],
@@ -210,12 +210,12 @@ export class CustomerService {
         { id: 'id-005', name: 'Denver Dev Portal', type: 'service', status: 'Connected', boundServices: [{ name: 'Dev Workspace', role: 'bind' }], lastConnected: '2 min ago', requestsSent: 5640, requestsReceived: 3120, bandwidthSent: '14.6 GB', bandwidthReceived: '28.2 GB', bandwidthSentPct: 68, bandwidthReceivedPct: 74, throughputSent: '4.8 MB/s', throughputReceived: '9.2 MB/s', droppedPackets: 1, droppedConnections: 0 },
       ],
       userList: [
-        { id: 'usr-001', name: 'Raj Patel', email: 'raj@umbrella.com', role: 'operator', location: 'San Francisco HQ', permissions: { locations: 'manage', connectors: 'manage', workflows: 'manage', users: 'manage' } },
-        { id: 'usr-002', name: 'Nina Frost', email: 'nina@umbrella.com', role: 'operator', location: 'Seattle DC', permissions: { locations: 'manage', connectors: 'manage', workflows: 'manage', users: 'read-only' } },
-        { id: 'usr-003', name: 'Omar Hassan', email: 'omar@umbrella.com', role: 'monitor', location: 'Frankfurt DC', permissions: { locations: 'read-only', connectors: 'read-only' } },
-        { id: 'usr-004', name: 'Lena Bauer', email: 'lena@umbrella.com', role: 'custom', location: 'Toronto Office', permissions: { workflows: 'manage', connectors: 'read-only' } },
-        { id: 'usr-005', name: 'Sven Lindqvist', email: 'sven@umbrella.com', role: 'monitor', location: 'Singapore DC', permissions: { locations: 'read-only', connectors: 'read-only', workflows: 'read-only' } },
-        { id: 'usr-006', name: 'Priya Nair', email: 'priya@umbrella.com', role: 'custom', location: 'Denver Office', permissions: { connectors: 'manage', workflows: 'manage', users: 'read-only' } },
+        { id: 'usr-001', name: 'Raj Patel', email: 'raj@provider.com', role: 'operator', location: 'San Francisco HQ', permissions: { locations: 'manage', connectors: 'manage', workflows: 'manage', users: 'manage' } },
+        { id: 'usr-002', name: 'Nina Frost', email: 'nina@provider.com', role: 'operator', location: 'Seattle DC', permissions: { locations: 'manage', connectors: 'manage', workflows: 'manage', users: 'read-only' } },
+        { id: 'usr-003', name: 'Omar Hassan', email: 'omar@provider.com', role: 'monitor', location: 'Frankfurt DC', permissions: { locations: 'read-only', connectors: 'read-only' } },
+        { id: 'usr-004', name: 'Lena Bauer', email: 'lena@provider.com', role: 'custom', location: 'Toronto Office', permissions: { workflows: 'manage', connectors: 'read-only' } },
+        { id: 'usr-005', name: 'Sven Lindqvist', email: 'sven@provider.com', role: 'monitor', location: 'Singapore DC', permissions: { locations: 'read-only', connectors: 'read-only', workflows: 'read-only' } },
+        { id: 'usr-006', name: 'Priya Nair', email: 'priya@provider.com', role: 'custom', location: 'Denver Office', permissions: { connectors: 'manage', workflows: 'manage', users: 'read-only' } },
       ],
       bandwidthHistory: {
         tx: [18,20,23,21,25,14,12,19,21,24,22,26,24,20,17,21,24,26,22,20,17,14,19,21,24,22,26,24,20,17],
@@ -250,9 +250,9 @@ export class CustomerService {
         { id: 'id-004', name: 'Miami File Server', type: 'service', status: 'Connected', boundServices: [{ name: 'File Share', role: 'bind' }], lastConnected: 'Just now', requestsSent: 3840, requestsReceived: 2210, bandwidthSent: '9.6 GB', bandwidthReceived: '18.4 GB', bandwidthSentPct: 64, bandwidthReceivedPct: 76, throughputSent: '6.4 MB/s', throughputReceived: '12.2 MB/s', droppedPackets: 0, droppedConnections: 0 },
       ],
       userList: [
-        { id: 'usr-001', name: 'John Reyes', email: 'john@globex.com', role: 'operator', location: 'New York Office', permissions: { locations: 'manage', connectors: 'manage', workflows: 'manage', users: 'manage' } },
-        { id: 'usr-002', name: 'Sarah Okafor', email: 'sarah@globex.com', role: 'custom', location: 'Miami Branch', permissions: { connectors: 'read-only', workflows: 'manage' } },
-        { id: 'usr-003', name: 'Marcus Webb', email: 'marcus@globex.com', role: 'monitor', location: 'New York Office', permissions: { locations: 'read-only', connectors: 'read-only' } },
+        { id: 'usr-001', name: 'John Reyes', email: 'john@provider.com', role: 'operator', location: 'New York Office', permissions: { locations: 'manage', connectors: 'manage', workflows: 'manage', users: 'manage' } },
+        { id: 'usr-002', name: 'Sarah Okafor', email: 'sarah@provider.com', role: 'custom', location: 'Miami Branch', permissions: { connectors: 'read-only', workflows: 'manage' } },
+        { id: 'usr-003', name: 'Marcus Webb', email: 'marcus@provider.com', role: 'monitor', location: 'New York Office', permissions: { locations: 'read-only', connectors: 'read-only' } },
       ],
       bandwidthHistory: {
         tx: [3,4,5,4,5,3,2,4,4,5,4,5,5,4,3,4,5,5,4,4,3,3,4,4,5,4,5,5,4,3],
@@ -287,9 +287,9 @@ export class CustomerService {
         { id: 'id-004', name: 'Phoenix CRM Portal', type: 'service', status: 'Connected', boundServices: [{ name: 'CRM Portal', role: 'bind' }], lastConnected: '7 min ago', requestsSent: 3120, requestsReceived: 1840, bandwidthSent: '8.8 GB', bandwidthReceived: '16.2 GB', bandwidthSentPct: 56, bandwidthReceivedPct: 62, throughputSent: '6.4 MB/s', throughputReceived: '10.8 MB/s', droppedPackets: 0, droppedConnections: 0 },
       ],
       userList: [
-        { id: 'usr-001', name: 'Art Vandelay', email: 'art@vandelay.com', role: 'operator', location: 'Dallas HQ', permissions: { locations: 'manage', connectors: 'manage', workflows: 'manage', users: 'manage' } },
-        { id: 'usr-002', name: 'George Costanza', email: 'george@vandelay.com', role: 'custom', location: 'Phoenix Office', permissions: { workflows: 'read-only', connectors: 'read-only' } },
-        { id: 'usr-003', name: 'Elaine Benes', email: 'elaine@vandelay.com', role: 'monitor', location: 'Dallas HQ', permissions: { locations: 'read-only', connectors: 'read-only', workflows: 'read-only' } },
+        { id: 'usr-001', name: 'Art Vandelay', email: 'art@provider.com', role: 'operator', location: 'Dallas HQ', permissions: { locations: 'manage', connectors: 'manage', workflows: 'manage', users: 'manage' } },
+        { id: 'usr-002', name: 'George Costanza', email: 'george@provider.com', role: 'custom', location: 'Phoenix Office', permissions: { workflows: 'read-only', connectors: 'read-only' } },
+        { id: 'usr-003', name: 'Elaine Benes', email: 'elaine@provider.com', role: 'monitor', location: 'Dallas HQ', permissions: { locations: 'read-only', connectors: 'read-only', workflows: 'read-only' } },
       ],
       bandwidthHistory: {
         tx: [2,3,4,3,4,2,2,3,3,4,3,4,4,3,2,3,4,4,3,3,2,2,3,3,4,3,4,4,3,2],
@@ -330,10 +330,10 @@ export class CustomerService {
         { id: 'id-004', name: 'Portland Office Node', type: 'service', status: 'Disconnected', boundServices: [{ name: 'Office Suite', role: 'bind' }], lastConnected: '30 min ago', requestsSent: 0, requestsReceived: 0, bandwidthSent: '0 GB', bandwidthReceived: '0 GB', bandwidthSentPct: 0, bandwidthReceivedPct: 0, throughputSent: '0 MB/s', throughputReceived: '0 MB/s', droppedPackets: 18, droppedConnections: 4 },
       ],
       userList: [
-        { id: 'usr-001', name: 'Peter Gibbons', email: 'peter@initech.com', role: 'operator', location: 'Seattle DC', permissions: { locations: 'manage', connectors: 'manage', workflows: 'manage', users: 'manage' } },
-        { id: 'usr-002', name: 'Michael Bolton', email: 'michael@initech.com', role: 'monitor', location: 'Portland Office', permissions: { locations: 'read-only', connectors: 'read-only' } },
-        { id: 'usr-003', name: 'Samir Nagheenanajar', email: 'samir@initech.com', role: 'custom', location: 'Boise Branch', permissions: { connectors: 'manage', workflows: 'read-only', users: 'read-only' } },
-        { id: 'usr-004', name: 'Bill Lumbergh', email: 'bill@initech.com', role: 'operator', location: 'Seattle DC', permissions: { locations: 'manage', connectors: 'manage', workflows: 'manage', users: 'manage' } },
+        { id: 'usr-001', name: 'Peter Gibbons', email: 'peter@provider.com', role: 'operator', location: 'Seattle DC', permissions: { locations: 'manage', connectors: 'manage', workflows: 'manage', users: 'manage' } },
+        { id: 'usr-002', name: 'Michael Bolton', email: 'michael@provider.com', role: 'monitor', location: 'Portland Office', permissions: { locations: 'read-only', connectors: 'read-only' } },
+        { id: 'usr-003', name: 'Samir Nagheenanajar', email: 'samir@provider.com', role: 'custom', location: 'Boise Branch', permissions: { connectors: 'manage', workflows: 'read-only', users: 'read-only' } },
+        { id: 'usr-004', name: 'Bill Lumbergh', email: 'bill@provider.com', role: 'operator', location: 'Seattle DC', permissions: { locations: 'manage', connectors: 'manage', workflows: 'manage', users: 'manage' } },
       ],
       bandwidthHistory: {
         tx: [2,2,3,2,3,1,1,2,2,3,2,3,3,2,2,2,3,3,2,2,1,1,2,2,3,2,3,3,2,2],
@@ -358,8 +358,8 @@ export class CustomerService {
         { id: 'id-002', name: 'LA Device Node', type: 'device', status: 'Disconnected', boundServices: [{ name: 'Remote Desktop', role: 'dial' }], lastConnected: '3 days ago', requestsSent: 0, requestsReceived: 0, bandwidthSent: '0 GB', bandwidthReceived: '0 GB', bandwidthSentPct: 0, bandwidthReceivedPct: 0, throughputSent: '0 MB/s', throughputReceived: '0 MB/s', droppedPackets: 0, droppedConnections: 0, uptime: '0%', usageBandwidth: '0 GB', usagePct: 0, connectorStatus: 'Offline' },
       ],
       userList: [
-        { id: 'usr-001', name: 'Logan Pierce', email: 'logan@soylent.com', role: 'operator', location: 'Los Angeles HQ', permissions: { locations: 'manage', connectors: 'manage', workflows: 'manage', users: 'manage' } },
-        { id: 'usr-002', name: 'Maya Chen', email: 'maya@soylent.com', role: 'monitor', location: 'Los Angeles HQ', permissions: { locations: 'read-only', connectors: 'read-only' } },
+        { id: 'usr-001', name: 'Logan Pierce', email: 'logan@provider.com', role: 'operator', location: 'Los Angeles HQ', permissions: { locations: 'manage', connectors: 'manage', workflows: 'manage', users: 'manage' } },
+        { id: 'usr-002', name: 'Maya Chen', email: 'maya@provider.com', role: 'monitor', location: 'Los Angeles HQ', permissions: { locations: 'read-only', connectors: 'read-only' } },
       ],
       bandwidthHistory: {
         tx: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],

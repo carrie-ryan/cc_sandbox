@@ -279,26 +279,59 @@
         @if (showAddDevice) {
           <div class="bg-white border border-blue-200 rounded-xl p-5 mb-4">
             <p class="text-sm font-semibold text-gray-900 mb-1">Activate a device</p>
-            <p class="text-xs text-gray-400 mb-4">Enter the activation token provided by your IT administrator.</p>
+            <p class="text-xs text-gray-500 mb-4">Follow the steps below to enroll a new device and gain access to your network resources.</p>
+
+            <!-- Step 1: Download JWT -->
+            <div class="flex gap-3 mb-4">
+              <div class="flex-shrink-0 w-5 h-5 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center mt-0.5">1</div>
+              <div class="flex-1">
+                <p class="text-sm font-medium text-gray-800 mb-1">Download your activation file</p>
+                <p class="text-xs text-gray-500 mb-2">Your IT administrator has prepared a JWT activation file for this device. Click below to download it — you'll need it in the next step.</p>
+                <button (click)="downloadJwt()"
+                  class="inline-flex items-center gap-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg transition-colors">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+                  </svg>
+                  Download Activation File (.jwt)
+                </button>
+              </div>
+            </div>
+
+            <!-- Step 2: Download Ziti Desktop Edge -->
+            <div class="flex gap-3 mb-4">
+              <div class="flex-shrink-0 w-5 h-5 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center mt-0.5">2</div>
+              <div class="flex-1">
+                <p class="text-sm font-medium text-gray-800 mb-1">Download Ziti Desktop Edge</p>
+                <p class="text-xs text-gray-500 mb-2">If you haven't already, install the Ziti Desktop Edge application for your operating system. Visit the link below and select the version that matches your device. If you already have it installed, you can skip this step.</p>
+                <a href="https://netfoundry.io/products/netfoundry-downloads/#zititunnelers" target="_blank" rel="noopener noreferrer"
+                  class="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-200 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/>
+                  </svg>
+                  Download Ziti Desktop Edge
+                </a>
+              </div>
+            </div>
+
+            <!-- Step 3: Use the file -->
+            <div class="flex gap-3 mb-5">
+              <div class="flex-shrink-0 w-5 h-5 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center mt-0.5">3</div>
+              <div class="flex-1">
+                <p class="text-sm font-medium text-gray-800 mb-1">Enroll using the activation file</p>
+                <p class="text-xs text-gray-500">Once Ziti Desktop Edge is installed, open the application and use the <span class="font-medium text-gray-700">Add</span> function to import the <span class="font-mono text-gray-700">.jwt</span> file you downloaded in Step 1. Your device will then be enrolled and access will begin.</p>
+              </div>
+            </div>
+
             <div class="flex items-center gap-3">
-              <input [(ngModel)]="activationToken" placeholder="e.g. ACT-XXXX-XXXX-XXXX"
-                class="flex-1 text-sm font-mono border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400"/>
-              <button (click)="submitActivationToken()" [disabled]="!activationToken.trim()"
-                class="text-sm font-semibold px-4 py-2 rounded-lg transition-colors whitespace-nowrap"
-                [class.text-white]="activationToken.trim()"
-                [class.bg-blue-600]="activationToken.trim()"
-                [class.hover:bg-blue-700]="activationToken.trim()"
-                [class.text-gray-400]="!activationToken.trim()"
-                [class.bg-gray-100]="!activationToken.trim()"
-                [class.cursor-not-allowed]="!activationToken.trim()">
-                Confirm
+              <button (click)="submitActivationToken()"
+                class="text-sm font-semibold px-4 py-2 rounded-lg transition-colors text-white bg-blue-600 hover:bg-blue-700">
+                Done
               </button>
               <button (click)="showAddDevice = false"
                 class="text-sm font-medium text-gray-500 bg-white border border-gray-200 hover:bg-gray-50 px-4 py-2 rounded-lg transition-colors">
                 Cancel
               </button>
             </div>
-            <p class="text-xs text-gray-400 mt-3">If a device appears that you don't recognize or weren't expecting, do not accept it and contact your network provider immediately.</p>
           </div>
         }
 
@@ -779,7 +812,7 @@
         <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0zM19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/>
         </svg>
-        Locations & Connectors
+        Locations & Access
       </button>
 
       <button (click)="activeSection = 'access'"

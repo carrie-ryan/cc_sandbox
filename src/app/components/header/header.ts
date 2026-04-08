@@ -25,7 +25,7 @@ export class HeaderComponent {
   switchPersona(persona: 'ian' | 'maya') {
     this.personaService.setPersona(persona);
     this.userMenuOpen = false;
-    this.router.navigate(['/customer-dashboard']);
+    this.router.navigate([persona === 'maya' ? '/login' : '/customer-dashboard']);
   }
 
   navigateToDashboard() {
