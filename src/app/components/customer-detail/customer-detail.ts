@@ -250,11 +250,12 @@ export class CustomerDetailComponent {
 
   tabs: { key: Tab; label: string }[] = [
     { key: 'summary', label: 'Summary' },
+    { key: 'alerts', label: 'Recent Alerts' },
     { key: 'connections', label: 'Connections' },
     { key: 'locations', label: 'Locations' },
     { key: 'connectors', label: 'Connectors' },
-    { key: 'users', label: 'Users' },
-    { key: 'alerts', label: 'Recent Alerts' },
+    { key: 'users', label: 'User Permissions' },
+    
   ];
 
   constructor(

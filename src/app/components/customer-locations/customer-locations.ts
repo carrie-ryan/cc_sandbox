@@ -51,6 +51,12 @@ export class CustomerLocationsComponent {
   showAddConnectorModal = false;
   showConnectorDrawer = false;
   showDeployModal = false;
+  showBulkUploadModal = false;
+  bulkUploadConnector: CustomerConnector | null = null;
+  bulkUploadStep: 'upload' | 'preview' = 'upload';
+  bulkUploadFileName = '';
+  bulkUploadPreviewRows: Array<{ label: string; email: string }> = [];
+  bulkUploadError = '';
   activeConnector: CustomerConnector | null = null;
   connectorMenuOpenId: string | null = null;
 
@@ -192,6 +198,8 @@ export class CustomerLocationsComponent {
   }
   rowMenuOpenId: string | null = null;
   hostedAppsOpenId: string | null = null;
+  editingConnectorId: string | null = null;
+  editingConnectorName = '';
   activeLocationId: string | null = null;
   pausedConnectors = new Set<string>();
 
@@ -266,11 +274,13 @@ export class CustomerLocationsComponent {
   }
 
   get totalLicenses(): number {
-    return this.locations.reduce((sum, loc) => sum + loc.licensesAllocated, 0);
+    return this.locations.reduce((sum, loc) =>
+      sum + loc.connectors.reduce((s, c) => s + Number(c.allocation.split('/')[1]), 0), 0);
   }
 
   get usedLicenses(): number {
-    return this.locations.reduce((sum, loc) => sum + loc.connectors.length, 0);
+    return this.locations.reduce((sum, loc) =>
+      sum + loc.connectors.reduce((s, c) => s + Number(c.allocation.split('/')[0]), 0), 0);
   }
 
   get availableLicenses(): number {
@@ -297,6 +307,25 @@ export class CustomerLocationsComponent {
       'SDK Embedded': 'bg-orange-100 text-orange-700',
     };
     return map[type] ?? 'bg-gray-100 text-gray-600';
+  }
+
+  deleteConnector(conn: CustomerConnector, loc: CustomerLocation): void {
+    loc.connectors.splice(loc.connectors.indexOf(conn), 1);
+  }
+
+  duplicateConnector(conn: CustomerConnector, loc: CustomerLocation): void {
+    const newId = 'c-dup-' + Date.now();
+    const copy: CustomerConnector = { ...conn, id: newId, name: conn.name + ' (Copy)' };
+    const idx = loc.connectors.indexOf(conn);
+    loc.connectors.splice(idx + 1, 0, copy);
+    this.editingConnectorId = newId;
+    this.editingConnectorName = copy.name;
+  }
+
+  commitConnectorName(conn: CustomerConnector): void {
+    const trimmed = this.editingConnectorName.trim();
+    if (trimmed) conn.name = trimmed;
+    this.editingConnectorId = null;
   }
 
   toggleExpand(id: string): void {
@@ -342,5 +371,72 @@ export class CustomerLocationsComponent {
   closeAddConnector(): void {
     this.showAddConnectorModal = false;
     this.activeLocationId = null;
+  }
+
+  openBulkUpload(conn: CustomerConnector): void {
+    this.bulkUploadConnector = conn;
+    this.bulkUploadStep = 'upload';
+    this.bulkUploadFileName = '';
+    this.bulkUploadPreviewRows = [];
+    this.bulkUploadError = '';
+    this.rowMenuOpenId = null;
+    this.showBulkUploadModal = true;
+  }
+
+  onBulkFileSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    this.bulkUploadFileName = file.name;
+    this.bulkUploadError = '';
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = (e.target as FileReader).result as string;
+      this.parseBulkCsv(text);
+    };
+    reader.readAsText(file);
+  }
+
+  private parseBulkCsv(text: string): void {
+    const lines = text.split(/\r?\n/).filter(l => l.trim());
+    if (lines.length < 2) {
+      this.bulkUploadError = 'File must contain a header row and at least one data row.';
+      return;
+    }
+    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+    const labelIdx = headers.indexOf('label');
+    const emailIdx = headers.indexOf('email');
+    if (labelIdx === -1) {
+      this.bulkUploadError = 'CSV must include a "label" column.';
+      return;
+    }
+    const rows: Array<{ label: string; email: string }> = [];
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].split(',').map(c => c.trim());
+      const label = cols[labelIdx] ?? '';
+      const email = emailIdx !== -1 ? (cols[emailIdx] ?? '') : '';
+      if (label) rows.push({ label, email });
+    }
+    if (rows.length === 0) {
+      this.bulkUploadError = 'No valid rows found in the file.';
+      return;
+    }
+    this.bulkUploadPreviewRows = rows;
+    this.bulkUploadStep = 'preview';
+  }
+
+  confirmBulkUpload(): void {
+    for (const row of this.bulkUploadPreviewRows) {
+      this.drawerEntries.push({
+        id: 'de-bulk-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+        label: row.label,
+        token: '',
+        connection: 'Offline',
+        enrollmentStatus: 'Pending',
+        uptime: '--',
+        activated: '--',
+        lastConnected: '--',
+      });
+    }
+    this.showBulkUploadModal = false;
   }
 }
