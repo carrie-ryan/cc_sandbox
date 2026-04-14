@@ -1,13 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, inject } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-
-interface LogEntry {
-  timestamp: Date;
-  url: string;
-  port: number;
-  status: 'success' | 'fail';
-}
+import { LogEntry, generateLogs, formatLogTimestamp, filterLogs } from '../../utils/log.utils';
 
 interface CustomerConnector {
   id: string;
@@ -44,10 +39,49 @@ interface CustomerLocation {
 
 @Component({
   selector: 'app-customer-locations',
-  imports: [RouterLink, FormsModule],
+  imports: [RouterLink, FormsModule, NgTemplateOutlet],
   templateUrl: './customer-locations.html',
 })
 export class CustomerLocationsComponent {
+  private readonly el = inject(ElementRef);
+  private previouslyFocusedEl: HTMLElement | null = null;
+
+  get isAnyModalOpen(): boolean {
+    return this.showConnectorDrawer || this.showDeployModal || this.showBulkUploadModal || this.showAddConnectorModal;
+  }
+
+  private saveFocus(): void {
+    this.previouslyFocusedEl = document.activeElement as HTMLElement;
+  }
+
+  private saveActionMenuTrigger(connName: string): void {
+    // The menu item being clicked is about to be removed from the DOM when the
+    // dropdown closes. Save the stable three-dot button instead so focus can
+    // return to it after the modal/drawer closes.
+    const btn = this.el.nativeElement.querySelector(`[aria-label="Actions for ${connName}"]`) as HTMLElement | null;
+    this.previouslyFocusedEl = btn ?? document.activeElement as HTMLElement;
+  }
+
+  private restoreFocus(): void {
+    // Defer focus() past Angular's change detection cycle so the [attr.inert]
+    // binding on the main content div is removed before we attempt to focus.
+    // Calling focus() on an element inside an inert subtree is a silent no-op.
+    const target = this.previouslyFocusedEl;
+    this.previouslyFocusedEl = null;
+    setTimeout(() => target?.focus());
+  }
+
+  private focusFirstInDialog(): void {
+    setTimeout(() => {
+      const dialog = this.el.nativeElement.parentElement?.querySelector('[role="dialog"]') as HTMLElement | null;
+      if (!dialog) return;
+      const first = dialog.querySelector(
+        'button:not([disabled]), input:not([type="hidden"]):not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      ) as HTMLElement | null;
+      first?.focus();
+    }, 50);
+  }
+
   showAddConnectorModal = false;
   showConnectorDrawer = false;
   showDeployModal = false;
@@ -69,63 +103,40 @@ export class CustomerLocationsComponent {
   private allLogs: LogEntry[] = [];
 
   get filteredLogs(): LogEntry[] {
-    const cutoff = new Date();
-    if (this.logsTimeframe === '24h') cutoff.setHours(cutoff.getHours() - 24);
-    else if (this.logsTimeframe === '7d') cutoff.setDate(cutoff.getDate() - 7);
-    else cutoff.setDate(cutoff.getDate() - 30);
-    return this.allLogs.filter(l => {
-      if (l.timestamp < cutoff) return false;
-      if (this.logsStatusFilter !== 'all' && l.status !== this.logsStatusFilter) return false;
-      if (this.logsSearch) {
-        const q = this.logsSearch.toLowerCase();
-        return l.url.toLowerCase().includes(q) || String(l.port).includes(q);
-      }
-      return true;
-    });
+    return filterLogs(this.allLogs, this.logsTimeframe, this.logsStatusFilter, this.logsSearch);
   }
 
+  private logsEntryLabel: string | null = null;
+
   openLogs(entry: DeployedEntry): void {
+    this.logsEntryLabel = entry.label;
     this.connectorMenuOpenId = null;
     this.activeLogsEntry = entry;
     this.logsTimeframe = '7d';
     this.logsStatusFilter = 'all';
     this.logsSearch = '';
-    this.allLogs = this.generateLogs(entry.id);
+    this.allLogs = generateLogs(entry.id);
     this.showLogsView = true;
+    setTimeout(() => {
+      const dialog = this.el.nativeElement.parentElement?.querySelector('[role="dialog"]') as HTMLElement | null;
+      const backBtn = dialog?.querySelector('[aria-label="Back to identities"]') as HTMLElement | null;
+      backBtn?.focus();
+    }, 50);
   }
 
   closeLogs(): void {
     this.showLogsView = false;
     this.activeLogsEntry = null;
+    const label = this.logsEntryLabel;
+    this.logsEntryLabel = null;
+    setTimeout(() => {
+      const dialog = this.el.nativeElement.parentElement?.querySelector('[role="dialog"]') as HTMLElement | null;
+      const trigger = dialog?.querySelector(`[aria-label="Actions for ${label}"]`) as HTMLElement | null;
+      trigger?.focus();
+    }, 50);
   }
 
-  private generateLogs(seed: string): LogEntry[] {
-    const urls = [
-      'app.salesforce.com', 'mail.google.com', 'github.com',
-      'api.internal.corp', 'jira.company.io', 'confluence.company.io',
-      'vpn.corp.net', 's3.amazonaws.com', 'login.microsoftonline.com',
-      'slack.com', 'zoom.us', 'drive.google.com',
-    ];
-    const ports = [443, 443, 443, 8443, 80, 22, 3389, 5432, 8080];
-    const hash = (s: string) => s.split('').reduce((a, c) => a * 31 + c.charCodeAt(0), 7);
-    const rand = (n: number, i: number) => Math.abs(hash(seed + i)) % n;
-    const entries: LogEntry[] = [];
-    const now = Date.now();
-    for (let i = 0; i < 120; i++) {
-      const minsAgo = rand(43200, i * 3) + i * 2;
-      entries.push({
-        timestamp: new Date(now - minsAgo * 60000),
-        url: urls[rand(urls.length, i * 7)],
-        port: ports[rand(ports.length, i * 13)],
-        status: rand(10, i * 17) < 8 ? 'success' : 'fail',
-      });
-    }
-    return entries.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-  }
-
-  formatLogTimestamp(d: Date): string {
-    return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  }
+  formatLogTimestamp = formatLogTimestamp;
 
   drawerEntries: DeployedEntry[] = [
     { id: 'de-1', label: "John Smith's Mobile",  token: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', connection: 'Online',  enrollmentStatus: 'Enrolled',       uptime: '99%', activated: 'Jan 3, 2026',  lastConnected: '2 hrs ago' },
@@ -136,9 +147,46 @@ export class CustomerLocationsComponent {
   drawerSearch = '';
   drawerConnectionFilter: 'all' | 'Online' | 'Offline' = 'all';
   drawerStatusFilter: 'all' | 'Enrolled' | 'Pending' | 'Expired Token' = 'all';
+  bulkReissueComplete = false;
+
+  get expiredTokenCount(): number {
+    return this.drawerEntries.filter(e => e.enrollmentStatus === 'Expired Token').length;
+  }
+
+  bulkReissueExpiredTokens(): void {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const segment = (len: number) => Array.from({ length: len }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+    this.drawerEntries = this.drawerEntries.map(e => {
+      if (e.enrollmentStatus !== 'Expired Token') return e;
+      return { ...e, enrollmentStatus: 'Pending', token: `${segment(8)}-${segment(4)}-${segment(4)}-${segment(4)}-${segment(12)}` };
+    });
+    this.bulkReissueComplete = true;
+    setTimeout(() => this.bulkReissueComplete = false, 3000);
+  }
+  drawerSortCol: 'label' | 'connection' | 'enrollmentStatus' | 'uptime' | 'activated' | 'lastConnected' | null = null;
+  drawerSortDir: 'asc' | 'desc' = 'asc';
+
+  setDrawerSort(col: 'label' | 'connection' | 'enrollmentStatus' | 'uptime' | 'activated' | 'lastConnected'): void {
+    if (this.drawerSortCol === col) {
+      this.drawerSortDir = this.drawerSortDir === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.drawerSortCol = col;
+      this.drawerSortDir = 'asc';
+    }
+  }
+
+  private parseDrawerRelativeTime(s: string): number {
+    if (s === '--') return Infinity;
+    const m = s.match(/(\d+)\s*(min|hr|day)/i);
+    if (!m) return Infinity;
+    const n = parseInt(m[1]);
+    if (m[2].startsWith('min')) return n;
+    if (m[2].startsWith('hr')) return n * 60;
+    return n * 1440;
+  }
 
   get filteredDrawerEntries(): DeployedEntry[] {
-    return this.drawerEntries.filter(e => {
+    let entries = this.drawerEntries.filter(e => {
       if (this.drawerConnectionFilter !== 'all' && e.connection !== this.drawerConnectionFilter) return false;
       if (this.drawerStatusFilter !== 'all' && e.enrollmentStatus !== this.drawerStatusFilter) return false;
       if (this.drawerSearch) {
@@ -147,6 +195,31 @@ export class CustomerLocationsComponent {
       }
       return true;
     });
+
+    if (this.drawerSortCol) {
+      const col = this.drawerSortCol;
+      const dir = this.drawerSortDir === 'asc' ? 1 : -1;
+      entries = [...entries].sort((a, b) => {
+        let va: string | number, vb: string | number;
+        switch (col) {
+          case 'label':            va = a.label.toLowerCase();      vb = b.label.toLowerCase();      break;
+          case 'connection':       va = a.connection;               vb = b.connection;               break;
+          case 'enrollmentStatus': va = a.enrollmentStatus;         vb = b.enrollmentStatus;         break;
+          case 'uptime':           va = a.uptime === '--' ? -1 : parseFloat(a.uptime);
+                                   vb = b.uptime === '--' ? -1 : parseFloat(b.uptime);               break;
+          case 'activated':        va = a.activated === '--' ? 0 : new Date(a.activated).getTime();
+                                   vb = b.activated === '--' ? 0 : new Date(b.activated).getTime(); break;
+          case 'lastConnected':    va = this.parseDrawerRelativeTime(a.lastConnected);
+                                   vb = this.parseDrawerRelativeTime(b.lastConnected);               break;
+          default: return 0;
+        }
+        if (va < vb) return -1 * dir;
+        if (va > vb) return 1 * dir;
+        return 0;
+      });
+    }
+
+    return entries;
   }
 
   deployLabel = '';
@@ -156,12 +229,19 @@ export class CustomerLocationsComponent {
   tokenEmailSent = false;
 
   openDeployModal(): void {
+    this.saveFocus();
     this.deployLabel = '';
     this.deployEmail = '';
     this.deployToken = '';
     this.tokenCopied = false;
     this.tokenEmailSent = false;
     this.showDeployModal = true;
+    this.focusFirstInDialog();
+  }
+
+  closeDeployModal(): void {
+    this.showDeployModal = false;
+    this.restoreFocus();
   }
 
   generateToken(): void {
@@ -195,6 +275,7 @@ export class CustomerLocationsComponent {
       lastConnected: '--',
     });
     this.showDeployModal = false;
+    this.restoreFocus();
   }
   rowMenuOpenId: string | null = null;
   hostedAppsOpenId: string | null = null;
@@ -253,23 +334,23 @@ export class CustomerLocationsComponent {
     },
   ];
 
-  locationAllocation(loc: CustomerLocation): string {
+  private locationTotals(loc: CustomerLocation): { used: number; total: number } {
     let used = 0, total = 0;
     for (const conn of loc.connectors) {
       const [u, t] = conn.allocation.split('/').map(Number);
       used += u;
       total += t;
     }
+    return { used, total };
+  }
+
+  locationAllocation(loc: CustomerLocation): string {
+    const { used, total } = this.locationTotals(loc);
     return `${used}/${total}`;
   }
 
   locationUsagePct(loc: CustomerLocation): number {
-    let used = 0, total = 0;
-    for (const conn of loc.connectors) {
-      const [u, t] = conn.allocation.split('/').map(Number);
-      used += u;
-      total += t;
-    }
+    const { used, total } = this.locationTotals(loc);
     return total > 0 ? used / total : 0;
   }
 
@@ -345,11 +426,15 @@ export class CustomerLocationsComponent {
   }
 
   openConnectorDrawer(conn: CustomerConnector): void {
+    this.saveActionMenuTrigger(conn.name);
     this.activeConnector = conn;
     this.drawerSearch = '';
     this.drawerConnectionFilter = 'all';
     this.drawerStatusFilter = 'all';
+    this.drawerSortCol = null;
+    this.drawerSortDir = 'asc';
     this.showConnectorDrawer = true;
+    this.focusFirstInDialog();
   }
 
   closeConnectorDrawer(): void {
@@ -357,23 +442,28 @@ export class CustomerLocationsComponent {
     this.activeConnector = null;
     this.showLogsView = false;
     this.activeLogsEntry = null;
+    this.restoreFocus();
   }
 
   openAddConnector(locationId: string): void {
+    this.saveFocus();
     this.activeLocationId = locationId;
     this.connectorName = '';
     this.connectorType = '';
     this.selectedTemplate = 'No Template';
     this.saveAsTemplate = false;
     this.showAddConnectorModal = true;
+    this.focusFirstInDialog();
   }
 
   closeAddConnector(): void {
     this.showAddConnectorModal = false;
     this.activeLocationId = null;
+    this.restoreFocus();
   }
 
   openBulkUpload(conn: CustomerConnector): void {
+    this.saveActionMenuTrigger(conn.name);
     this.bulkUploadConnector = conn;
     this.bulkUploadStep = 'upload';
     this.bulkUploadFileName = '';
@@ -381,6 +471,12 @@ export class CustomerLocationsComponent {
     this.bulkUploadError = '';
     this.rowMenuOpenId = null;
     this.showBulkUploadModal = true;
+    this.focusFirstInDialog();
+  }
+
+  closeBulkUploadModal(): void {
+    this.showBulkUploadModal = false;
+    this.restoreFocus();
   }
 
   onBulkFileSelected(event: Event): void {
@@ -438,5 +534,6 @@ export class CustomerLocationsComponent {
       });
     }
     this.showBulkUploadModal = false;
+    this.restoreFocus();
   }
 }

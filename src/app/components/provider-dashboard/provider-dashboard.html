@@ -141,7 +141,7 @@
         <tr>
           <!-- Fixed: Customer -->
           <th (click)="setSort('name')" class="text-left px-6 py-3 text-xs font-semibold uppercase tracking-wider cursor-pointer select-none transition-colors hover:bg-gray-100"
-            [class.text-blue-600]="sortCol === 'name'" [class.text-gray-500]="sortCol !== 'name'">
+            [class.text-blue-600]="sortCol === 'name'" [class.text-gray-600]="sortCol !== 'name'">
             <span class="inline-flex items-center gap-1">
               Customer
               <ng-container *ngTemplateOutlet="sortIcon; context: { col: 'name' }"></ng-container>
@@ -160,7 +160,7 @@
               [class.text-right]="col.align === 'right'"
               [class.bg-blue-50]="dragOverColId === col.id && draggedColId !== col.id"
               [class.text-blue-600]="sortCol === col.id || (dragOverColId === col.id && draggedColId !== col.id)"
-              [class.text-gray-500]="sortCol !== col.id && dragOverColId !== col.id"
+              [class.text-gray-600]="sortCol !== col.id && dragOverColId !== col.id"
               [class.opacity-40]="draggedColId === col.id">
               <span class="inline-flex items-center gap-1" [class.justify-end]="col.align === 'right'">
                 {{ col.label }}
@@ -175,7 +175,7 @@
           }
           <!-- Fixed: Alerts -->
           <th (click)="setSort('alerts')" class="text-right px-6 py-3 text-xs font-semibold uppercase tracking-wider cursor-pointer select-none transition-colors hover:bg-gray-100"
-            [class.text-blue-600]="sortCol === 'alerts'" [class.text-gray-500]="sortCol !== 'alerts'">
+            [class.text-blue-600]="sortCol === 'alerts'" [class.text-gray-600]="sortCol !== 'alerts'">
             <span class="inline-flex items-center justify-end gap-1">
               Alerts
               <ng-container *ngTemplateOutlet="sortIcon; context: { col: 'alerts' }"></ng-container>
@@ -282,10 +282,10 @@
                   [class.border-amber-400]="customer.alertSeverity === 'Warning'">
                   <!-- Sub-header -->
                   <div class="grid grid-cols-[1fr_140px_160px_100px] bg-gray-50 border-b border-gray-200 px-4 py-2">
-                    <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Alert Description</span>
-                    <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Created</span>
-                    <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Type</span>
-                    <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 text-right">Actions</span>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-gray-600">Alert Description</span>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-gray-600">Created</span>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-gray-600">Type</span>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-gray-600 text-right">Actions</span>
                   </div>
                   <!-- Alert detail rows -->
                   @for (alert of customer.alerts; track alert.resource) {

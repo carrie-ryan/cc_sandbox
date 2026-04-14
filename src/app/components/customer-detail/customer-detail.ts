@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CustomerService, Customer } from '../../services/customer.service';
+import { LogEntry, generateLogs, formatLogTimestamp, filterLogs } from '../../utils/log.utils';
 
 type Tab = 'summary' | 'connections' | 'locations' | 'connectors' | 'users' | 'alerts';
 
@@ -10,13 +11,6 @@ interface TableColumn {
   label: string;
   enabled: boolean;
   required?: boolean;
-}
-
-interface LogEntry {
-  timestamp: Date;
-  url: string;
-  port: number;
-  status: 'success' | 'fail';
 }
 
 interface Widget {
@@ -45,7 +39,6 @@ export class CustomerDetailComponent {
   connectorMenuOpenId: string | null = null;
   menuPositionTop: number | null = null;
   menuPositionBottom: number | null = null;
-  disabledIdentityIds = new Set<string>();
 
   // Logs panel
   showLogsPanel = false;
@@ -60,20 +53,7 @@ export class CustomerDetailComponent {
   }
 
   get filteredLogs(): LogEntry[] {
-    const cutoff = new Date();
-    if (this.logsTimeframe === '24h') cutoff.setHours(cutoff.getHours() - 24);
-    else if (this.logsTimeframe === '7d') cutoff.setDate(cutoff.getDate() - 7);
-    else cutoff.setDate(cutoff.getDate() - 30);
-
-    return this.allLogs.filter(l => {
-      if (l.timestamp < cutoff) return false;
-      if (this.logsStatusFilter !== 'all' && l.status !== this.logsStatusFilter) return false;
-      if (this.logsSearch) {
-        const q = this.logsSearch.toLowerCase();
-        return l.url.toLowerCase().includes(q) || String(l.port).includes(q);
-      }
-      return true;
-    });
+    return filterLogs(this.allLogs, this.logsTimeframe, this.logsStatusFilter, this.logsSearch);
   }
 
   openLogs(id: string): void {
@@ -82,38 +62,11 @@ export class CustomerDetailComponent {
     this.logsTimeframe = '7d';
     this.logsStatusFilter = 'all';
     this.logsSearch = '';
-    this.allLogs = this.generateLogs(id);
+    this.allLogs = generateLogs(id);
     this.showLogsPanel = true;
   }
 
-  private generateLogs(seed: string): LogEntry[] {
-    const urls = [
-      'app.salesforce.com', 'mail.google.com', 'github.com',
-      'api.internal.corp', 'jira.company.io', 'confluence.company.io',
-      'vpn.corp.net', 's3.amazonaws.com', 'login.microsoftonline.com',
-      'slack.com', 'zoom.us', 'drive.google.com',
-    ];
-    const ports = [443, 443, 443, 8443, 80, 22, 3389, 5432, 8080];
-    const hash = (s: string) => s.split('').reduce((a, c) => a * 31 + c.charCodeAt(0), 7);
-    const rand = (n: number, i: number) => Math.abs(hash(seed + i)) % n;
-
-    const entries: LogEntry[] = [];
-    const now = Date.now();
-    for (let i = 0; i < 120; i++) {
-      const minsAgo = rand(43200, i * 3) + i * 2; // up to 30 days
-      entries.push({
-        timestamp: new Date(now - minsAgo * 60000),
-        url: urls[rand(urls.length, i * 7)],
-        port: ports[rand(ports.length, i * 13)],
-        status: rand(10, i * 17) < 8 ? 'success' : 'fail',
-      });
-    }
-    return entries.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-  }
-
-  formatLogTimestamp(d: Date): string {
-    return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  }
+  formatLogTimestamp = formatLogTimestamp;
 
   get activeConnector() {
     return this.customer?.connectorList.find(c => c.id === this.connectorMenuOpenId) ?? null;
@@ -140,15 +93,6 @@ export class CustomerDetailComponent {
       this.menuPositionTop = relY + 4;
     }
     this.connectorMenuOpenId = id;
-  }
-
-  toggleIdentityEnabled(id: string): void {
-    if (this.disabledIdentityIds.has(id)) {
-      this.disabledIdentityIds.delete(id);
-    } else {
-      this.disabledIdentityIds.add(id);
-    }
-    this.connectorMenuOpenId = null;
   }
 
   tableColumns: Record<string, TableColumn[]> = {

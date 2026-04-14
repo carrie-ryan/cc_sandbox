@@ -1,4 +1,4 @@
-<div>
+<div [attr.inert]="isAnyModalOpen ? '' : null">
 
   <!-- Page heading -->
   <h1 class="text-2xl font-bold text-gray-900 mb-1">Locations & Access</h1>
@@ -33,8 +33,8 @@
 
   <!-- Warning banner -->
   @if (licenseWarning) {
-    <div class="flex items-start gap-2.5 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-6">
-      <svg class="w-4 h-4 text-amber-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+    <div aria-live="polite" aria-atomic="true" class="flex items-start gap-2.5 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-6">
+      <svg aria-hidden="true" class="w-4 h-4 text-amber-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
       </svg>
       <p class="text-sm text-amber-800">You're approaching your connector license limit. Contact your provider to increase your allocation before new connectors can be added.</p>
@@ -44,11 +44,11 @@
   <!-- Main card -->
   <div class="bg-white border border-gray-200 rounded-lg">
 
-    <!-- Card header -->
+    <!-- Card header + Search -->
     <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200">
       <div class="flex items-center gap-3">
         <div class="w-9 h-9 bg-green-50 rounded-lg flex items-center justify-center shrink-0">
-          <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <svg aria-hidden="true" class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/>
           </svg>
@@ -58,36 +58,17 @@
           <p class="text-xs text-gray-500">{{ locations.length }} location(s)</p>
         </div>
       </div>
-      <button class="flex items-center gap-1.5 border border-gray-200 text-gray-600 text-sm px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
-        </svg>
-        Upload
-      </button>
-    </div>
-
-    <!-- Search + Filters -->
-    <div class="flex items-center justify-between px-5 py-3 border-b border-gray-200">
       <div class="relative">
-        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <svg aria-hidden="true" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
         </svg>
         <input
           [(ngModel)]="searchQuery"
           type="text"
+          aria-label="Search locations or resources"
           placeholder="Search locations or resources..."
           class="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm w-72 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
-      </div>
-      <div class="flex items-center gap-0.5">
-        @for (filter of filters; track filter) {
-          <button
-            (click)="activeFilter = filter"
-            class="px-3 py-1.5 rounded text-sm transition-colors"
-            [class]="activeFilter === filter ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-500 hover:bg-gray-50'">
-            {{ filter }}
-          </button>
-        }
       </div>
     </div>
 
@@ -95,9 +76,9 @@
     <table class="w-full">
       <thead>
         <tr class="border-b border-gray-200 bg-gray-50/50">
-          <th class="text-left text-[10px] font-bold uppercase tracking-wider text-gray-400 px-5 py-3 w-[28%]">Location Name</th>
-          <th class="text-left text-[10px] font-bold uppercase tracking-wider text-gray-400 px-4 py-3 w-[22%]">Details</th>
-          <th class="text-left text-[10px] font-bold uppercase tracking-wider text-gray-400 px-4 py-3 w-[50%]">Total Allocated Resources</th>
+          <th class="text-left text-xs font-bold uppercase tracking-wider text-gray-600 px-5 py-3 w-[28%]">Location Name</th>
+          <th class="text-left text-xs font-bold uppercase tracking-wider text-gray-600 px-4 py-3 w-[22%]">Details</th>
+          <th class="text-left text-xs font-bold uppercase tracking-wider text-gray-600 px-4 py-3 w-[50%]">Total Allocated Resources</th>
         </tr>
       </thead>
       <tbody>
@@ -111,9 +92,11 @@
               <div class="flex items-center gap-2">
                 <button
                   (click)="toggleExpand(loc.id)"
-                  class="text-gray-400 hover:text-gray-600 transition-transform duration-150 shrink-0"
+                  [attr.aria-expanded]="expanded[loc.id]"
+                  [attr.aria-label]="(expanded[loc.id] ? 'Collapse ' : 'Expand ') + loc.name"
+                  class="text-gray-400 hover:text-gray-600 motion-safe:transition-transform motion-safe:duration-150 shrink-0 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
                   [class.rotate-90]="expanded[loc.id]">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
                   </svg>
                 </button>
@@ -124,7 +107,7 @@
             <!-- Details -->
             <td class="px-4 py-3.5">
               <div class="flex items-start gap-1.5">
-                <svg class="w-3.5 h-3.5 text-gray-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <svg aria-hidden="true" class="w-3.5 h-3.5 text-gray-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
                   <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/>
                 </svg>
@@ -141,7 +124,7 @@
                 <span class="text-sm font-medium" [class]="locationUsagePct(loc) >= 0.8 ? 'text-amber-600' : 'text-gray-700'">{{ locationAllocation(loc) }}</span>
                 @if (locationUsagePct(loc) >= 0.8) {
                   <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
-                    <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <svg aria-hidden="true" class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
                     </svg>
                     Near capacity
@@ -160,13 +143,13 @@
                 <!-- Connector sub-header -->
                 <div class="grid grid-cols-[3rem_2fr_1fr_1fr_1fr_1fr_1fr_5rem] bg-gray-50 border-b border-gray-200 px-2 py-2">
                   <div></div>
-                  <div class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Network Resource</div>
-                  <div class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Type</div>
-                  <div class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Available Apps</div>
-                  <div class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Connection</div>
-                  <div class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Resource Allocations</div>
-                  <div class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Assign Access</div>
-                  <div class="text-[10px] font-bold uppercase tracking-wider text-gray-400 text-right pr-3">Actions</div>
+                  <div class="text-[10px] font-bold uppercase tracking-wider text-gray-600">Network Resource</div>
+                  <div class="text-[10px] font-bold uppercase tracking-wider text-gray-600">Type</div>
+                  <div class="text-[10px] font-bold uppercase tracking-wider text-gray-600">Available Apps</div>
+                  <div class="text-[10px] font-bold uppercase tracking-wider text-gray-600">Connection</div>
+                  <div class="text-[10px] font-bold uppercase tracking-wider text-gray-600">Resource Allocations</div>
+                  <div class="text-[10px] font-bold uppercase tracking-wider text-gray-600">Assign Access</div>
+                  <div class="text-[10px] font-bold uppercase tracking-wider text-gray-600 text-right pr-3">Actions</div>
                 </div>
 
                 @for (conn of loc.connectors; track conn.id) {
@@ -180,6 +163,7 @@
                           (blur)="commitConnectorName(conn)"
                           (keydown.enter)="commitConnectorName(conn)"
                           (keydown.escape)="editingConnectorId = null"
+                          aria-label="Edit connector name"
                           class="w-full border border-blue-400 rounded px-2 py-0.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           [attr.autofocus]="true" />
                       } @else {
@@ -193,12 +177,15 @@
                     <!-- Hosted Apps -->
                     <div class="relative" (click)="$event.stopPropagation()">
                       <button (click)="hostedAppsOpenId = hostedAppsOpenId === conn.id ? null : conn.id"
-                        class="flex items-center gap-1.5 w-fit bg-blue-50 text-blue-600 text-xs font-medium px-2 py-0.5 rounded-full border border-blue-100 hover:bg-blue-100 transition-colors">
-                        <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        aria-haspopup="listbox"
+                        [attr.aria-expanded]="hostedAppsOpenId === conn.id"
+                        [attr.aria-label]="conn.hostedApps + ' hosted apps'"
+                        class="flex items-center gap-1.5 w-fit bg-blue-50 text-blue-600 text-xs font-medium px-2 py-0.5 rounded-full border border-blue-100 hover:bg-blue-100 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
+                        <svg aria-hidden="true" class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z"/>
                         </svg>
                         {{ conn.hostedApps }}
-                        <svg class="w-2.5 h-2.5 shrink-0 transition-transform" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"
+                        <svg aria-hidden="true" class="w-2.5 h-2.5 shrink-0 motion-safe:transition-transform" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"
                           [class.rotate-180]="hostedAppsOpenId === conn.id">
                           <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
                         </svg>
@@ -235,8 +222,8 @@
                     <div class="text-sm font-medium text-gray-700">{{ conn.allocation }}</div>
                     <!-- Assign -->
                     <div>
-                      <button (click)="openDeployModal(); $event.stopPropagation()" class="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded border border-blue-200 text-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <button (click)="openDeployModal(); $event.stopPropagation()" class="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded border border-blue-200 text-blue-600 bg-blue-50 hover:bg-blue-100 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
+                        <svg aria-hidden="true" class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                         Assign
@@ -245,25 +232,27 @@
                     <!-- Actions -->
                     <div class="relative flex items-center justify-end pr-3" (click)="$event.stopPropagation()">
                       <button (click)="rowMenuOpenId = rowMenuOpenId === conn.id ? null : conn.id"
-                        class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                        [attr.aria-label]="'Actions for ' + conn.name"
+                        [attr.aria-expanded]="rowMenuOpenId === conn.id"
+                        class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
                         [class.bg-gray-100]="rowMenuOpenId === conn.id"
                         [class.text-gray-600]="rowMenuOpenId === conn.id">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <svg aria-hidden="true" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                           <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
                         </svg>
                       </button>
                       @if (rowMenuOpenId === conn.id) {
                         <div class="absolute right-3 top-8 z-20 w-48 bg-white border border-gray-200 rounded-lg shadow-lg py-1" (click)="$event.stopPropagation()">
                           <button (click)="openConnectorDrawer(conn); rowMenuOpenId = null"
-                            class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors text-left">
-                            <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 motion-safe:transition-colors text-left">
+                            <svg aria-hidden="true" class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z"/>
                             </svg>
                             View Assigned Identities
                           </button>
                           <button (click)="openBulkUpload(conn)"
-                            class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors text-left">
-                            <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 motion-safe:transition-colors text-left">
+                            <svg aria-hidden="true" class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
                             </svg>
                             Bulk Upload Identities
@@ -271,31 +260,31 @@
                           <div class="border-t border-gray-100 my-1"></div>
                           @if (conn.status === 'Offline') {
                             <button (click)="rowMenuOpenId = null"
-                              class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-green-700 hover:bg-green-50 transition-colors text-left">
-                              <svg class="w-3.5 h-3.5 text-green-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                              class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-green-700 hover:bg-green-50 motion-safe:transition-colors text-left">
+                              <svg aria-hidden="true" class="w-3.5 h-3.5 text-green-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z"/>
                               </svg>
                               Resume Connectivity
                             </button>
                           } @else {
                             <button (click)="rowMenuOpenId = null"
-                              class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-amber-700 hover:bg-amber-50 transition-colors text-left">
-                              <svg class="w-3.5 h-3.5 text-amber-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                              class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-amber-700 hover:bg-amber-50 motion-safe:transition-colors text-left">
+                              <svg aria-hidden="true" class="w-3.5 h-3.5 text-amber-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9v6m-4.5 0V9M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                               </svg>
                               Pause Connectivity
                             </button>
                           }
                           <button (click)="duplicateConnector(conn, loc); rowMenuOpenId = null"
-                            class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors text-left">
-                            <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 motion-safe:transition-colors text-left">
+                            <svg aria-hidden="true" class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75"/>
                             </svg>
                             Duplicate Network Resource
                           </button>
                           <button (click)="deleteConnector(conn, loc); rowMenuOpenId = null"
-                            class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-red-600 hover:bg-red-50 transition-colors text-left">
-                            <svg class="w-3.5 h-3.5 text-red-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-red-600 hover:bg-red-50 motion-safe:transition-colors text-left">
+                            <svg aria-hidden="true" class="w-3.5 h-3.5 text-red-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
                             </svg>
                             Delete
@@ -321,37 +310,37 @@
 @if (showConnectorDrawer && activeConnector) {
   <div class="fixed inset-0 z-50 flex justify-end">
     <div class="absolute inset-0 bg-black/30" (click)="closeConnectorDrawer()"></div>
-    <div class="relative w-[820px] h-full bg-white shadow-2xl flex flex-col overflow-hidden">
+    <div role="dialog" aria-modal="true" [attr.aria-labelledby]="showLogsView ? 'logs-view-title' : 'drawer-title'" class="relative w-[820px] h-full bg-white shadow-2xl flex flex-col overflow-hidden">
 
       <!-- Header -->
       <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 shrink-0">
         @if (showLogsView) {
           <div class="flex items-center gap-3">
-            <button (click)="closeLogs()" class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <button (click)="closeLogs()" aria-label="Back to identities" class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
+              <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>
               </svg>
             </button>
             <div>
-              <h2 class="text-base font-semibold text-gray-900">Activity Logs</h2>
+              <h2 id="logs-view-title" class="text-base font-semibold text-gray-900">Activity Logs</h2>
               <p class="text-xs text-gray-500">{{ activeConnector.name }} · {{ activeLogsEntry?.label }}</p>
             </div>
           </div>
         } @else {
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 bg-blue-500 rounded-lg flex items-center justify-center shrink-0">
-              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <svg aria-hidden="true" class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z"/>
               </svg>
             </div>
             <div>
-              <h2 class="text-base font-semibold text-gray-900">{{ activeConnector.name }}</h2>
+              <h2 id="drawer-title" class="text-base font-semibold text-gray-900">{{ activeConnector.name }}</h2>
               <p class="text-xs text-gray-500">{{ activeConnector.type }}</p>
             </div>
           </div>
         }
-        <button (click)="closeConnectorDrawer()" class="text-gray-400 hover:text-gray-600 p-1 rounded transition-colors">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <button (click)="closeConnectorDrawer()" aria-label="Close drawer" class="text-gray-400 hover:text-gray-600 p-1 rounded motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
+          <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
           </svg>
         </button>
@@ -367,7 +356,8 @@
             <div class="flex rounded-lg border border-gray-200 overflow-hidden text-xs font-medium">
               @for (tf of ([{v:'24h',l:'24h'},{v:'7d',l:'7d'},{v:'30d',l:'30d'}]); track tf.v) {
                 <button (click)="logsTimeframe = $any(tf.v)"
-                  [class]="logsTimeframe === tf.v ? 'bg-blue-600 text-white px-3 py-1.5' : 'bg-white text-gray-600 hover:bg-gray-50 px-3 py-1.5 transition-colors'">
+                  class="focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+                  [class]="logsTimeframe === tf.v ? 'bg-blue-600 text-white px-3 py-1.5' : 'bg-white text-gray-600 hover:bg-gray-50 px-3 py-1.5 motion-safe:transition-colors'">
                   {{ tf.l }}
                 </button>
               }
@@ -375,24 +365,25 @@
             <div class="flex rounded-lg border border-gray-200 overflow-hidden text-xs font-medium">
               @for (f of ([{v:'all',l:'All'},{v:'success',l:'Success'},{v:'fail',l:'Failed'}]); track f.v) {
                 <button (click)="logsStatusFilter = $any(f.v)"
-                  [class]="logsStatusFilter === f.v ? 'bg-blue-600 text-white px-3 py-1.5' : 'bg-white text-gray-600 hover:bg-gray-50 px-3 py-1.5 transition-colors'">
+                  class="focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+                  [class]="logsStatusFilter === f.v ? 'bg-blue-600 text-white px-3 py-1.5' : 'bg-white text-gray-600 hover:bg-gray-50 px-3 py-1.5 motion-safe:transition-colors'">
                   {{ f.l }}
                 </button>
               }
             </div>
             <div class="relative flex-1 min-w-[160px]">
-              <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <svg aria-hidden="true" class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
               </svg>
-              <input [(ngModel)]="logsSearch" placeholder="Search URL or port…"
+              <input [(ngModel)]="logsSearch" aria-label="Search logs by URL or port" placeholder="Search URL or port…"
                 class="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400"/>
             </div>
             <span class="text-xs text-gray-400 shrink-0">{{ filteredLogs.length }} entries</span>
           </div>
           <!-- Log table -->
           @if (filteredLogs.length === 0) {
-            <div class="flex flex-col items-center justify-center h-40 text-gray-400">
-              <svg class="w-8 h-8 mb-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <div aria-live="polite" class="flex flex-col items-center justify-center h-40 text-gray-400">
+              <svg aria-hidden="true" class="w-8 h-8 mb-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
               </svg>
               <p class="text-sm">No log entries match your filters</p>
@@ -436,36 +427,68 @@
         <!-- Search + filters -->
         <div class="px-5 pt-4 pb-3 border-b border-gray-100 flex items-center gap-2 flex-wrap">
           <div class="relative flex-1 min-w-[160px]">
-            <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <svg aria-hidden="true" class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z"/>
             </svg>
-            <input type="text" [(ngModel)]="drawerSearch" placeholder="Search..."
+            <input type="text" [(ngModel)]="drawerSearch" aria-label="Search identities" placeholder="Search..."
               class="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"/>
           </div>
           <select [(ngModel)]="drawerConnectionFilter"
+            aria-label="Filter by connection"
             class="text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700 bg-white">
             <option value="all">All Connections</option>
             <option value="Online">Online</option>
             <option value="Offline">Offline</option>
           </select>
           <select [(ngModel)]="drawerStatusFilter"
+            aria-label="Filter by enrollment status"
             class="text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700 bg-white">
             <option value="all">All Statuses</option>
             <option value="Enrolled">Enrolled</option>
             <option value="Pending">Pending</option>
             <option value="Expired Token">Expired Token</option>
           </select>
+          @if (expiredTokenCount > 0) {
+            <button (click)="bulkReissueExpiredTokens()"
+              class="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-1 shrink-0">
+              <svg aria-hidden="true" class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"/>
+              </svg>
+              Reissue Expired Tokens
+              <span class="bg-red-200 text-red-800 font-bold px-1.5 py-0.5 rounded-full text-[10px] leading-none">{{ expiredTokenCount }}</span>
+            </button>
+          }
+          @if (bulkReissueComplete) {
+            <span aria-live="polite" class="inline-flex items-center gap-1 text-xs text-green-700 font-medium shrink-0">
+              <svg aria-hidden="true" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+              </svg>
+              Tokens reissued
+            </span>
+          }
         </div>
         <div class="overflow-x-auto">
           <table class="w-full text-left">
             <thead>
               <tr class="border-b border-gray-200 bg-gray-100">
-                <th class="text-[10px] font-bold uppercase tracking-wider text-gray-600 px-4 py-2.5">Identity</th>
-                <th class="text-[10px] font-bold uppercase tracking-wider text-gray-600 px-4 py-2.5">Connection</th>
-                <th class="text-[10px] font-bold uppercase tracking-wider text-gray-600 px-4 py-2.5">Status</th>
-                <th class="text-[10px] font-bold uppercase tracking-wider text-gray-600 px-4 py-2.5">Uptime</th>
-                <th class="text-[10px] font-bold uppercase tracking-wider text-gray-600 px-4 py-2.5">Activated</th>
-                <th class="text-[10px] font-bold uppercase tracking-wider text-gray-600 px-4 py-2.5">Last Connected</th>
+                <th (click)="setDrawerSort('label')" [attr.aria-sort]="drawerSortCol === 'label' ? (drawerSortDir === 'asc' ? 'ascending' : 'descending') : 'none'" class="text-[10px] font-bold uppercase tracking-wider px-4 py-2.5 cursor-pointer select-none hover:bg-gray-200 motion-safe:transition-colors" [class.text-blue-600]="drawerSortCol === 'label'" [class.text-gray-600]="drawerSortCol !== 'label'">
+                  <span class="inline-flex items-center gap-1">Identity <ng-container *ngTemplateOutlet="drawerSortIcon; context: { col: 'label' }"></ng-container></span>
+                </th>
+                <th (click)="setDrawerSort('connection')" [attr.aria-sort]="drawerSortCol === 'connection' ? (drawerSortDir === 'asc' ? 'ascending' : 'descending') : 'none'" class="text-[10px] font-bold uppercase tracking-wider px-4 py-2.5 cursor-pointer select-none hover:bg-gray-200 motion-safe:transition-colors" [class.text-blue-600]="drawerSortCol === 'connection'" [class.text-gray-600]="drawerSortCol !== 'connection'">
+                  <span class="inline-flex items-center gap-1">Connection <ng-container *ngTemplateOutlet="drawerSortIcon; context: { col: 'connection' }"></ng-container></span>
+                </th>
+                <th (click)="setDrawerSort('enrollmentStatus')" [attr.aria-sort]="drawerSortCol === 'enrollmentStatus' ? (drawerSortDir === 'asc' ? 'ascending' : 'descending') : 'none'" class="text-[10px] font-bold uppercase tracking-wider px-4 py-2.5 cursor-pointer select-none hover:bg-gray-200 motion-safe:transition-colors" [class.text-blue-600]="drawerSortCol === 'enrollmentStatus'" [class.text-gray-600]="drawerSortCol !== 'enrollmentStatus'">
+                  <span class="inline-flex items-center gap-1">Status <ng-container *ngTemplateOutlet="drawerSortIcon; context: { col: 'enrollmentStatus' }"></ng-container></span>
+                </th>
+                <th (click)="setDrawerSort('uptime')" [attr.aria-sort]="drawerSortCol === 'uptime' ? (drawerSortDir === 'asc' ? 'ascending' : 'descending') : 'none'" class="text-[10px] font-bold uppercase tracking-wider px-4 py-2.5 cursor-pointer select-none hover:bg-gray-200 motion-safe:transition-colors" [class.text-blue-600]="drawerSortCol === 'uptime'" [class.text-gray-600]="drawerSortCol !== 'uptime'">
+                  <span class="inline-flex items-center gap-1">Uptime <ng-container *ngTemplateOutlet="drawerSortIcon; context: { col: 'uptime' }"></ng-container></span>
+                </th>
+                <th (click)="setDrawerSort('activated')" [attr.aria-sort]="drawerSortCol === 'activated' ? (drawerSortDir === 'asc' ? 'ascending' : 'descending') : 'none'" class="text-[10px] font-bold uppercase tracking-wider px-4 py-2.5 cursor-pointer select-none hover:bg-gray-200 motion-safe:transition-colors" [class.text-blue-600]="drawerSortCol === 'activated'" [class.text-gray-600]="drawerSortCol !== 'activated'">
+                  <span class="inline-flex items-center gap-1">Activated <ng-container *ngTemplateOutlet="drawerSortIcon; context: { col: 'activated' }"></ng-container></span>
+                </th>
+                <th (click)="setDrawerSort('lastConnected')" [attr.aria-sort]="drawerSortCol === 'lastConnected' ? (drawerSortDir === 'asc' ? 'ascending' : 'descending') : 'none'" class="text-[10px] font-bold uppercase tracking-wider px-4 py-2.5 cursor-pointer select-none hover:bg-gray-200 motion-safe:transition-colors" [class.text-blue-600]="drawerSortCol === 'lastConnected'" [class.text-gray-600]="drawerSortCol !== 'lastConnected'">
+                  <span class="inline-flex items-center gap-1">Last Connected <ng-container *ngTemplateOutlet="drawerSortIcon; context: { col: 'lastConnected' }"></ng-container></span>
+                </th>
                 <th class="text-[10px] font-bold uppercase tracking-wider text-gray-600 px-4 py-2.5 text-right">Actions</th>
               </tr>
             </thead>
@@ -478,9 +501,9 @@
                   </td>
                   <td class="px-4 py-3">
                     <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full"
-                      [class]="entry.connection === 'Online' ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'">
+                      [class]="entry.connection === 'Online' ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-700'">
                       <span class="w-1.5 h-1.5 rounded-full"
-                        [class]="entry.connection === 'Online' ? 'bg-green-500' : 'bg-gray-400'"></span>
+                        [class]="entry.connection === 'Online' ? 'bg-green-500' : 'bg-gray-500'"></span>
                       {{ entry.connection }}
                     </span>
                   </td>
@@ -508,43 +531,45 @@
                   <td class="px-4 py-3 text-right">
                     <div class="relative inline-block">
                       <button (click)="connectorMenuOpenId = connectorMenuOpenId === entry.id ? null : entry.id; $event.stopPropagation()"
-                        class="text-gray-400 hover:text-gray-600 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        [attr.aria-label]="'Actions for ' + entry.label"
+                        [attr.aria-expanded]="connectorMenuOpenId === entry.id"
+                        class="text-gray-400 hover:text-gray-600 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
+                        <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z"/>
                         </svg>
                       </button>
                       @if (connectorMenuOpenId === entry.id) {
                         <div class="absolute right-0 top-6 z-10 w-44 bg-white rounded-lg shadow-lg border border-gray-100 py-1" (click)="$event.stopPropagation()">
                           @if (entry.enrollmentStatus === 'Pending' || entry.enrollmentStatus === 'Expired Token') {
-                            <button (click)="connectorMenuOpenId = null" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors text-left">
-                              <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <button (click)="connectorMenuOpenId = null" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 motion-safe:transition-colors text-left">
+                              <svg aria-hidden="true" class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"/>
                               </svg>
                               Reissue Token
                             </button>
                           } @else {
-                            <button (click)="openLogs(entry)" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors text-left">
-                              <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <button (click)="openLogs(entry)" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 motion-safe:transition-colors text-left">
+                              <svg aria-hidden="true" class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
                               </svg>
                               View Logs
                             </button>
-                            <button (click)="connectorMenuOpenId = null" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors text-left">
-                              <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <button (click)="connectorMenuOpenId = null" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 motion-safe:transition-colors text-left">
+                              <svg aria-hidden="true" class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/>
                               </svg>
                               Reset Enrollment
                             </button>
-                            <button (click)="connectorMenuOpenId = null" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-amber-700 hover:bg-amber-50 transition-colors text-left">
-                              <svg class="w-3.5 h-3.5 text-amber-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <button (click)="connectorMenuOpenId = null" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-amber-700 hover:bg-amber-50 motion-safe:transition-colors text-left">
+                              <svg aria-hidden="true" class="w-3.5 h-3.5 text-amber-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
                               </svg>
                               Disable
                             </button>
                           }
                           <div class="border-t border-gray-100 my-1"></div>
-                          <button (click)="connectorMenuOpenId = null" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-red-600 hover:bg-red-50 transition-colors text-left">
-                            <svg class="w-3.5 h-3.5 text-red-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <button (click)="connectorMenuOpenId = null" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-red-600 hover:bg-red-50 motion-safe:transition-colors text-left">
+                            <svg aria-hidden="true" class="w-3.5 h-3.5 text-red-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
                             </svg>
                             Delete
@@ -558,7 +583,7 @@
             </tbody>
           </table>
           @if (filteredDrawerEntries.length === 0) {
-            <div class="py-10 text-center text-sm text-gray-400">No entries match your search or filters.</div>
+            <div aria-live="polite" class="py-10 text-center text-sm text-gray-400">No entries match your search or filters.</div>
           }
         </div>
         }
@@ -567,28 +592,46 @@
 
     </div>
   </div>
+
+  <ng-template #drawerSortIcon let-col="col">
+    @if (drawerSortCol === col) {
+      @if (drawerSortDir === 'asc') {
+        <svg aria-hidden="true" class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"/>
+        </svg>
+      } @else {
+        <svg aria-hidden="true" class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
+        </svg>
+      }
+    } @else {
+      <svg aria-hidden="true" class="w-3 h-3 text-gray-300 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"/>
+      </svg>
+    }
+  </ng-template>
 }
 
 <!-- ===================== DEPLOY MODAL ===================== -->
 @if (showDeployModal) {
   <div class="fixed inset-0 z-[60] flex items-center justify-center bg-black/40">
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 flex flex-col">
+    <div role="dialog" aria-modal="true" aria-labelledby="deploy-modal-title" class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 flex flex-col">
 
       <!-- Header -->
       <div class="flex items-start justify-between px-6 py-4 border-b border-gray-200">
         <div class="flex items-start gap-3">
           <div class="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
-            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <svg aria-hidden="true" class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
           </div>
           <div>
-            <h2 class="text-base font-semibold text-gray-900">Assign Access</h2>
+            <h2 id="deploy-modal-title" class="text-base font-semibold text-gray-900">Assign Access</h2>
             <p class="text-xs text-gray-500">Create a label or description for the identity that will have access to this Network Resource. The identity will be assigned an activation token and will be able to download it to be granted access.</p>
           </div>
         </div>
-        <button (click)="showDeployModal = false" class="text-gray-400 hover:text-gray-600 p-1 rounded transition-colors shrink-0">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <button (click)="closeDeployModal()" aria-label="Close dialog" class="text-gray-400 hover:text-gray-600 p-1 rounded motion-safe:transition-colors shrink-0 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
+          <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
           </svg>
         </button>
@@ -599,8 +642,9 @@
 
         <!-- Label or Description -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1.5">Label or Description <span class="text-red-500">*</span></label>
+          <label for="deploy-label-input" class="block text-sm font-medium text-gray-700 mb-1.5">Label or Description <span class="text-red-500">*</span></label>
           <input
+            id="deploy-label-input"
             [(ngModel)]="deployLabel"
             type="text"
             placeholder="e.g. John Smith's Mobile"
@@ -610,10 +654,12 @@
 
         <!-- User Email Address -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1.5">User Email Address <span class="text-red-500">*</span></label>
+          <label for="deploy-email-input" class="block text-sm font-medium text-gray-700 mb-1.5">User Email Address <span class="text-red-500">*</span></label>
           <input
+            id="deploy-email-input"
             [(ngModel)]="deployEmail"
             type="email"
+            autocomplete="email"
             placeholder="e.g. jsmith@acme.com"
             class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
@@ -624,13 +670,13 @@
 
       <!-- Footer -->
       <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200">
-        <button (click)="showDeployModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+        <button (click)="closeDeployModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
           Cancel
         </button>
         <button
           (click)="confirmDeploy()"
           [disabled]="!deployLabel.trim() || !deployEmail.trim()"
-          class="px-5 py-2 text-sm font-medium text-white rounded-lg transition-colors"
+          class="px-5 py-2 text-sm font-medium text-white rounded-lg motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
           [class]="deployLabel.trim() && deployEmail.trim() ? 'bg-blue-500 hover:bg-blue-600' : 'bg-blue-200 cursor-not-allowed'">
           Assign
         </button>
@@ -643,30 +689,30 @@
 <!-- ===================== BULK UPLOAD MODAL ===================== -->
 @if (showBulkUploadModal && bulkUploadConnector) {
   <div class="fixed inset-0 z-[60] flex items-center justify-center bg-black/40">
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 flex flex-col">
+    <div role="dialog" aria-modal="true" aria-labelledby="bulk-upload-modal-title" class="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 flex flex-col">
 
       <!-- Header -->
       <div class="flex items-start justify-between px-6 py-4 border-b border-gray-200">
         <div class="flex items-start gap-3">
           <div class="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
-            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <svg aria-hidden="true" class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
             </svg>
           </div>
           <div>
-            <h2 class="text-base font-semibold text-gray-900">Bulk Upload Identities</h2>
+            <h2 id="bulk-upload-modal-title" class="text-base font-semibold text-gray-900">Bulk Upload Identities</h2>
             <p class="text-xs text-gray-500">{{ bulkUploadConnector.name }}</p>
           </div>
         </div>
-        <button (click)="showBulkUploadModal = false" class="text-gray-400 hover:text-gray-600 p-1 rounded transition-colors shrink-0">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <button (click)="closeBulkUploadModal()" aria-label="Close dialog" class="text-gray-400 hover:text-gray-600 p-1 rounded motion-safe:transition-colors shrink-0 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
+          <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
           </svg>
         </button>
       </div>
 
       <!-- Step indicator -->
-      <div class="flex items-center gap-2 px-6 pt-4 pb-0">
+      <div role="status" [attr.aria-label]="'Step ' + (bulkUploadStep === 'upload' ? '1' : '2') + ' of 2'" class="flex items-center gap-2 px-6 pt-4 pb-0">
         <div class="flex items-center gap-1.5">
           <div [class]="bulkUploadStep === 'upload' ? 'w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-semibold' : 'w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-semibold'">1</div>
           <span [class]="bulkUploadStep === 'upload' ? 'text-xs font-medium text-gray-900' : 'text-xs text-gray-400'">Upload File</span>
@@ -683,15 +729,15 @@
         <div class="px-6 py-5 flex flex-col gap-4">
 
           <!-- Drop zone -->
-          <label class="flex flex-col items-center justify-center gap-3 border-2 border-dashed border-gray-200 rounded-xl py-10 px-6 cursor-pointer hover:border-blue-400 hover:bg-blue-50/40 transition-colors group">
+          <label class="flex flex-col items-center justify-center gap-3 border-2 border-dashed border-gray-200 rounded-xl py-10 px-6 cursor-pointer hover:border-blue-400 hover:bg-blue-50/40 motion-safe:transition-colors group">
             <input #bulkFileInput type="file" accept=".csv" class="hidden" (change)="onBulkFileSelected($event)">
-            <div class="w-12 h-12 bg-gray-100 group-hover:bg-blue-100 rounded-xl flex items-center justify-center transition-colors">
-              <svg class="w-6 h-6 text-gray-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <div class="w-12 h-12 bg-gray-100 group-hover:bg-blue-100 rounded-xl flex items-center justify-center motion-safe:transition-colors">
+              <svg aria-hidden="true" class="w-6 h-6 text-gray-400 group-hover:text-blue-500 motion-safe:transition-colors" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
               </svg>
             </div>
             <div class="text-center">
-              <p class="text-sm font-medium text-gray-700 group-hover:text-blue-700 transition-colors">Click to upload a CSV file</p>
+              <p class="text-sm font-medium text-gray-700 group-hover:text-blue-700 motion-safe:transition-colors">Click to upload a CSV file</p>
               <p class="text-xs text-gray-400 mt-0.5">or drag and drop</p>
             </div>
             <span class="text-xs text-gray-400 bg-gray-100 px-2.5 py-1 rounded-full">.csv</span>
@@ -699,8 +745,8 @@
 
           <!-- Error -->
           @if (bulkUploadError) {
-            <div class="flex items-start gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2.5">
-              <svg class="w-4 h-4 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <div role="alert" class="flex items-start gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2.5">
+              <svg aria-hidden="true" class="w-4 h-4 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
               </svg>
               <p class="text-xs text-red-700">{{ bulkUploadError }}</p>
@@ -722,8 +768,8 @@
 
         <!-- Footer -->
         <div class="flex justify-end px-6 py-4 border-t border-gray-200">
-          <button (click)="showBulkUploadModal = false"
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+          <button (click)="closeBulkUploadModal()"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
             Cancel
           </button>
         </div>
@@ -735,7 +781,7 @@
 
           <div class="flex items-center gap-2">
             <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center shrink-0">
-              <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <svg aria-hidden="true" class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
               </svg>
             </div>
@@ -774,19 +820,19 @@
         <!-- Footer -->
         <div class="flex items-center justify-between px-6 py-4 border-t border-gray-200">
           <button (click)="bulkUploadStep = 'upload'"
-            class="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            class="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
+            <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>
             </svg>
             Back
           </button>
           <div class="flex items-center gap-3">
-            <button (click)="showBulkUploadModal = false"
-              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+            <button (click)="closeBulkUploadModal()"
+              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
               Cancel
             </button>
             <button (click)="confirmBulkUpload()"
-              class="px-5 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors">
+              class="px-5 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-lg motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
               Import {{ bulkUploadPreviewRows.length }} {{ bulkUploadPreviewRows.length === 1 ? 'Identity' : 'Identities' }}
             </button>
           </div>
@@ -799,20 +845,20 @@
 
 <!-- ===================== ADD CONNECTOR MODAL ===================== -->
 @if (showAddConnectorModal) {
-  <div class="fixed inset-0 z-50 flex flex-col bg-white">
+  <div role="dialog" aria-modal="true" aria-labelledby="add-connector-modal-title" class="fixed inset-0 z-50 flex flex-col bg-white">
 
     <!-- Modal Header -->
     <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 shrink-0">
       <div class="flex items-center gap-3">
         <div class="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
-          <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <svg aria-hidden="true" class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
           </svg>
         </div>
-        <h2 class="text-base font-semibold text-gray-900">Add Connector</h2>
+        <h2 id="add-connector-modal-title" class="text-base font-semibold text-gray-900">Add Connector</h2>
       </div>
-      <button (click)="closeAddConnector()" class="text-gray-400 hover:text-gray-600 p-1 rounded">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <button (click)="closeAddConnector()" aria-label="Close dialog" class="text-gray-400 hover:text-gray-600 p-1 rounded motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
+        <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
         </svg>
       </button>
@@ -826,7 +872,7 @@
         <div class="bg-white border border-gray-200 rounded-lg p-6">
           <div class="flex items-center gap-3 mb-6">
             <div class="w-9 h-9 bg-blue-50 rounded-lg flex items-center justify-center shrink-0">
-              <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <svg aria-hidden="true" class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/>
               </svg>
             </div>
@@ -852,7 +898,7 @@
                     <option [value]="t">{{ t }}</option>
                   }
                 </select>
-                <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <svg aria-hidden="true" class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
                 </svg>
               </div>
@@ -861,10 +907,11 @@
             <!-- Name -->
             <div>
               <div class="flex items-center justify-between mb-1.5">
-                <label class="text-sm font-medium text-gray-700">Name</label>
+                <label for="connector-name-input" class="text-sm font-medium text-gray-700">Name</label>
                 <span class="text-xs font-semibold text-red-500 bg-red-50 border border-red-200 px-2 py-0.5 rounded">REQUIRED</span>
               </div>
               <input
+                id="connector-name-input"
                 [(ngModel)]="connectorName"
                 type="text"
                 placeholder="e.g. Warehouse Gateway"
@@ -875,11 +922,12 @@
             <!-- Type -->
             <div>
               <div class="flex items-center justify-between mb-1.5">
-                <label class="text-sm font-medium text-gray-700">Type</label>
+                <label for="connector-type-select" class="text-sm font-medium text-gray-700">Type</label>
                 <span class="text-xs font-semibold text-red-500 bg-red-50 border border-red-200 px-2 py-0.5 rounded">REQUIRED</span>
               </div>
               <div class="relative">
                 <select
+                  id="connector-type-select"
                   [(ngModel)]="connectorType"
                   class="w-full appearance-none border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white pr-8"
                   [class]="connectorType ? 'text-gray-700' : 'text-gray-400'">
@@ -888,7 +936,7 @@
                     <option [value]="type">{{ type }}</option>
                   }
                 </select>
-                <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <svg aria-hidden="true" class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
                 </svg>
               </div>
@@ -900,7 +948,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1.5">Location</label>
                 <div class="flex items-center gap-3 border border-gray-200 rounded-lg px-4 py-3 bg-gray-50">
                   <div class="w-8 h-8 bg-blue-100 rounded flex items-center justify-center shrink-0">
-                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <svg aria-hidden="true" class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
                       <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/>
                     </svg>
@@ -920,7 +968,7 @@
         <div class="bg-white border border-gray-200 rounded-lg p-6">
           <div class="flex items-center gap-3 mb-5">
             <div class="w-9 h-9 bg-teal-50 rounded-lg flex items-center justify-center shrink-0">
-              <svg class="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <svg aria-hidden="true" class="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z"/>
               </svg>
             </div>
@@ -933,14 +981,14 @@
           <!-- Placeholder until type is selected -->
           @if (!connectorType) {
             <div class="border border-dashed border-gray-200 rounded-lg py-10 flex items-center justify-center gap-2 text-gray-400 text-sm">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/>
               </svg>
               Select a connector type to configure application details
             </div>
           } @else {
             <div class="border border-dashed border-gray-200 rounded-lg py-8 flex flex-col items-center justify-center gap-2 text-gray-400 text-sm">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
               </svg>
               <span>Add a hosted application</span>
@@ -960,12 +1008,12 @@
       <div class="flex items-center gap-3">
         <button
           (click)="closeAddConnector()"
-          class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+          class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
           Cancel
         </button>
         <button
-          class="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          class="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-lg motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
+          <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
           </svg>
           Add Connector

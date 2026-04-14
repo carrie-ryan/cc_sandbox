@@ -1173,24 +1173,24 @@
             <thead class="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th (click)="setAuditSort('entity')" class="text-left px-5 py-2.5 text-xs font-semibold uppercase tracking-wider cursor-pointer select-none transition-colors hover:bg-gray-100"
-                  [class.text-blue-600]="auditSortCol === 'entity'" [class.text-gray-500]="auditSortCol !== 'entity'">
+                  [class.text-blue-600]="auditSortCol === 'entity'" [class.text-gray-600]="auditSortCol !== 'entity'">
                   <span class="inline-flex items-center gap-1">Entity <ng-container *ngTemplateOutlet="auditSortIcon; context: { col: 'entity' }"></ng-container></span>
                 </th>
                 <th (click)="setAuditSort('type')" class="text-left px-4 py-2.5 text-xs font-semibold uppercase tracking-wider cursor-pointer select-none transition-colors hover:bg-gray-100"
-                  [class.text-blue-600]="auditSortCol === 'type'" [class.text-gray-500]="auditSortCol !== 'type'">
+                  [class.text-blue-600]="auditSortCol === 'type'" [class.text-gray-600]="auditSortCol !== 'type'">
                   <span class="inline-flex items-center gap-1">Type <ng-container *ngTemplateOutlet="auditSortIcon; context: { col: 'type' }"></ng-container></span>
                 </th>
-                <th class="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Accessing Applications</th>
+                <th class="text-left px-4 py-2.5 text-xs font-semibold text-gray-600 uppercase tracking-wider">Accessing Applications</th>
                 <th (click)="setAuditSort('throughput')" class="text-right px-4 py-2.5 text-xs font-semibold uppercase tracking-wider cursor-pointer select-none transition-colors hover:bg-gray-100"
-                  [class.text-blue-600]="auditSortCol === 'throughput'" [class.text-gray-500]="auditSortCol !== 'throughput'">
+                  [class.text-blue-600]="auditSortCol === 'throughput'" [class.text-gray-600]="auditSortCol !== 'throughput'">
                   <span class="inline-flex items-center justify-end gap-1">Throughput <ng-container *ngTemplateOutlet="auditSortIcon; context: { col: 'throughput' }"></ng-container></span>
                 </th>
                 <th (click)="setAuditSort('lastSeen')" class="text-right px-4 py-2.5 text-xs font-semibold uppercase tracking-wider cursor-pointer select-none transition-colors hover:bg-gray-100"
-                  [class.text-blue-600]="auditSortCol === 'lastSeen'" [class.text-gray-500]="auditSortCol !== 'lastSeen'">
+                  [class.text-blue-600]="auditSortCol === 'lastSeen'" [class.text-gray-600]="auditSortCol !== 'lastSeen'">
                   <span class="inline-flex items-center justify-end gap-1">Last Seen <ng-container *ngTemplateOutlet="auditSortIcon; context: { col: 'lastSeen' }"></ng-container></span>
                 </th>
                 <th (click)="setAuditSort('status')" class="text-right px-5 py-2.5 text-xs font-semibold uppercase tracking-wider cursor-pointer select-none transition-colors hover:bg-gray-100"
-                  [class.text-blue-600]="auditSortCol === 'status'" [class.text-gray-500]="auditSortCol !== 'status'">
+                  [class.text-blue-600]="auditSortCol === 'status'" [class.text-gray-600]="auditSortCol !== 'status'">
                   <span class="inline-flex items-center justify-end gap-1">Connection <ng-container *ngTemplateOutlet="auditSortIcon; context: { col: 'status' }"></ng-container></span>
                 </th>
               </tr>

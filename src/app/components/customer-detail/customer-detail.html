@@ -800,13 +800,13 @@
             @if (col('connectors', 'throughput')) {
               <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Throughput ↑↓</th>
             }
-            @if (col('connectors', 'usage')) {
-              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Usage ↑↓</th>
-            }
             <!-- <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Dropped Pkts</th> -->
             <!-- <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Dropped Conns</th> -->
             @if (col('connectors', 'uptime')) {
               <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Uptime</th>
+            }
+            @if (col('connectors', 'usage')) {
+              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Usage</th>
             }
             @if (col('connectors', 'enrollmentStatus')) {
               <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
@@ -873,12 +873,31 @@
               @if (col('connectors', 'requests')) {
                 <td class="px-4 py-3 text-right text-xs text-gray-400">—</td>
               }
+              <!-- Bandwidth -->
+              @if (col('connectors', 'bandwidth')) {
+                <td class="px-4 py-3">
+                  <div class="flex flex-col items-end gap-1">
+                    <span class="text-xs text-gray-700">{{ scaleBw(connector.usageBandwidth) }}</span>
+                    <div class="w-16 h-1 bg-gray-200 rounded-full overflow-hidden">
+                      <div class="h-full bg-blue-400 rounded-full" [style.width.%]="connector.usagePct"></div>
+                    </div>
+                  </div>
+                </td>
+              }
               <!-- Throughput -->
               @if (col('connectors', 'throughput')) {
                 <td class="px-4 py-3 text-right text-xs text-gray-400">—</td>
               }
               <!-- Uptime -->
               @if (col('connectors', 'uptime')) {
+                <td class="px-4 py-3 text-right">
+                  <span [class]="connector.uptime === '0%' ? 'text-red-500 font-medium' : isUptimeDegraded(connector.uptime) ? 'text-amber-600 font-medium' : 'text-gray-700'">
+                    {{ connector.uptime }}
+                  </span>
+                </td>
+              }
+              <!-- Usage -->
+              @if (col('connectors', 'usage')) {
                 <td class="px-4 py-3">
                   <div class="flex flex-col items-end gap-1">
                     <span class="text-sm font-semibold text-gray-800">{{ scaleBw(connector.usageBandwidth) }}</span>
@@ -886,14 +905,6 @@
                       <div class="h-full bg-green-500 rounded-full" [style.width.%]="connector.usagePct"></div>
                     </div>
                   </div>
-                </td>
-              }
-              <!-- Usage -->
-              @if (col('connectors', 'usage')) {
-                <td class="px-4 py-3 text-right">
-                  <span [class]="connector.uptime === '0%' ? 'text-red-500 font-medium' : isUptimeDegraded(connector.uptime) ? 'text-amber-600 font-medium' : 'text-gray-700'">
-                    {{ connector.uptime }}
-                  </span>
                 </td>
               }
               <!-- Status -->
@@ -1143,16 +1154,16 @@
         <!-- Sub-header -->
         <div class="grid grid-cols-[1fr_160px_180px_120px] bg-gray-50 border-b border-gray-200 px-5 py-3">
           @if (col('alerts', 'description')) {
-            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Alert Description</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-gray-500">Alert Description</span>
           }
           @if (col('alerts', 'created')) {
-            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Created</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-gray-500">Created</span>
           }
           @if (col('alerts', 'type')) {
-            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Type</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-gray-500">Type</span>
           }
           @if (col('alerts', 'actions')) {
-            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 text-right">Actions</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-gray-500 text-right">Actions</span>
           }
         </div>
         @for (alert of customer.alerts; track alert.resource) {
