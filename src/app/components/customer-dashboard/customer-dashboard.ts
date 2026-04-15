@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { NgTemplateOutlet, UpperCasePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { CustomerLocationsComponent } from '../customer-locations/customer-locations';
+import { CustomerIdentitiesComponent } from '../customer-identities/customer-identities';
 import { CustomerService, Customer, CustomerIdentity } from '../../services/customer.service';
 import { PersonaService } from '../../services/persona.service';
 import { OnboardingService } from '../../services/onboarding.service';
@@ -79,7 +80,7 @@ export interface MayaConnection {
 @Component({
   selector: 'app-customer-dashboard',
   templateUrl: './customer-dashboard.html',
-  imports: [FormsModule, NgTemplateOutlet, UpperCasePipe, RouterLink, CustomerLocationsComponent],
+  imports: [FormsModule, NgTemplateOutlet, UpperCasePipe, RouterLink, CustomerLocationsComponent, CustomerIdentitiesComponent],
   host: { class: 'flex-1 min-h-0 overflow-hidden' },
 })
 export class CustomerDashboardComponent implements OnDestroy {
@@ -518,7 +519,7 @@ export class CustomerDashboardComponent implements OnDestroy {
   }
 
   // Navigation
-  activeSection: 'overview' | 'connectors' | 'audit' | 'alerts' | 'access' | 'licenses' | 'locations' = 'overview';
+  activeSection: 'overview' | 'connectors' | 'audit' | 'alerts' | 'access' | 'licenses' | 'locations' | 'identities' = 'overview';
 
   get alertBadge(): number { return this.visibleAlerts.length; }
   get connectorBadge(): number { return this.degradedConnectors + this.offlineConnectors; }

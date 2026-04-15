@@ -814,7 +814,19 @@
         Locations & Access
       </button>
 
-      <button (click)="activeSection = 'access'"
+      <button (click)="activeSection = 'identities'"
+        class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-left"
+        [class.bg-blue-50]="activeSection === 'identities'"
+        [class.text-blue-700]="activeSection === 'identities'"
+        [class.text-gray-600]="activeSection !== 'identities'"
+        [class.hover:bg-gray-100]="activeSection !== 'identities'">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z"/>
+        </svg>
+        Users
+      </button>      
+
+      <!-- <button (click)="activeSection = 'access'"
         class="w-full flex items-center justify-between gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-left"
         [class.bg-blue-50]="activeSection === 'access'"
         [class.text-blue-700]="activeSection === 'access'"
@@ -826,7 +838,7 @@
           </svg>
           Access Control
         </div>
-      </button>
+      </button> 
 
       <!-- <button (click)="activeSection = 'licenses'"
         class="w-full flex items-center justify-between gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-left"
@@ -901,7 +913,8 @@
         <h1 class="text-lg font-bold text-gray-900 mb-1">Overview</h1>
         <p class="text-sm text-gray-500 mb-6">Site health at a glance.</p>
 
-        <!-- Getting Started Checklist -->
+        <!--
+        Getting Started Checklist
         @if (!onboardingService.checklistDismissed()) {
           <div class="bg-white border border-gray-200 rounded-xl p-5 mb-6 max-w-md">
             <div class="flex items-start justify-between mb-3">
@@ -916,7 +929,7 @@
               </button>
             </div>
 
-            <!-- Progress bar -->
+            Progress bar
             <div class="w-full h-1.5 bg-gray-100 rounded-full mb-4 overflow-hidden">
               <div class="h-full bg-blue-500 rounded-full transition-all duration-500"
                 [style.width]="(checklistCompletedCount / 4 * 100) + '%'">
@@ -924,7 +937,7 @@
             </div>
 
             <div class="flex flex-col gap-2.5">
-              <!-- 1. Account activated -->
+              1. Account activated
               <div class="flex items-center gap-2.5">
                 <div class="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center shrink-0">
                   <svg class="w-3 h-3 text-green-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
@@ -934,7 +947,7 @@
                 <span class="text-sm text-gray-400 line-through">Account activated</span>
               </div>
 
-              <!-- 2. Provider setup reviewed -->
+              2. Provider setup reviewed
               <div class="flex items-center gap-2.5">
                 @if (onboardingService.setupReviewed()) {
                   <div class="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center shrink-0">
@@ -946,11 +959,11 @@
                 } @else {
                   <div class="w-5 h-5 rounded-full border-2 border-gray-200 shrink-0"></div>
                   <span class="text-sm text-gray-700">Review provider setup</span>
-                  <a [routerLink]="['/customer-portal/onboarding']" class="ml-auto text-xs text-blue-600 hover:underline font-medium shrink-0">Start →</a>
+                  <a [routerLink]="['/customer-portal/onboarding']" class="ml-auto text-xs text-blue-600 hover:underline font-medium shrink-0">Start -></a>
                 }
               </div>
 
-              <!-- 3. Connectors added -->
+              3. Connectors added
               <div class="flex items-center gap-2.5">
                 @if (onboardingService.connectorsAdded()) {
                   <div class="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center shrink-0">
@@ -962,11 +975,11 @@
                 } @else {
                   <div class="w-5 h-5 rounded-full border-2 border-gray-200 shrink-0"></div>
                   <span class="text-sm text-gray-700">Add connectors to locations</span>
-                  <button (click)="activeSection = 'locations'" class="ml-auto text-xs text-blue-600 hover:underline font-medium shrink-0">Go →</button>
+                  <button (click)="activeSection = 'locations'" class="ml-auto text-xs text-blue-600 hover:underline font-medium shrink-0">Go -></button>
                 }
               </div>
 
-              <!-- 4. Hosted applications -->
+              4. Hosted applications
               <div class="flex items-center gap-2.5">
                 @if (onboardingService.hostedAppsConfigured()) {
                   <div class="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center shrink-0">
@@ -993,6 +1006,7 @@
             }
           </div>
         }
+        -->
 
         <!-- KPI Stats -->
         <div class="grid grid-cols-4 gap-4 mb-6">
@@ -2123,6 +2137,10 @@
 
 
     <!-- Locations & Connectors -->
+    @if (activeSection === 'identities') {
+      <app-customer-identities />
+    }
+
     @if (activeSection === 'locations') {
       <app-customer-locations />
     }
