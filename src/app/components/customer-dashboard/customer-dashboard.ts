@@ -242,7 +242,10 @@ export class CustomerDashboardComponent implements OnDestroy {
 
   saveMayaNotifPrefs() {
     this.mayaNotifSaved = true;
-    setTimeout(() => this.mayaNotifSaved = false, 2000);
+    setTimeout(() => {
+      this.mayaNotifSaved = false;
+      this.personaService.showSettings.set(false);
+    }, 800);
   }
 
   killSwitchActive = false;

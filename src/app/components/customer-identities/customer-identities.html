@@ -1,8 +1,8 @@
 <!-- ── IDENTITIES TABLE ── -->
-<div>
+<div [attr.inert]="isAnyModalOpen ? '' : null">
   <div class="mb-5">
-    <h1 class="text-lg font-bold text-gray-900 mb-1">Users</h1>
-    <p class="text-sm text-gray-500">Manage users, enrollment, and activation tokens.</p>
+    <h1 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1">Users</h1>
+    <p class="text-sm text-gray-500 dark:text-gray-400">Manage users, enrollment, and tokens.</p>
   </div>
 
   <!-- Search + filters -->
@@ -12,11 +12,11 @@
         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z"/>
       </svg>
       <input type="text" [(ngModel)]="search" (ngModelChange)="identitiesPage = 1" aria-label="Search identities" placeholder="Search..."
-        class="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"/>
+        class="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 dark:focus:ring-blue-400"/>
     </div>
 <select [(ngModel)]="statusFilter" (ngModelChange)="identitiesPage = 1"
       aria-label="Filter by enrollment status"
-      class="text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700 bg-white">
+      class="text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700 bg-white dark:border-gray-600 dark:text-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700">
       <option value="all">All Statuses</option>
       <option value="Enrolled">Enrolled</option>
       <option value="Pending">Pending</option>
@@ -24,7 +24,7 @@
     </select>
     @if (expiredTokenCount > 0) {
       <button (click)="bulkReissueExpiredTokens()"
-        class="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-1 shrink-0">
+        class="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-1 shrink-0 dark:border-red-700 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50">
         <svg aria-hidden="true" class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"/>
         </svg>
@@ -33,13 +33,20 @@
       </button>
     }
     @if (bulkReissueComplete) {
-      <span aria-live="polite" class="inline-flex items-center gap-1 text-xs text-green-700 font-medium shrink-0">
+      <span aria-live="polite" class="inline-flex items-center gap-1 text-xs text-green-700 dark:text-green-300 font-medium shrink-0">
         <svg aria-hidden="true" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
         </svg>
         Tokens reissued
       </span>
     }
+    <button (click)="openAddUserModal()"
+      class="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 shrink-0 ml-auto">
+      <svg aria-hidden="true" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+      </svg>
+      Add User(s)
+    </button>
   </div>
 
   <!-- Selection action bar -->
@@ -61,7 +68,7 @@
     </div>
   }
   @if (assignComplete) {
-    <div aria-live="polite" class="flex items-center gap-1.5 mb-3 px-3 py-2 bg-green-50 border border-green-200 rounded-lg text-xs font-medium text-green-700">
+    <div aria-live="polite" class="flex items-center gap-1.5 mb-3 px-3 py-2 bg-green-50 border border-green-200 rounded-lg text-xs font-medium text-green-700 dark:bg-green-900/30 dark:border-green-700 dark:text-green-300">
       <svg aria-hidden="true" class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
       </svg>
@@ -69,38 +76,50 @@
     </div>
   }
 
-  <div class="bg-white border border-gray-200 rounded-lg overflow-x-auto">
+
+  <div class="bg-white border border-gray-200 rounded-lg overflow-x-auto dark:bg-gray-800 dark:border-gray-700">
     <table class="w-full text-left">
       <thead>
-        <tr class="border-b border-gray-200 bg-gray-50/50">
+        <tr class="border-b border-gray-200 bg-gray-50/50 dark:border-gray-700 dark:bg-gray-700">
           <th class="px-5 py-3 w-8">
             <input type="checkbox" [checked]="allSelected" (change)="toggleSelectAll()"
               aria-label="Select all users on this page"
-              class="w-3.5 h-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"/>
+              class="w-3.5 h-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer dark:border-gray-600"/>
           </th>
-          <th (click)="setSort('label')" [attr.aria-sort]="sortCol === 'label' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'" class="text-xs font-bold uppercase tracking-wider px-5 py-3 cursor-pointer select-none hover:bg-gray-100 motion-safe:transition-colors" [class.text-blue-600]="sortCol === 'label'" [class.text-gray-600]="sortCol !== 'label'">
-            <span class="inline-flex items-center gap-1">User <ng-container *ngTemplateOutlet="sortIcon; context: { col: 'label' }"></ng-container></span>
+          <th (click)="setSort('label')" [attr.aria-sort]="sortCol === 'label' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'" class="text-xs font-bold uppercase tracking-wider px-5 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-700 motion-safe:transition-colors" [class.text-blue-600]="sortCol === 'label'" [class.text-gray-600]="sortCol !== 'label'">
+            <span class="inline-flex items-center gap-1.5">
+              @if (expandedIds.size > 0) {
+                <button (click)="collapseAll(); $event.stopPropagation()" aria-label="Collapse all rows" title="Collapse all rows"
+                  class="p-0.5 rounded text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 shrink-0">
+                  <svg aria-hidden="true" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.41 5.41L12 10l4.59-4.59"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.41 18.59L12 14l4.59 4.59"/>
+                  </svg>
+                </button>
+              }
+              User <ng-container *ngTemplateOutlet="sortIcon; context: { col: 'label' }"></ng-container>
+            </span>
           </th>
-          <th (click)="setSort('email')" [attr.aria-sort]="sortCol === 'email' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'" class="text-xs font-bold uppercase tracking-wider px-5 py-3 cursor-pointer select-none hover:bg-gray-100 motion-safe:transition-colors" [class.text-blue-600]="sortCol === 'email'" [class.text-gray-600]="sortCol !== 'email'">
+          <th (click)="setSort('email')" [attr.aria-sort]="sortCol === 'email' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'" class="text-xs font-bold uppercase tracking-wider px-5 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-700 motion-safe:transition-colors" [class.text-blue-600]="sortCol === 'email'" [class.text-gray-600]="sortCol !== 'email'">
             <span class="inline-flex items-center gap-1">Email Address <ng-container *ngTemplateOutlet="sortIcon; context: { col: 'email' }"></ng-container></span>
           </th>
-          <th class="text-xs font-bold uppercase tracking-wider text-gray-600 px-5 py-3">Connector(s)</th>
-          <th class="text-xs font-bold uppercase tracking-wider text-gray-600 px-5 py-3 text-right">Actions</th>
+          <th class="text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 px-5 py-3">Connector(s)</th>
+          <th class="text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 px-5 py-3 text-right">Actions</th>
         </tr>
       </thead>
       <tbody>
         @for (entry of pagedEntries; track entry.id) {
-          <tr [class.border-b]="!isExpanded(entry.id)" class="border-gray-100 hover:bg-gray-50/40 transition-colors" [class.bg-blue-50]="isSelected(entry.id)">
+          <tr [class.border-b]="!isExpanded(entry.id)" class="border-gray-100 dark:border-gray-700 hover:bg-gray-50/40 dark:hover:bg-gray-700 transition-colors" [class.bg-blue-50]="isSelected(entry.id)">
             <td class="px-5 py-3.5 w-8">
               <input type="checkbox" [checked]="isSelected(entry.id)" (change)="toggleSelect(entry.id)"
                 [attr.aria-label]="'Select ' + entry.label"
-                class="w-3.5 h-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"/>
+                class="w-3.5 h-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer dark:border-gray-600"/>
             </td>
             <td class="px-5 py-3.5">
               <div class="flex items-center gap-2">
                 @if (entry.connectorAssignments?.length) {
                   <button (click)="toggleExpand(entry.id)" [attr.aria-label]="(isExpanded(entry.id) ? 'Collapse' : 'Expand') + ' ' + entry.label"
-                    class="text-gray-400 hover:text-gray-600 motion-safe:transition-transform motion-safe:duration-150 shrink-0 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 rounded"
+                    class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 motion-safe:transition-transform motion-safe:duration-150 shrink-0 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 rounded"
                     [class.rotate-90]="isExpanded(entry.id)">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
@@ -109,17 +128,22 @@
                 } @else {
                   <span class="w-3.5 shrink-0"></span>
                 }
-                <span class="text-sm font-semibold text-gray-800">{{ entry.label }}</span>
+                <span class="text-sm font-semibold text-gray-800 dark:text-gray-100">{{ entry.label }}</span>
+                @if (entry.connectorAssignments?.some(a => a.status === 'Expired Token')) {
+                  <svg aria-label="Has expired token" title="Has expired token" class="w-3.5 h-3.5 text-red-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+                  </svg>
+                }
               </div>
             </td>
-            <td class="px-5 py-3.5 text-sm" [class]="entry.email ? 'text-gray-600' : 'text-gray-400'">{{ entry.email || '—' }}</td>
+            <td class="px-5 py-3.5 text-sm" [class]="entry.email ? 'text-gray-600 dark:text-gray-300' : 'text-gray-400 dark:text-gray-500'">{{ entry.email || '—' }}</td>
             <td class="px-5 py-3.5">
               @if (entry.connectorAssignments?.length) {
-                <span class="text-sm text-gray-600">
+                <span class="text-sm text-gray-600 dark:text-gray-300">
                   {{ entry.connectorAssignments![0].name }}{{ entry.connectorAssignments!.length > 1 ? ' +' + (entry.connectorAssignments!.length - 1) + ' more' : '' }}
                 </span>
               } @else {
-                <span class="text-sm text-gray-400">—</span>
+                <span class="text-sm text-gray-400 dark:text-gray-500">—</span>
               }
             </td>
             <td class="px-5 py-3.5 text-right">
@@ -127,7 +151,7 @@
                 <button (click)="menuOpenId = menuOpenId === entry.id ? null : entry.id; $event.stopPropagation()"
                   [attr.aria-label]="'Actions for ' + entry.label"
                   [attr.aria-expanded]="menuOpenId === entry.id"
-                  class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+                  class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-500 dark:hover:text-gray-300 dark:hover:bg-gray-700 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
                   [class.bg-gray-100]="menuOpenId === entry.id"
                   [class.text-gray-600]="menuOpenId === entry.id">
                   <svg aria-hidden="true" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -135,12 +159,19 @@
                   </svg>
                 </button>
                 @if (menuOpenId === entry.id) {
-                  <div class="absolute right-0 top-6 z-10 w-44 bg-white rounded-lg shadow-lg border border-gray-100 py-1" (click)="$event.stopPropagation()">
-                    <button (click)="menuOpenId = null" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-red-600 hover:bg-red-50 motion-safe:transition-colors text-left">
+                  <div class="absolute right-0 top-6 z-10 w-44 bg-white rounded-lg shadow-lg border border-gray-100 py-1 dark:bg-gray-800 dark:border-gray-700" (click)="$event.stopPropagation()">
+                    <button (click)="openAssignForSingle(entry.id)" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700 motion-safe:transition-colors text-left">
+                      <svg aria-hidden="true" class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/>
+                      </svg>
+                      Add to Connector
+                    </button>
+                    <div class="my-1 border-t border-gray-100 dark:border-gray-700"></div>
+                    <button (click)="menuOpenId = null" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 motion-safe:transition-colors text-left">
                       <svg aria-hidden="true" class="w-3.5 h-3.5 text-red-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
                       </svg>
-                      Delete
+                      Delete User
                     </button>
                   </div>
                 }
@@ -148,65 +179,91 @@
             </td>
           </tr>
           @if (isExpanded(entry.id) && entry.connectorAssignments?.length) {
-            <tr class="border-b border-gray-100">
+            <tr class="border-b border-gray-100 dark:border-gray-700">
               <td colspan="5" class="p-0">
                 <!-- Connector sub-header -->
-                <div class="grid grid-cols-[3.5rem_2fr_2fr_1.5fr_1.5fr_5rem] gap-x-4 bg-gray-50 border-b border-gray-200 px-2 py-2">
+                <div class="grid grid-cols-[3.5rem_2fr_2fr_1.5fr_1.5fr_5rem] gap-x-4 bg-gray-50 border-b border-gray-200 px-2 py-2 dark:bg-gray-900 dark:border-gray-700">
                   <div></div>
-                  <div class="text-[10px] font-bold uppercase tracking-wider text-gray-600">Connector(s)</div>
-                  <div class="text-[10px] font-bold uppercase tracking-wider text-gray-600">Application(s)</div>
-                  <div class="text-[10px] font-bold uppercase tracking-wider text-gray-600">Status</div>
-                  <div class="text-[10px] font-bold uppercase tracking-wider text-gray-600">Activated</div>
-                  <div class="text-[10px] font-bold uppercase tracking-wider text-gray-600 text-right pr-3">Actions</div>
+                  <div class="text-[10px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300">Connector(s)</div>
+                  <div class="text-[10px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300">Application(s)</div>
+                  <div class="text-[10px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300">Status</div>
+                  <div class="text-[10px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300">Activated</div>
+                  <div class="text-[10px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 text-right pr-3">Actions</div>
                 </div>
                 @for (a of entry.connectorAssignments; track a.id) {
-                  <div class="grid grid-cols-[3.5rem_2fr_2fr_1.5fr_1.5fr_5rem] gap-x-4 items-center px-2 py-3 border-b border-gray-100 last:border-0 hover:bg-gray-50/50">
+                  <div class="grid grid-cols-[3.5rem_2fr_2fr_1.5fr_1.5fr_5rem] gap-x-4 items-center px-2 py-3 border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50/50 dark:hover:bg-gray-700">
                     <div></div>
-                    <div class="text-sm text-gray-800 font-medium">{{ a.name }}</div>
-                    <div class="text-sm text-gray-800">{{ a.apps.map(appLabel).join(', ') }}</div>
-                    <div>
+                    <div class="text-sm text-gray-800 dark:text-gray-100 font-medium">{{ a.name }}</div>
+                    <div class="flex flex-col gap-0.5">
+                      @for (app of a.apps; track app) {
+                        <div class="flex items-center gap-1.5">
+                          <span class="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0"></span>
+                          <span class="text-xs text-gray-700 dark:text-gray-200">{{ appLabel(app) }}</span>
+                        </div>
+                      }
+                    </div>
+                    <div class="flex flex-col gap-1 items-start">
                       @if (a.status === 'Enrolled') {
-                        <span class="inline-flex items-center gap-1 text-xs font-medium px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 shrink-0">
+                        <span class="inline-flex items-center gap-1 text-xs font-medium px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 shrink-0 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700">
                           <span class="w-1 h-1 rounded-full bg-blue-500"></span>Enrolled
                         </span>
                       } @else if (a.status === 'Pending') {
-                        <span class="inline-flex items-center gap-1 text-xs font-medium px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 shrink-0">
+                        <span class="inline-flex items-center gap-1 text-xs font-medium px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 shrink-0 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700">
                           <span class="w-1 h-1 rounded-full bg-amber-400"></span>Pending
                         </span>
                       } @else {
-                        <span class="inline-flex items-center gap-1 text-xs font-medium px-1.5 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200 shrink-0">
+                        <span class="inline-flex items-center gap-1 text-xs font-medium px-1.5 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200 shrink-0 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700">
                           <span class="w-1 h-1 rounded-full bg-red-400"></span>Expired Token
                         </span>
                       }
+                      @if (reissuedKey === (entry.id + '::' + a.id)) {
+                        <span aria-live="polite" class="inline-flex items-center gap-1 text-[10px] font-medium text-green-700 dark:text-green-300">
+                          <svg aria-hidden="true" class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+                          </svg>
+                          Token reissued
+                        </span>
+                      }
                     </div>
-                    <div class="text-sm text-gray-800">{{ a.activated ?? '--' }}</div>
+                    <div class="text-sm" [class]="a.status === 'Enrolled' ? 'text-gray-800 dark:text-gray-100' : 'text-gray-400 dark:text-gray-500'">{{ a.status === 'Enrolled' ? (a.activated ?? '--') : '—' }}</div>
                     <div class="relative flex items-center justify-end pr-3">
-                      <button (click)="subMenuOpenId = subMenuOpenId === a.id ? null : a.id; $event.stopPropagation()"
+                      <button (click)="subMenuOpenId = subMenuOpenId === (entry.id + '::' + a.id) ? null : (entry.id + '::' + a.id); $event.stopPropagation()"
                         [attr.aria-label]="'Actions for ' + a.name"
-                        [attr.aria-expanded]="subMenuOpenId === a.id"
-                        class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+                        [attr.aria-expanded]="subMenuOpenId === (entry.id + '::' + a.id)"
+                        class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-500 dark:hover:text-gray-300 dark:hover:bg-gray-700 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
                         [class.bg-gray-100]="subMenuOpenId === a.id"
                         [class.text-gray-600]="subMenuOpenId === a.id">
                         <svg aria-hidden="true" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                           <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
                         </svg>
                       </button>
-                      @if (subMenuOpenId === a.id) {
-                        <div class="absolute right-0 top-6 z-10 w-40 bg-white rounded-lg shadow-lg border border-gray-100 py-1" (click)="$event.stopPropagation()">
-                          <button (click)="openLogs(entry); subMenuOpenId = null" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 motion-safe:transition-colors text-left">
+                      @if (subMenuOpenId === (entry.id + '::' + a.id)) {
+                        <div class="absolute right-0 top-6 z-10 w-40 bg-white rounded-lg shadow-lg border border-gray-100 py-1 dark:bg-gray-800 dark:border-gray-700" (click)="$event.stopPropagation()">
+                          @if (a.status !== 'Pending') {
+                          <button (click)="openLogs(entry); subMenuOpenId = null" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700 motion-safe:transition-colors text-left">
                             <svg aria-hidden="true" class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
                             </svg>
                             View Logs
                           </button>
+                          }
                           @if (a.status === 'Expired Token') {
-                            <button (click)="subMenuOpenId = null" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 motion-safe:transition-colors text-left">
+                            <button (click)="reissueConnectorToken(entry.id, a.id); subMenuOpenId = null" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700 motion-safe:transition-colors text-left">
                               <svg aria-hidden="true" class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"/>
                               </svg>
                               Reissue Token
                             </button>
                           }
+                          @if (a.status !== 'Pending') {
+                            <div class="my-1 border-t border-gray-100 dark:border-gray-700"></div>
+                          }
+                          <button (click)="identityService.removeConnector(entry.id, a.id); subMenuOpenId = null" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 motion-safe:transition-colors text-left">
+                            <svg aria-hidden="true" class="w-3.5 h-3.5 text-red-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/>
+                            </svg>
+                            Remove Connector
+                          </button>
                         </div>
                       }
                     </div>
@@ -219,16 +276,16 @@
       </tbody>
     </table>
     @if (filteredEntries.length === 0) {
-      <div aria-live="polite" class="py-10 text-center text-sm text-gray-400">No entries match your search or filters.</div>
+      <div aria-live="polite" class="py-10 text-center text-sm text-gray-400 dark:text-gray-500">No entries match your search or filters.</div>
     }
     @if (filteredEntries.length > identitiesPageSize) {
-      <div class="flex items-center justify-between px-5 py-3 border-t border-gray-100">
-        <span class="text-xs text-gray-400">
+      <div class="flex items-center justify-between px-5 py-3 border-t border-gray-100 dark:border-gray-700">
+        <span class="text-xs text-gray-400 dark:text-gray-500">
           {{ identitiesPageStart }}–{{ identitiesPageEnd }} of {{ filteredEntries.length }}
         </span>
         <div class="flex items-center gap-1">
           <button (click)="identitiesPage = identitiesPage - 1" [disabled]="identitiesPage === 1"
-            class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:pointer-events-none">
+            class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-500 dark:hover:text-gray-300 dark:hover:bg-gray-700 transition-colors disabled:opacity-30 disabled:pointer-events-none">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>
             </svg>
@@ -245,7 +302,7 @@
             </button>
           }
           <button (click)="identitiesPage = identitiesPage + 1" [disabled]="identitiesPage === identitiesPageCount"
-            class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:pointer-events-none">
+            class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-500 dark:hover:text-gray-300 dark:hover:bg-gray-700 transition-colors disabled:opacity-30 disabled:pointer-events-none">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
             </svg>
@@ -260,15 +317,15 @@
 @if (showLogsView && activeLogsEntry) {
   <div class="fixed inset-0 z-50 flex justify-end">
     <div class="absolute inset-0 bg-black/30" (click)="closeLogs()"></div>
-    <div role="dialog" aria-modal="true" aria-labelledby="logs-drawer-title" class="relative w-[700px] h-full bg-white shadow-2xl flex flex-col overflow-hidden">
+    <div role="dialog" aria-modal="true" aria-labelledby="logs-drawer-title" class="relative w-[700px] h-full bg-white shadow-2xl flex flex-col overflow-hidden dark:bg-gray-800">
 
       <!-- Header -->
-      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 shrink-0">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 shrink-0">
         <div>
-          <h2 id="logs-drawer-title" class="text-base font-semibold text-gray-900">Activity Logs</h2>
-          <p class="text-xs text-gray-500 mt-0.5">{{ activeLogsEntry.label }}</p>
+          <h2 id="logs-drawer-title" class="text-base font-semibold text-gray-900 dark:text-gray-100">Activity Logs</h2>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ activeLogsEntry.label }}</p>
         </div>
-        <button (click)="closeLogs()" aria-label="Close logs" class="text-gray-400 hover:text-gray-600 p-1 rounded motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
+        <button (click)="closeLogs()" aria-label="Close logs" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
           <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
           </svg>
@@ -276,21 +333,21 @@
       </div>
 
       <!-- Toolbar -->
-      <div class="flex items-center gap-3 px-6 py-3 border-b border-gray-100 shrink-0 flex-wrap">
-        <div class="flex rounded-lg border border-gray-200 overflow-hidden text-xs font-medium">
+      <div class="flex items-center gap-3 px-6 py-3 border-b border-gray-100 dark:border-gray-700 shrink-0 flex-wrap">
+        <div class="flex rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden text-xs font-medium">
           @for (tf of ([{v:'24h',l:'24h'},{v:'7d',l:'7d'},{v:'30d',l:'30d'}]); track tf.v) {
             <button (click)="logsTimeframe = $any(tf.v)"
               class="focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
-              [class]="logsTimeframe === tf.v ? 'bg-blue-600 text-white px-3 py-1.5' : 'bg-white text-gray-600 hover:bg-gray-50 px-3 py-1.5 motion-safe:transition-colors'">
+              [class]="logsTimeframe === tf.v ? 'bg-blue-600 text-white px-3 py-1.5' : 'bg-white text-gray-600 hover:bg-gray-50 px-3 py-1.5 motion-safe:transition-colors dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'">
               {{ tf.l }}
             </button>
           }
         </div>
-        <div class="flex rounded-lg border border-gray-200 overflow-hidden text-xs font-medium">
+        <div class="flex rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden text-xs font-medium">
           @for (f of ([{v:'all',l:'All'},{v:'success',l:'Success'},{v:'fail',l:'Failed'}]); track f.v) {
             <button (click)="logsStatusFilter = $any(f.v)"
               class="focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
-              [class]="logsStatusFilter === f.v ? 'bg-blue-600 text-white px-3 py-1.5' : 'bg-white text-gray-600 hover:bg-gray-50 px-3 py-1.5 motion-safe:transition-colors'">
+              [class]="logsStatusFilter === f.v ? 'bg-blue-600 text-white px-3 py-1.5' : 'bg-white text-gray-600 hover:bg-gray-50 px-3 py-1.5 motion-safe:transition-colors dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'">
               {{ f.l }}
             </button>
           }
@@ -300,15 +357,15 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
           </svg>
           <input [(ngModel)]="logsSearch" aria-label="Search logs by URL or port" placeholder="Search URL or port…"
-            class="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400"/>
+            class="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 dark:focus:ring-blue-400"/>
         </div>
-        <span class="text-xs text-gray-400 shrink-0">{{ filteredLogs.length }} entries</span>
+        <span class="text-xs text-gray-400 dark:text-gray-500 shrink-0">{{ filteredLogs.length }} entries</span>
       </div>
 
       <!-- Log table -->
       <div class="flex-1 overflow-y-auto">
         @if (filteredLogs.length === 0) {
-          <div aria-live="polite" class="flex flex-col items-center justify-center h-40 text-gray-400">
+          <div aria-live="polite" class="flex flex-col items-center justify-center h-40 text-gray-400 dark:text-gray-500">
             <svg aria-hidden="true" class="w-8 h-8 mb-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
             </svg>
@@ -316,27 +373,27 @@
           </div>
         } @else {
           <table class="w-full text-xs">
-            <thead class="bg-gray-50 border-b border-gray-200 sticky top-0">
+            <thead class="bg-gray-50 border-b border-gray-200 sticky top-0 dark:bg-gray-700 dark:border-gray-700">
               <tr>
-                <th class="text-left px-6 py-2.5 font-semibold text-gray-500 uppercase tracking-wider">Timestamp</th>
-                <th class="text-left px-4 py-2.5 font-semibold text-gray-500 uppercase tracking-wider">URL</th>
-                <th class="text-right px-4 py-2.5 font-semibold text-gray-500 uppercase tracking-wider">Port</th>
-                <th class="text-right px-6 py-2.5 font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                <th class="text-left px-6 py-2.5 font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Timestamp</th>
+                <th class="text-left px-4 py-2.5 font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">URL</th>
+                <th class="text-right px-4 py-2.5 font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Port</th>
+                <th class="text-right px-6 py-2.5 font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100">
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
               @for (log of filteredLogs; track $index) {
-                <tr class="hover:bg-gray-50 transition-colors">
-                  <td class="px-6 py-2.5 text-gray-500 whitespace-nowrap">{{ formatLogTimestamp(log.timestamp) }}</td>
-                  <td class="px-4 py-2.5 text-gray-700 font-medium">{{ log.url }}</td>
-                  <td class="px-4 py-2.5 text-right text-gray-500 font-mono">{{ log.port }}</td>
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  <td class="px-6 py-2.5 text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ formatLogTimestamp(log.timestamp) }}</td>
+                  <td class="px-4 py-2.5 text-gray-700 dark:text-gray-200 font-medium">{{ log.url }}</td>
+                  <td class="px-4 py-2.5 text-right text-gray-500 dark:text-gray-400 font-mono">{{ log.port }}</td>
                   <td class="px-6 py-2.5 text-right">
                     @if (log.status === 'success') {
-                      <span class="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
+                      <span class="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full dark:text-green-300 dark:bg-green-900/30 dark:border-green-700">
                         <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>Success
                       </span>
                     } @else {
-                      <span class="inline-flex items-center gap-1 text-xs font-medium text-red-700 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full">
+                      <span class="inline-flex items-center gap-1 text-xs font-medium text-red-700 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full dark:text-red-300 dark:bg-red-900/30 dark:border-red-700">
                         <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>Failed
                       </span>
                     }
@@ -355,22 +412,22 @@
 <!-- ── ASSIGN TO CONNECTOR MODAL ── -->
 @if (showAssignModal) {
   <div class="fixed inset-0 z-[60] flex items-center justify-center bg-black/40">
-    <div role="dialog" aria-modal="true" aria-labelledby="assign-modal-title" class="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 flex flex-col max-h-[85vh]">
+    <div role="dialog" aria-modal="true" aria-labelledby="assign-modal-title" class="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 flex flex-col max-h-[85vh] dark:bg-gray-800">
 
       <!-- Header -->
-      <div class="flex items-start justify-between px-6 py-4 border-b border-gray-200 shrink-0">
+      <div class="flex items-start justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 shrink-0">
         <div class="flex items-start gap-3">
-          <div class="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
+          <div class="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center shrink-0 dark:bg-blue-900/40">
             <svg aria-hidden="true" class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/>
             </svg>
           </div>
           <div>
-            <h2 id="assign-modal-title" class="text-base font-semibold text-gray-900">Add to Connector</h2>
-            <p class="text-xs text-gray-500">Assigning {{ selectedIds.size }} user{{ selectedIds.size === 1 ? '' : 's' }} — select a connector to grant user(s) access to the available applications .</p>
+            <h2 id="assign-modal-title" class="text-base font-semibold text-gray-900 dark:text-gray-100">Add to Connector</h2>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Assigning {{ selectedIds.size }} user{{ selectedIds.size === 1 ? '' : 's' }} — select a connector to grant user(s) access to the available applications .</p>
           </div>
         </div>
-        <button (click)="closeAssignModal()" aria-label="Close dialog" class="text-gray-400 hover:text-gray-600 p-1 rounded motion-safe:transition-colors shrink-0 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
+        <button (click)="closeAssignModal()" aria-label="Close dialog" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded motion-safe:transition-colors shrink-0 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
           <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
           </svg>
@@ -381,13 +438,13 @@
       <div class="flex flex-1 min-h-0 overflow-hidden">
 
         <!-- Left: connector list (multi-select) -->
-        <div class="w-[55%] border-r border-gray-200 overflow-y-auto">
-          <p class="px-4 pt-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400">Connectors</p>
+        <div class="w-[55%] border-r border-gray-200 dark:border-gray-700 overflow-y-auto">
+          <p class="px-4 pt-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Connectors</p>
           @for (connector of connectors; track connector.id) {
-            <label class="flex items-start gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 motion-safe:transition-colors"
+            <label class="flex items-start gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 motion-safe:transition-colors"
               [class.bg-blue-50]="assignConnectorIds.has(connector.id)">
               <input type="checkbox" [checked]="assignConnectorIds.has(connector.id)" (change)="toggleAssignConnector(connector.id)"
-                class="mt-1 w-3.5 h-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0 cursor-pointer"/>
+                class="mt-1 w-3.5 h-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0 cursor-pointer dark:border-gray-600"/>
               <span class="mt-0.5 w-2 h-2 rounded-full shrink-0"
                 [class.bg-green-500]="connector.status === 'Online'"
                 [class.bg-amber-400]="connector.status === 'Degraded'"
@@ -400,9 +457,9 @@
                   {{ connector.name }}
                 </span>
                 <div class="flex items-center gap-1.5 mt-0.5">
-                  <span class="text-xs text-gray-400 capitalize">{{ connector.type }}</span>
-                  <span class="text-gray-300">·</span>
-                  <span class="text-xs text-gray-400">{{ connector.location }}</span>
+                  <span class="text-xs text-gray-400 dark:text-gray-500 capitalize">{{ connector.type }}</span>
+                  <span class="text-gray-300 dark:text-gray-600">·</span>
+                  <span class="text-xs text-gray-400 dark:text-gray-500">{{ connector.location }}</span>
                 </div>
               </div>
             </label>
@@ -413,25 +470,25 @@
         <div class="w-[45%] overflow-y-auto">
           @if (selectedConnectors.length === 0) {
             <div class="flex flex-col items-center justify-center h-full gap-2 text-center px-6 py-10">
-              <svg aria-hidden="true" class="w-8 h-8 text-gray-200" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <svg aria-hidden="true" class="w-8 h-8 text-gray-200 dark:text-gray-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/>
               </svg>
-              <p class="text-xs text-gray-400">Select a connector to see its available applications.</p>
+              <p class="text-xs text-gray-400 dark:text-gray-500">Select a connector to see its available applications.</p>
             </div>
           } @else {
-            <p class="px-4 pt-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400">Available Applications</p>
+            <p class="px-4 pt-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Available Applications</p>
             @for (connector of selectedConnectors; track connector.id) {
               <div class="px-4 pb-3" [class.pt-3]="!$first" [class.border-t]="!$first" [class.border-gray-100]="!$first">
-                <p class="text-xs font-semibold text-gray-600 mb-1.5">{{ connector.name }}</p>
+                <p class="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1.5">{{ connector.name }}</p>
                 @if (connector.hostedApps.length === 0) {
-                  <p class="text-xs text-gray-400 italic">No applications configured.</p>
+                  <p class="text-xs text-gray-400 dark:text-gray-500 italic">No applications configured.</p>
                 }
                 @for (app of connector.hostedApps; track app) {
                   <div class="flex items-center gap-2 py-1">
-                    <svg aria-hidden="true" class="w-3.5 h-3.5 text-gray-300 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <svg aria-hidden="true" class="w-3.5 h-3.5 text-gray-300 dark:text-gray-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
                     </svg>
-                    <span class="text-sm text-gray-700">{{ appLabel(app) }}</span>
+                    <span class="text-sm text-gray-700 dark:text-gray-200">{{ appLabel(app) }}</span>
                   </div>
                 }
               </div>
@@ -442,9 +499,9 @@
       </div>
 
       <!-- Footer -->
-      <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 shrink-0">
+      <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 shrink-0">
         <button (click)="closeAssignModal()"
-          class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
+          class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 dark:text-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:hover:bg-gray-700">
           Cancel
         </button>
         <button (click)="confirmAssign()" [disabled]="!canConfirmAssign"
@@ -460,19 +517,489 @@
   </div>
 }
 
+<!-- ── ADD USER SUCCESS TOAST ── -->
+@if (showAddUserSuccessToast) {
+  <div role="status" aria-live="polite" aria-atomic="true"
+    class="fixed bottom-5 right-5 z-[70] flex items-start gap-3 bg-white border border-green-200 rounded-xl shadow-lg px-4 py-3.5 w-full max-w-sm dark:bg-gray-800 dark:border-green-700">
+    <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center shrink-0 mt-0.5 dark:bg-green-900/30">
+      <svg aria-hidden="true" class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+      </svg>
+    </div>
+    <div class="flex-1 min-w-0">
+      <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+        {{ addUserSuccessCount === 1 ? 'User added successfully' : addUserSuccessCount + ' users added successfully' }}
+      </p>
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Eanrollment token{{ addUserSuccessCount === 1 ? '' : 's' }} generated.</p>
+    </div>
+    <button (click)="dismissAddUserToast()" aria-label="Dismiss notification"
+      class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-0.5 rounded shrink-0 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
+      <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+  </div>
+}
+
+<!-- ── ADD USER CHOICE MODAL ── -->
+@if (showAddUserChoiceModal) {
+  <div class="fixed inset-0 z-[60] flex items-center justify-center bg-black/40">
+    <div role="dialog" aria-modal="true" aria-labelledby="add-user-choice-title" class="bg-white rounded-xl shadow-2xl w-full max-w-sm mx-4 flex flex-col dark:bg-gray-800">
+      <div class="flex items-start justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div>
+          <h2 id="add-user-choice-title" class="text-base font-semibold text-gray-900 dark:text-gray-100">Add User(s)</h2>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">How would you like to add users?</p>
+        </div>
+        <button (click)="closeAddUserChoiceModal()" aria-label="Close dialog" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded motion-safe:transition-colors shrink-0 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
+          <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="px-6 py-5 flex flex-col gap-3">
+        <button (click)="openAddUserDeployModal()" class="flex items-start gap-4 w-full text-left border border-gray-200 rounded-lg px-4 py-4 hover:border-blue-400 hover:bg-blue-50/40 motion-safe:transition-colors group focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 dark:border-gray-600 dark:hover:bg-gray-700">
+          <div class="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center shrink-0 group-hover:bg-blue-200 motion-safe:transition-colors dark:bg-blue-900/40">
+            <svg aria-hidden="true" class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">Single User</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Add one user and generate an enrollment token.</p>
+          </div>
+        </button>
+        <button (click)="openAddUserBulkModal()" class="flex items-start gap-4 w-full text-left border border-gray-200 rounded-lg px-4 py-4 hover:border-blue-400 hover:bg-blue-50/40 motion-safe:transition-colors group focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 dark:border-gray-600 dark:hover:bg-gray-700">
+          <div class="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center shrink-0 group-hover:bg-blue-100 motion-safe:transition-colors dark:bg-gray-700">
+            <svg aria-hidden="true" class="w-4 h-4 text-gray-500 group-hover:text-blue-600 motion-safe:transition-colors dark:text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">Bulk Upload</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Upload multiple users from a CSV file. An enrollment token will be generated for each.</p>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ── ADD USER SINGLE MODAL ── -->
+@if (showAddUserDeployModal) {
+  <div class="fixed inset-0 z-[60] flex items-center justify-center bg-black/40">
+    <div role="dialog" aria-modal="true" aria-labelledby="add-user-deploy-title"
+      class="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 flex flex-col dark:bg-gray-800">
+
+      <!-- Header -->
+      <div class="flex items-start justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 shrink-0">
+        <div class="flex items-start gap-3">
+          <div class="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center shrink-0 dark:bg-blue-900/40">
+            <svg aria-hidden="true" class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
+            </svg>
+          </div>
+          <div>
+            <h2 id="add-user-deploy-title" class="text-base font-semibold text-gray-900 dark:text-gray-100">Add User</h2>
+            <p class="text-xs text-gray-500 dark:text-gray-400">
+              @if (addUserStep === 'form') { Enter the user's details. An enrollment token will be generated automatically. }
+              @else { Optionally assign this user to one or more connectors now, or skip and do it later. }
+            </p>
+          </div>
+        </div>
+        <button (click)="closeAddUserDeployModal()" aria-label="Close dialog" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded motion-safe:transition-colors shrink-0 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
+          <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Step indicator -->
+      <div role="status" [attr.aria-label]="'Step ' + (addUserStep === 'form' ? '1' : '2') + ' of 2'" class="flex items-center gap-2 px-6 pt-4 pb-0">
+        <div class="flex items-center gap-1.5">
+          <div [class]="addUserStep === 'form' ? 'w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-semibold' : 'w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-semibold'">1</div>
+          <span [class]="addUserStep === 'form' ? 'text-xs font-medium text-gray-900 dark:text-gray-100' : 'text-xs text-gray-400 dark:text-gray-500'">User Details</span>
+        </div>
+        <div class="flex-1 h-px bg-gray-200 dark:bg-gray-700 mx-1"></div>
+        <div class="flex items-center gap-1.5">
+          <div [class]="addUserStep === 'connectors' ? 'w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-semibold' : 'w-5 h-5 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center text-xs font-semibold dark:bg-gray-700 dark:text-gray-500'">2</div>
+          <span [class]="addUserStep === 'connectors' ? 'text-xs font-medium text-gray-900 dark:text-gray-100' : 'text-xs text-gray-400 dark:text-gray-500'">Assign Connector <span class="text-gray-400 dark:text-gray-500 font-normal">(optional)</span></span>
+        </div>
+      </div>
+
+      <!-- Step 1: User details form -->
+      @if (addUserStep === 'form') {
+        <div class="px-6 py-5 flex flex-col gap-5">
+          <div>
+            <label for="add-user-label" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">Label or Description <span class="text-red-500">*</span></label>
+            <input id="add-user-label" [(ngModel)]="addUserDeployLabel" type="text" placeholder="e.g. John Smith's Mobile"
+              class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 dark:focus:ring-blue-400"/>
+          </div>
+          <div>
+            <label for="add-user-email" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">User Email Address <span class="text-red-500">*</span></label>
+            <input id="add-user-email" [(ngModel)]="addUserDeployEmail" type="email" autocomplete="email" placeholder="e.g. jsmith@acme.com"
+              class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 dark:focus:ring-blue-400"/>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1.5">The user will receive their enrollment token at this address.</p>
+          </div>
+        </div>
+        <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+          <button (click)="closeAddUserDeployModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 dark:text-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:hover:bg-gray-700">
+            Cancel
+          </button>
+          <button (click)="advanceSingleToConnectors()" [disabled]="!addUserDeployLabel.trim() || !addUserDeployEmail.trim()"
+            class="inline-flex items-center gap-1.5 px-5 py-2 text-sm font-medium text-white rounded-lg motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+            [class]="addUserDeployLabel.trim() && addUserDeployEmail.trim() ? 'bg-blue-500 hover:bg-blue-600' : 'bg-blue-200 cursor-not-allowed'">
+            Next
+            <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
+            </svg>
+          </button>
+        </div>
+      }
+
+      <!-- Step 2: Connector selection -->
+      @if (addUserStep === 'connectors') {
+        <div class="flex flex-1 min-h-0 overflow-hidden">
+          <!-- Left: connector list -->
+          <div class="w-[55%] border-r border-gray-200 dark:border-gray-700 overflow-y-auto max-h-80">
+            <p class="px-4 pt-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Connectors</p>
+            @for (connector of connectors; track connector.id) {
+              <label class="flex items-start gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 motion-safe:transition-colors"
+                [class.bg-blue-50]="addUserConnectorIds.has(connector.id)">
+                <input type="checkbox" [checked]="addUserConnectorIds.has(connector.id)" (change)="toggleAddUserConnector(connector.id)"
+                  class="mt-1 w-3.5 h-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0 cursor-pointer dark:border-gray-600"/>
+                <span class="mt-1.5 w-2 h-2 rounded-full shrink-0"
+                  [class.bg-green-500]="connector.status === 'Online'"
+                  [class.bg-amber-400]="connector.status === 'Degraded'"
+                  [class.bg-gray-300]="connector.status === 'Offline'">
+                </span>
+                <div class="flex-1 min-w-0">
+                  <span class="text-sm font-medium truncate block"
+                    [class.text-blue-700]="addUserConnectorIds.has(connector.id)"
+                    [class.text-gray-800]="!addUserConnectorIds.has(connector.id)">{{ connector.name }}</span>
+                  <div class="flex items-center gap-1.5 mt-0.5">
+                    <span class="text-xs text-gray-400 dark:text-gray-500 capitalize">{{ connector.type }}</span>
+                    <span class="text-gray-300 dark:text-gray-600">·</span>
+                    <span class="text-xs text-gray-400 dark:text-gray-500">{{ connector.location }}</span>
+                  </div>
+                </div>
+              </label>
+            }
+          </div>
+          <!-- Right: apps for selected connectors -->
+          <div class="w-[45%] overflow-y-auto max-h-80">
+            @if (addUserSelectedConnectors.length === 0) {
+              <div class="flex flex-col items-center justify-center h-full gap-2 text-center px-6 py-10">
+                <svg aria-hidden="true" class="w-8 h-8 text-gray-200 dark:text-gray-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/>
+                </svg>
+                <p class="text-xs text-gray-400 dark:text-gray-500">Select a connector to see its available applications.</p>
+              </div>
+            } @else {
+              <p class="px-4 pt-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Available Applications</p>
+              @for (connector of addUserSelectedConnectors; track connector.id) {
+                <div class="px-4 pb-3" [class.pt-3]="!$first" [class.border-t]="!$first" [class.border-gray-100]="!$first">
+                  <p class="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1.5">{{ connector.name }}</p>
+                  @for (app of connector.hostedApps; track app) {
+                    <div class="flex items-center gap-2 py-1">
+                      <svg aria-hidden="true" class="w-3.5 h-3.5 text-gray-300 dark:text-gray-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+                      </svg>
+                      <span class="text-sm text-gray-700 dark:text-gray-200">{{ appLabel(app) }}</span>
+                    </div>
+                  }
+                </div>
+              }
+            }
+          </div>
+        </div>
+        <div class="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-gray-700 shrink-0">
+          <button (click)="addUserStep = 'form'"
+            class="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
+            <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>
+            </svg>
+            Back
+          </button>
+          <div class="flex items-center gap-3">
+            <button (click)="skipAndFinalizeAddSingleUser()"
+              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 dark:text-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:hover:bg-gray-700">
+              Skip
+            </button>
+            <button (click)="finalizeAddSingleUser()" [disabled]="addUserConnectorIds.size === 0"
+              class="inline-flex items-center gap-2 px-5 py-2 text-sm font-medium text-white rounded-lg motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+              [class]="addUserConnectorIds.size > 0 ? 'bg-blue-500 hover:bg-blue-600' : 'bg-blue-200 cursor-not-allowed'">
+              <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/>
+              </svg>
+              Add &amp; Assign
+            </button>
+          </div>
+        </div>
+      }
+
+    </div>
+  </div>
+}
+
+<!-- ── ADD USER BULK UPLOAD MODAL ── -->
+@if (showAddUserBulkModal) {
+  <div class="fixed inset-0 z-[60] flex items-center justify-center bg-black/40">
+    <div role="dialog" aria-modal="true" aria-labelledby="bulk-upload-modal-title"
+      class="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 flex flex-col dark:bg-gray-800">
+
+      <!-- Header -->
+      <div class="flex items-start justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div class="flex items-start gap-3">
+          <div class="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center shrink-0 dark:bg-blue-900/40">
+            <svg aria-hidden="true" class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+            </svg>
+          </div>
+          <div>
+            <h2 id="bulk-upload-modal-title" class="text-base font-semibold text-gray-900 dark:text-gray-100">Bulk Upload Users</h2>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Upload multiple users from a CSV file. An enrollment token will be generated for each user.</p>
+          </div>
+        </div>
+        <button (click)="closeAddUserBulkModal()" aria-label="Close dialog" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded motion-safe:transition-colors shrink-0 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
+          <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Step indicator -->
+      <div role="status" [attr.aria-label]="'Step ' + (bulkUploadStep === 'upload' ? '1' : bulkUploadStep === 'preview' ? '2' : '3') + ' of 3'" class="flex items-center gap-2 px-6 pt-4 pb-0">
+        <div class="flex items-center gap-1.5">
+          <div [class]="bulkUploadStep === 'upload' ? 'w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-semibold' : 'w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-semibold'">1</div>
+          <span [class]="bulkUploadStep === 'upload' ? 'text-xs font-medium text-gray-900 dark:text-gray-100' : 'text-xs text-gray-400 dark:text-gray-500'">Upload File</span>
+        </div>
+        <div class="flex-1 h-px bg-gray-200 dark:bg-gray-700 mx-1"></div>
+        <div class="flex items-center gap-1.5">
+          <div [class]="bulkUploadStep === 'preview' ? 'w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-semibold' : 'w-5 h-5 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center text-xs font-semibold dark:bg-gray-700 dark:text-gray-500'">2</div>
+          <span [class]="bulkUploadStep === 'preview' ? 'text-xs font-medium text-gray-900 dark:text-gray-100' : 'text-xs text-gray-400 dark:text-gray-500'">Review</span>
+        </div>
+        <div class="flex-1 h-px bg-gray-200 dark:bg-gray-700 mx-1"></div>
+        <div class="flex items-center gap-1.5">
+          <div [class]="bulkUploadStep === 'connectors' ? 'w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-semibold' : 'w-5 h-5 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center text-xs font-semibold dark:bg-gray-700 dark:text-gray-500'">3</div>
+          <span [class]="bulkUploadStep === 'connectors' ? 'text-xs font-medium text-gray-900 dark:text-gray-100' : 'text-xs text-gray-400 dark:text-gray-500'">Assign Connector <span class="text-gray-400 dark:text-gray-500 font-normal">(optional)</span></span>
+        </div>
+      </div>
+
+      <!-- Step 1: Upload -->
+      @if (bulkUploadStep === 'upload') {
+        <div class="px-6 py-5 flex flex-col gap-4">
+          <label [class]="bulkUploadParsing
+              ? 'flex flex-col items-center justify-center gap-3 border-2 border-dashed border-blue-300 bg-blue-50/40 rounded-xl py-10 px-6 cursor-wait'
+              : 'flex flex-col items-center justify-center gap-3 border-2 border-dashed border-gray-200 rounded-xl py-10 px-6 cursor-pointer hover:border-blue-400 hover:bg-blue-50/40 motion-safe:transition-colors group dark:border-gray-600 dark:hover:border-blue-500'">
+            <input type="file" accept=".csv" class="hidden" [disabled]="bulkUploadParsing" (change)="onBulkFileSelected($event)">
+            @if (bulkUploadParsing) {
+              <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center dark:bg-blue-900/40">
+                <svg aria-hidden="true" class="w-6 h-6 text-blue-500 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"/>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+                </svg>
+              </div>
+              <div class="text-center">
+                <p class="text-sm font-medium text-blue-700 dark:text-blue-300">Reading file…</p>
+                <p class="text-xs text-blue-500 dark:text-blue-400 mt-0.5 max-w-xs truncate">{{ bulkUploadFileName }}</p>
+              </div>
+            } @else {
+              <div class="w-12 h-12 bg-gray-100 group-hover:bg-blue-100 rounded-xl flex items-center justify-center motion-safe:transition-colors dark:bg-gray-700 dark:group-hover:bg-blue-900/40">
+                <svg aria-hidden="true" class="w-6 h-6 text-gray-400 group-hover:text-blue-500 motion-safe:transition-colors dark:text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+                </svg>
+              </div>
+              <div class="text-center">
+                <p class="text-sm font-medium text-gray-700 group-hover:text-blue-700 motion-safe:transition-colors dark:text-gray-200">Click to upload a CSV file</p>
+                <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">or drag and drop</p>
+              </div>
+              <span class="text-xs text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-2.5 py-1 rounded-full">.csv</span>
+            }
+          </label>
+          @if (bulkUploadError) {
+            <div role="alert" class="flex items-start gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2.5 dark:bg-red-900/30 dark:border-red-700">
+              <svg aria-hidden="true" class="w-4 h-4 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+              </svg>
+              <p class="text-xs text-red-700 dark:text-red-300">{{ bulkUploadError }}</p>
+            </div>
+          }
+          <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 dark:bg-gray-900 dark:border-gray-700">
+            <p class="text-xs font-medium text-gray-600 dark:text-gray-300 mb-2">Expected CSV format</p>
+            <div class="font-mono text-xs text-gray-500 dark:text-gray-400 bg-white border border-gray-100 rounded px-3 py-2 space-y-0.5 dark:bg-gray-800 dark:border-gray-700">
+              <p class="text-gray-400 dark:text-gray-500">label,email</p>
+              <p>John Smith's Mobile,jsmith&#64;corp.com</p>
+              <p>Sarah Lee's Laptop,slee&#64;corp.com</p>
+            </div>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">The <span class="font-medium text-gray-600 dark:text-gray-300">label and email</span> columns are required.</p>
+          </div>
+        </div>
+        <div class="flex justify-end px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+          <button (click)="closeAddUserBulkModal()" [disabled]="bulkUploadParsing"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed dark:text-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:hover:bg-gray-700">
+            Cancel
+          </button>
+        </div>
+      }
+
+      <!-- Step 2: Preview -->
+      @if (bulkUploadStep === 'preview') {
+        <div class="px-6 py-5 flex flex-col gap-4">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center shrink-0 dark:bg-green-900/30">
+              <svg aria-hidden="true" class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ bulkUploadPreviewRows.length }} user{{ bulkUploadPreviewRows.length === 1 ? '' : 's' }} parsed</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">{{ bulkUploadFileName }}</p>
+            </div>
+          </div>
+          <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden max-h-60 overflow-y-auto">
+            <table class="w-full text-xs">
+              <thead class="bg-gray-50 border-b border-gray-200 sticky top-0 dark:bg-gray-700 dark:border-gray-700">
+                <tr>
+                  <th class="text-left px-3 py-2 font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">#</th>
+                  <th class="text-left px-3 py-2 font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Label</th>
+                  <th class="text-left px-3 py-2 font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Email</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                @for (row of bulkUploadPreviewRows; track $index) {
+                  <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <td class="px-3 py-2 text-gray-400 dark:text-gray-500">{{ $index + 1 }}</td>
+                    <td class="px-3 py-2 font-medium text-gray-800 dark:text-gray-100">{{ row.label }}</td>
+                    <td class="px-3 py-2 text-gray-500 dark:text-gray-400">{{ row.email || '—' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          <p class="text-xs text-gray-500 dark:text-gray-400">All users will be added with <span class="font-medium text-gray-700 dark:text-gray-200">Pending</span> enrollment status and an activation token will be generated for each.</p>
+        </div>
+        <div class="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+          <button (click)="bulkUploadStep = 'upload'"
+            class="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
+            <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>
+            </svg>
+            Back
+          </button>
+          <div class="flex items-center gap-3">
+            <button (click)="closeAddUserBulkModal()"
+              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 dark:text-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:hover:bg-gray-700">
+              Cancel
+            </button>
+            <button (click)="advanceBulkToConnectors()"
+              class="inline-flex items-center gap-1.5 px-5 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-lg motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
+              Next
+              <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- Step 3: Connector selection -->
+      @if (bulkUploadStep === 'connectors') {
+        <div class="flex flex-1 min-h-0 overflow-hidden">
+          <!-- Left: connector list -->
+          <div class="w-[55%] border-r border-gray-200 dark:border-gray-700 overflow-y-auto max-h-80">
+            <p class="px-4 pt-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Connectors</p>
+            @for (connector of connectors; track connector.id) {
+              <label class="flex items-start gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 motion-safe:transition-colors"
+                [class.bg-blue-50]="addUserConnectorIds.has(connector.id)">
+                <input type="checkbox" [checked]="addUserConnectorIds.has(connector.id)" (change)="toggleAddUserConnector(connector.id)"
+                  class="mt-1 w-3.5 h-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0 cursor-pointer dark:border-gray-600"/>
+                <span class="mt-1.5 w-2 h-2 rounded-full shrink-0"
+                  [class.bg-green-500]="connector.status === 'Online'"
+                  [class.bg-amber-400]="connector.status === 'Degraded'"
+                  [class.bg-gray-300]="connector.status === 'Offline'">
+                </span>
+                <div class="flex-1 min-w-0">
+                  <span class="text-sm font-medium truncate block"
+                    [class.text-blue-700]="addUserConnectorIds.has(connector.id)"
+                    [class.text-gray-800]="!addUserConnectorIds.has(connector.id)">{{ connector.name }}</span>
+                  <div class="flex items-center gap-1.5 mt-0.5">
+                    <span class="text-xs text-gray-400 dark:text-gray-500 capitalize">{{ connector.type }}</span>
+                    <span class="text-gray-300 dark:text-gray-600">·</span>
+                    <span class="text-xs text-gray-400 dark:text-gray-500">{{ connector.location }}</span>
+                  </div>
+                </div>
+              </label>
+            }
+          </div>
+          <!-- Right: apps for selected connectors -->
+          <div class="w-[45%] overflow-y-auto max-h-80">
+            @if (addUserSelectedConnectors.length === 0) {
+              <div class="flex flex-col items-center justify-center h-full gap-2 text-center px-6 py-10">
+                <svg aria-hidden="true" class="w-8 h-8 text-gray-200 dark:text-gray-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/>
+                </svg>
+                <p class="text-xs text-gray-400 dark:text-gray-500">Select a connector to see its available applications.</p>
+              </div>
+            } @else {
+              <p class="px-4 pt-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Available Applications</p>
+              @for (connector of addUserSelectedConnectors; track connector.id) {
+                <div class="px-4 pb-3" [class.pt-3]="!$first" [class.border-t]="!$first" [class.border-gray-100]="!$first">
+                  <p class="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1.5">{{ connector.name }}</p>
+                  @for (app of connector.hostedApps; track app) {
+                    <div class="flex items-center gap-2 py-1">
+                      <svg aria-hidden="true" class="w-3.5 h-3.5 text-gray-300 dark:text-gray-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+                      </svg>
+                      <span class="text-sm text-gray-700 dark:text-gray-200">{{ appLabel(app) }}</span>
+                    </div>
+                  }
+                </div>
+              }
+            }
+          </div>
+        </div>
+        <div class="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-gray-700 shrink-0">
+          <button (click)="bulkUploadStep = 'preview'"
+            class="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
+            <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>
+            </svg>
+            Back
+          </button>
+          <div class="flex items-center gap-3">
+            <button (click)="skipAndFinalizeBulkUpload()"
+              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 dark:text-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:hover:bg-gray-700">
+              Skip
+            </button>
+            <button (click)="finalizeBulkUpload()" [disabled]="addUserConnectorIds.size === 0"
+              class="inline-flex items-center gap-2 px-5 py-2 text-sm font-medium text-white rounded-lg motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+              [class]="addUserConnectorIds.size > 0 ? 'bg-blue-500 hover:bg-blue-600' : 'bg-blue-200 cursor-not-allowed'">
+              <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/>
+              </svg>
+              Upload &amp; Assign
+            </button>
+          </div>
+        </div>
+      }
+
+    </div>
+  </div>
+}
+
 <ng-template #sortIcon let-col="col">
   @if (sortCol === col) {
     @if (sortDir === 'asc') {
-      <svg aria-hidden="true" class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+      <svg aria-hidden="true" class="w-3 h-3 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"/>
       </svg>
     } @else {
-      <svg aria-hidden="true" class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+      <svg aria-hidden="true" class="w-3 h-3 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
       </svg>
     }
   } @else {
-    <svg aria-hidden="true" class="w-3 h-3 text-gray-300 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+    <svg aria-hidden="true" class="w-3 h-3 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"/>
     </svg>
   }

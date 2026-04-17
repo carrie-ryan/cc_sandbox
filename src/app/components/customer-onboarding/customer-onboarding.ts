@@ -30,10 +30,21 @@ export class CustomerOnboardingComponent {
   templates = ['No Template', 'Standard Device', 'Secure Gateway'];
 
   locations: WizardLocation[] = [
-    { id: 'cloc-1', name: 'Riverside Main Clinic',  address: '789 Medical Plaza',   addressSub: 'Portland, OR 97201',  licensesAllocated: 20, connectors: [{ name: 'Chicago Gateway 1', type: 'Gateway', apps: ['Patient Records Portal', 'Scheduling System', 'Imaging Viewer'] }, { name: 'Chicago Gateway 2', type: 'Gateway', apps: ['Lab Results Portal', 'Pharmacy System'] }, { name: 'Chicago Device 1', type: 'Device', apps: ['Remote Desktop', 'File Share'] }] },
-    { id: 'cloc-2', name: 'Riverside Urgent Care',  address: '456 Healthcare Way',  addressSub: 'Beaverton, OR 97005', licensesAllocated: 15, connectors: [{ name: 'Austin Host 3', type: 'Device', apps: ['Patient Records Portal', 'Telehealth Platform'] }, { name: 'New York Clientless 1', type: 'Clientless', apps: ['Web Portal', 'Patient Records Portal', 'Scheduling System'] }] },
-    { id: 'cloc-3', name: 'Riverside Admin Office', address: '123 Business Center', addressSub: 'Portland, OR 97201',  licensesAllocated: 5,  connectors: [{ name: 'London Gateway 1', type: 'Gateway', apps: ['Patient Records Portal', 'Imaging Viewer'] }, { name: 'London Device 1', type: 'Device', apps: ['Remote Desktop'] }] },
+    { id: 'cloc-1', name: 'Riverside Main Clinic',  address: '789 Medical Plaza',   addressSub: 'Portland, OR 97201',  licensesAllocated: 20, connectors: [{ name: 'Chicago Gateway 1', type: 'Gateway', apps: ['HTTPS'] }, { name: 'Chicago Gateway 2', type: 'Gateway', apps: ['HTTPS', 'SSH'] }, { name: 'Chicago Device 1', type: 'Device', apps: ['RDP'] }] },
+    { id: 'cloc-2', name: 'Riverside Urgent Care',  address: '456 Healthcare Way',  addressSub: 'Beaverton, OR 97005', licensesAllocated: 15, connectors: [{ name: 'Austin Host 3', type: 'Device', apps: ['RDP', 'SSH'] }, { name: 'New York Clientless 1', type: 'Clientless', apps: ['HTTPS'] }] },
+    { id: 'cloc-3', name: 'Riverside Admin Office', address: '123 Business Center', addressSub: 'Portland, OR 97201',  licensesAllocated: 5,  connectors: [{ name: 'London Gateway 1', type: 'Gateway', apps: ['HTTPS'] }, { name: 'London Device 1', type: 'Device', apps: ['RDP'] }] },
   ];
+
+  readonly appFriendlyNames: Record<string, string> = {
+    'RDP':   'Remote Desktop',
+    'HTTPS': 'File Share',
+    'SSH':   'Secure Shell',
+  };
+
+  readonly appLabel = (tech: string): string => {
+    const friendly = this.appFriendlyNames[tech];
+    return friendly ? `${tech} / ${friendly}` : tech;
+  };
 
   connectorTypeColor(type: string): string {
     const map: { [key: string]: string } = {
@@ -47,55 +58,15 @@ export class CustomerOnboardingComponent {
 
   constructor(private router: Router, private onboardingService: OnboardingService) {}
 
+  get totalConnectorsAdded(): number {
+    return this.locations.reduce((sum, loc) => sum + loc.connectors.length, 0);
+  }
+
   get activeLocation(): WizardLocation | null {
     return this.locations.find(l => l.id === this.activeLocationId) ?? null;
   }
 
-  get totalConnectorsAdded(): number {
-    return this.locations.reduce((sum, l) => sum + l.connectors.length, 0);
-  }
-
   goToStep2(): void { this.currentStep = 2; }
-
-  private baseConnectorCounts: { [id: string]: number } = {};
-
-  goToStep3(): void {
-    this.onboardingService.setupReviewed.set(true);
-    this.baseConnectorCounts = Object.fromEntries(this.locations.map(l => [l.id, l.connectors.length]));
-    this.currentStep = 3;
-  }
-
-  duplicatesAdded(loc: WizardLocation): number {
-    return loc.connectors.length - (this.baseConnectorCounts[loc.id] ?? 0);
-  }
-
-  editingWizardKey: string | null = null;
-  editingWizardName = '';
-
-  duplicateWizardConnector(loc: WizardLocation, conn: { name: string; type: string; apps: string[]; isDuplicate?: boolean }): void {
-    const idx = loc.connectors.indexOf(conn);
-    loc.connectors.splice(idx + 1, 0, { name: conn.name + ' (Copy)', type: conn.type, apps: [...conn.apps], isDuplicate: true });
-  }
-
-  startRenameWizardConnector(key: string, name: string): void {
-    this.editingWizardKey = key;
-    this.editingWizardName = name;
-  }
-
-  commitRenameWizardConnector(conn: { name: string; type: string; apps: string[]; isDuplicate?: boolean }): void {
-    const trimmed = this.editingWizardName.trim();
-    if (trimmed) conn.name = trimmed;
-    this.editingWizardKey = null;
-  }
-
-  cancelRenameWizardConnector(): void {
-    this.editingWizardKey = null;
-  }
-
-  deleteWizardDuplicate(loc: WizardLocation, conn: { name: string; type: string; apps: string[]; isDuplicate?: boolean }): void {
-    const idx = loc.connectors.indexOf(conn);
-    if (idx !== -1) loc.connectors.splice(idx, 1);
-  }
 
   openAddModal(locationId: string): void {
     this.activeLocationId = locationId;
@@ -120,7 +91,7 @@ export class CustomerOnboardingComponent {
   }
 
   finish(): void {
-    if (this.totalConnectorsAdded > 0) this.onboardingService.connectorsAdded.set(true);
+    this.onboardingService.setupReviewed.set(true);
     this.router.navigate(['/customer-dashboard']);
   }
 

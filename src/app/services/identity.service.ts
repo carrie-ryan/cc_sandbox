@@ -38,12 +38,26 @@ export class IdentityService {
         { id: 'Chicago-GW-02',  name: 'Chicago Gateway 2', apps: ['HTTPS'], status: 'Pending',       activated: '--'           },
       ],
     },
-    { id: 'de-2', label: "Sarah Lee's Laptop",    email: 'slee@corp.com',    token: 'b2c3d4e5-f6a7-8901-bcde-f12345678901', connection: 'Offline', enrollmentStatus: 'Pending',       activated: '--'           },
-    { id: 'de-3', label: "Marcus Webb's Desktop", email: 'mwebb@corp.com',   token: 'c3d4e5f6-a7b8-9012-cdef-123456789012', connection: 'Offline', enrollmentStatus: 'Expired Token', activated: 'Dec 10, 2025' },
+    {
+      id: 'de-2', label: "Sarah Lee's Laptop", email: 'slee@corp.com',
+      token: 'b2c3d4e5-f6a7-8901-bcde-f12345678901', connection: 'Offline',
+      enrollmentStatus: 'Pending', activated: '--',
+      connectorAssignments: [
+        { id: 'Chicago-GW-02', name: 'Chicago Gateway 2', apps: ['HTTPS'], status: 'Pending', activated: '--' },
+      ],
+    },
+    {
+      id: 'de-3', label: "Marcus Webb's Desktop", email: 'mwebb@corp.com',
+      token: 'c3d4e5f6-a7b8-9012-cdef-123456789012', connection: 'Offline',
+      enrollmentStatus: 'Expired Token', activated: 'Dec 10, 2025',
+      connectorAssignments: [
+        { id: 'Chicago-Dev-01', name: 'Chicago Device 1', apps: ['RDP', 'SSH'], status: 'Expired Token', activated: 'Dec 10, 2025' },
+      ],
+    },
   ];
 
-  add(label: string, email: string): void {
-    this.entries.push({
+  add(label: string, email: string, connectorAssignment?: ConnectorAssignment): DeployedEntry {
+    const entry: DeployedEntry = {
       id: 'de-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
       label,
       email,
@@ -51,13 +65,29 @@ export class IdentityService {
       connection: 'Offline',
       enrollmentStatus: 'Pending',
       activated: '--',
-    });
+      connectorAssignments: connectorAssignment ? [connectorAssignment] : undefined,
+    };
+    this.entries.push(entry);
+    return entry;
   }
 
-  addBulk(rows: Array<{ label: string; email: string }>): void {
-    for (const row of rows) {
-      this.add(row.label, row.email);
-    }
+  addBulk(rows: Array<{ label: string; email: string }>, connectorAssignment?: ConnectorAssignment): DeployedEntry[] {
+    return rows.map(row => this.add(row.label, row.email, connectorAssignment));
+  }
+
+  reissueConnectorToken(entryId: string, assignmentId: string): void {
+    const entry = this.entries.find(e => e.id === entryId);
+    if (!entry) return;
+    const assignment = entry.connectorAssignments?.find(a => a.id === assignmentId);
+    if (!assignment) return;
+    assignment.status = 'Pending';
+    entry.enrollmentStatus = this.deriveStatus(entry.connectorAssignments!);
+  }
+
+  removeConnector(entryId: string, assignmentId: string): void {
+    const entry = this.entries.find(e => e.id === entryId);
+    if (!entry) return;
+    entry.connectorAssignments = entry.connectorAssignments?.filter(a => a.id !== assignmentId);
   }
 
   assignToConnectors(ids: string[], newAssignments: ConnectorAssignment[]): void {
@@ -69,8 +99,10 @@ export class IdentityService {
         .filter(a => !existingIds.has(a.id))
         .map(a => ({ ...a, status: 'Pending' as const }));
       entry.connectorAssignments = [...existing, ...toAdd];
-      entry.enrollmentStatus = this.deriveStatus(entry.connectorAssignments);
-      entry.token = this.generateToken();
+      if (entry.enrollmentStatus !== 'Expired Token') {
+        entry.enrollmentStatus = this.deriveStatus(entry.connectorAssignments);
+        entry.token = this.generateToken();
+      }
     }
   }
 
@@ -83,6 +115,9 @@ export class IdentityService {
   reissueExpiredTokens(): void {
     for (const entry of this.entries) {
       if (entry.enrollmentStatus === 'Expired Token') {
+        entry.connectorAssignments?.forEach(a => {
+          if (a.status === 'Expired Token') a.status = 'Pending';
+        });
         entry.enrollmentStatus = 'Pending';
         entry.token = this.generateToken();
       }

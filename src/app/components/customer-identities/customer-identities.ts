@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, ElementRef, inject } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LogEntry, generateLogs, formatLogTimestamp, filterLogs } from '../../utils/log.utils';
@@ -12,8 +12,11 @@ import { CustomerService, CustomerConnector } from '../../services/customer.serv
   templateUrl: './customer-identities.html',
 })
 export class CustomerIdentitiesComponent {
-  private readonly identityService = inject(IdentityService);
+  readonly identityService = inject(IdentityService);
   private readonly customerService = inject(CustomerService);
+  private readonly el = inject(ElementRef);
+  private previouslyFocusedEl: HTMLElement | null = null;
+  private addUserToastTimer: ReturnType<typeof setTimeout> | null = null;
   menuOpenId: string | null = null;
   subMenuOpenId: string | null = null;
 
@@ -56,6 +59,8 @@ export class CustomerIdentitiesComponent {
 
   clearSelection(): void { this.selectedIds = new Set(); }
 
+  collapseAll(): void { this.expandedIds = new Set(); }
+
   // Expandable rows
   expandedIds = new Set<string>();
 
@@ -89,6 +94,220 @@ export class CustomerIdentitiesComponent {
     this.showAssignModal = false;
   }
 
+  openAssignForSingle(id: string): void {
+    this.selectedIds = new Set([id]);
+    this.menuOpenId = null;
+    this.openAssignModal();
+  }
+
+  get isAnyModalOpen(): boolean {
+    return this.showAssignModal || this.showLogsView ||
+      this.showAddUserChoiceModal || this.showAddUserDeployModal || this.showAddUserBulkModal;
+  }
+
+  private saveFocus(): void {
+    this.previouslyFocusedEl = document.activeElement as HTMLElement;
+  }
+
+  private restoreFocus(): void {
+    const target = this.previouslyFocusedEl;
+    this.previouslyFocusedEl = null;
+    setTimeout(() => target?.focus());
+  }
+
+  private focusFirstInDialog(): void {
+    setTimeout(() => {
+      const dialog = this.el.nativeElement.parentElement?.querySelector('[role="dialog"]') as HTMLElement | null;
+      if (!dialog) return;
+      const first = dialog.querySelector(
+        'button:not([disabled]), input:not([type="hidden"]):not([disabled]), [tabindex]:not([tabindex="-1"])'
+      ) as HTMLElement | null;
+      first?.focus();
+    }, 50);
+  }
+
+  // Add User — choice modal
+  showAddUserChoiceModal = false;
+
+  openAddUserModal(): void {
+    this.saveFocus();
+    this.showAddUserChoiceModal = true;
+    this.focusFirstInDialog();
+  }
+
+  closeAddUserChoiceModal(): void {
+    this.showAddUserChoiceModal = false;
+    this.restoreFocus();
+  }
+
+  // Shared connector selection for add user flows
+  addUserConnectorIds = new Set<string>();
+
+  get addUserSelectedConnectors(): typeof this.connectors {
+    return this.connectors.filter(c => this.addUserConnectorIds.has(c.id));
+  }
+
+  toggleAddUserConnector(id: string): void {
+    const next = new Set(this.addUserConnectorIds);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    this.addUserConnectorIds = next;
+  }
+
+  // Add User — single deploy modal
+  showAddUserDeployModal = false;
+  addUserStep: 'form' | 'connectors' = 'form';
+  addUserDeployLabel = '';
+  addUserDeployEmail = '';
+
+  openAddUserDeployModal(): void {
+    this.showAddUserChoiceModal = false;
+    this.addUserDeployLabel = '';
+    this.addUserDeployEmail = '';
+    this.addUserStep = 'form';
+    this.addUserConnectorIds = new Set();
+    this.showAddUserDeployModal = true;
+    this.focusFirstInDialog();
+  }
+
+  closeAddUserDeployModal(): void {
+    this.showAddUserDeployModal = false;
+    this.restoreFocus();
+  }
+
+  advanceSingleToConnectors(): void {
+    if (!this.addUserDeployLabel.trim() || !this.addUserDeployEmail.trim()) return;
+    this.addUserStep = 'connectors';
+    this.focusFirstInDialog();
+  }
+
+  skipAndFinalizeAddSingleUser(): void {
+    this.addUserConnectorIds = new Set();
+    this.finalizeAddSingleUser();
+  }
+
+  finalizeAddSingleUser(): void {
+    const entry = this.identityService.add(this.addUserDeployLabel.trim(), this.addUserDeployEmail.trim());
+    if (this.addUserConnectorIds.size > 0) {
+      const assignments = this.addUserSelectedConnectors.map(c => ({
+        id: c.id, name: c.name, apps: c.hostedApps, status: 'Pending' as const,
+      }));
+      this.identityService.assignToConnectors([entry.id], assignments);
+    }
+    this.showAddUserDeployModal = false;
+    this.restoreFocus();
+    this.triggerAddUserToast(1);
+  }
+
+  // Add User — bulk upload modal
+  showAddUserBulkModal = false;
+  bulkUploadStep: 'upload' | 'preview' | 'connectors' = 'upload';
+  bulkUploadFileName = '';
+  bulkUploadPreviewRows: Array<{ label: string; email: string }> = [];
+  bulkUploadError = '';
+  bulkUploadParsing = false;
+
+  openAddUserBulkModal(): void {
+    this.showAddUserChoiceModal = false;
+    this.bulkUploadStep = 'upload';
+    this.bulkUploadFileName = '';
+    this.bulkUploadPreviewRows = [];
+    this.bulkUploadError = '';
+    this.bulkUploadParsing = false;
+    this.addUserConnectorIds = new Set();
+    this.showAddUserBulkModal = true;
+    this.focusFirstInDialog();
+  }
+
+  closeAddUserBulkModal(): void {
+    this.showAddUserBulkModal = false;
+    this.restoreFocus();
+  }
+
+  onBulkFileSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    this.bulkUploadFileName = file.name;
+    this.bulkUploadError = '';
+    this.bulkUploadParsing = true;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      this.parseBulkCsv((e.target as FileReader).result as string);
+      this.bulkUploadParsing = false;
+    };
+    reader.onerror = () => {
+      this.bulkUploadError = 'Failed to read the file. Please try again.';
+      this.bulkUploadParsing = false;
+    };
+    reader.readAsText(file);
+  }
+
+  private parseBulkCsv(text: string): void {
+    const lines = text.split(/\r?\n/).filter(l => l.trim());
+    if (lines.length < 2) {
+      this.bulkUploadError = 'File must contain a header row and at least one data row.';
+      return;
+    }
+    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+    const labelIdx = headers.indexOf('label');
+    const emailIdx = headers.indexOf('email');
+    if (labelIdx === -1) {
+      this.bulkUploadError = 'CSV must include a "label" column.';
+      return;
+    }
+    const rows: Array<{ label: string; email: string }> = [];
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].split(',').map(c => c.trim());
+      const label = cols[labelIdx] ?? '';
+      const email = emailIdx !== -1 ? (cols[emailIdx] ?? '') : '';
+      if (label) rows.push({ label, email });
+    }
+    if (rows.length === 0) {
+      this.bulkUploadError = 'No valid rows found in the file.';
+      return;
+    }
+    this.bulkUploadPreviewRows = rows;
+    this.bulkUploadStep = 'preview';
+  }
+
+  advanceBulkToConnectors(): void {
+    this.bulkUploadStep = 'connectors';
+    this.focusFirstInDialog();
+  }
+
+  skipAndFinalizeBulkUpload(): void {
+    this.addUserConnectorIds = new Set();
+    this.finalizeBulkUpload();
+  }
+
+  finalizeBulkUpload(): void {
+    const count = this.bulkUploadPreviewRows.length;
+    const entries = this.identityService.addBulk(this.bulkUploadPreviewRows);
+    if (this.addUserConnectorIds.size > 0) {
+      const assignments = this.addUserSelectedConnectors.map(c => ({
+        id: c.id, name: c.name, apps: c.hostedApps, status: 'Pending' as const,
+      }));
+      this.identityService.assignToConnectors(entries.map(e => e.id), assignments);
+    }
+    this.showAddUserBulkModal = false;
+    this.restoreFocus();
+    this.triggerAddUserToast(count);
+  }
+
+  // Add User — success toast
+  showAddUserSuccessToast = false;
+  addUserSuccessCount = 0;
+
+  private triggerAddUserToast(count: number): void {
+    if (this.addUserToastTimer) clearTimeout(this.addUserToastTimer);
+    this.addUserSuccessCount = count;
+    this.showAddUserSuccessToast = true;
+    this.addUserToastTimer = setTimeout(() => this.dismissAddUserToast(), 6000);
+  }
+
+  dismissAddUserToast(): void {
+    this.showAddUserSuccessToast = false;
+  }
+
   toggleAssignConnector(id: string): void {
     const next = new Set(this.assignConnectorIds);
     if (next.has(id)) next.delete(id); else next.add(id);
@@ -108,6 +327,16 @@ export class CustomerIdentitiesComponent {
     this.selectedIds = new Set();
     this.assignComplete = true;
     setTimeout(() => this.assignComplete = false, 3000);
+  }
+
+  // Per-connector reissue confirmation
+  reissuedKey: string | null = null;
+
+  reissueConnectorToken(entryId: string, assignmentId: string): void {
+    this.identityService.reissueConnectorToken(entryId, assignmentId);
+    const key = entryId + '::' + assignmentId;
+    this.reissuedKey = key;
+    setTimeout(() => { if (this.reissuedKey === key) this.reissuedKey = null; }, 3000);
   }
 
   // Logs view
@@ -195,7 +424,12 @@ export class CustomerIdentitiesComponent {
   get filteredEntries(): DeployedEntry[] {
     let entries = this.entries.filter(e => {
       if (this.connectionFilter !== 'all' && e.connection !== this.connectionFilter) return false;
-      if (this.statusFilter !== 'all' && e.enrollmentStatus !== this.statusFilter) return false;
+      if (this.statusFilter !== 'all') {
+        const matches = e.connectorAssignments?.length
+          ? e.connectorAssignments.some(a => a.status === this.statusFilter)
+          : e.enrollmentStatus === this.statusFilter;
+        if (!matches) return false;
+      }
       if (this.search) {
         const q = this.search.toLowerCase();
         return e.label.toLowerCase().includes(q) || e.email.toLowerCase().includes(q) || e.token.toLowerCase().includes(q);

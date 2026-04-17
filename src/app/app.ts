@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { HeaderComponent } from './components/header/header';
 import { SidebarComponent } from './components/sidebar/sidebar';
+import { PersonaService } from './services/persona.service';
 
 @Component({
   selector: 'app-root',
@@ -14,7 +15,13 @@ export class App {
   showSidebar = true;
   showChrome = true;
 
+  private personaService = inject(PersonaService);
+
   constructor(private router: Router) {
+    effect(() => {
+      document.documentElement.classList.toggle('dark', this.personaService.darkMode());
+    });
+
     this.router.events.pipe(
       filter((e): e is NavigationEnd => e instanceof NavigationEnd)
     ).subscribe(e => {

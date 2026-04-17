@@ -1,6 +1,6 @@
-import { Component, ElementRef, inject } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Output, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { IdentityService } from '../../services/identity.service';
+import { ConnectorAssignment, IdentityService } from '../../services/identity.service';
 
 interface CustomerConnector {
   id: string;
@@ -30,9 +30,12 @@ interface CustomerLocation {
   templateUrl: './customer-locations.html',
 })
 export class CustomerLocationsComponent {
+  @Output() navigateToIdentities = new EventEmitter<void>();
+
   private readonly el = inject(ElementRef);
   private readonly identityService = inject(IdentityService);
   private previouslyFocusedEl: HTMLElement | null = null;
+  private toastTimer: ReturnType<typeof setTimeout> | null = null;
 
   get isAnyModalOpen(): boolean {
     return this.showDeployModal || this.showAddConnectorModal || this.showBulkUploadModal || this.showAssignChoiceModal;
@@ -61,6 +64,10 @@ export class CustomerLocationsComponent {
       first?.focus();
     }, 50);
   }
+
+  showAssignSuccessToast = false;
+  assignSuccessCount = 0;
+  assignSuccessConnectorName = '';
 
   showAddConnectorModal = false;
   showAssignChoiceModal = false;
@@ -126,9 +133,18 @@ export class CustomerLocationsComponent {
 
   confirmDeploy(): void {
     if (!this.deployLabel.trim() || !this.deployEmail.trim()) return;
-    this.identityService.add(this.deployLabel.trim(), this.deployEmail.trim());
+    const connectorName = this.assignConnector?.name ?? '';
+    const assignment: ConnectorAssignment | undefined = this.assignConnector ? {
+      id: this.assignConnector.id,
+      name: this.assignConnector.name,
+      apps: this.assignConnector.hostedAppNames,
+      status: 'Pending',
+      activated: '--',
+    } : undefined;
+    this.identityService.add(this.deployLabel.trim(), this.deployEmail.trim(), assignment);
     this.showDeployModal = false;
     this.restoreFocus();
+    this.showToast(1, connectorName);
   }
 
   openBulkUploadModal(): void {
@@ -195,9 +211,36 @@ export class CustomerLocationsComponent {
   }
 
   confirmBulkUpload(): void {
-    this.identityService.addBulk(this.bulkUploadPreviewRows);
+    const count = this.bulkUploadPreviewRows.length;
+    const connectorName = this.assignConnector?.name ?? '';
+    const assignment: ConnectorAssignment | undefined = this.assignConnector ? {
+      id: this.assignConnector.id,
+      name: this.assignConnector.name,
+      apps: this.assignConnector.hostedAppNames,
+      status: 'Pending',
+      activated: '--',
+    } : undefined;
+    this.identityService.addBulk(this.bulkUploadPreviewRows, assignment);
     this.showBulkUploadModal = false;
     this.restoreFocus();
+    this.showToast(count, connectorName);
+  }
+
+  private showToast(count: number, connectorName: string): void {
+    if (this.toastTimer) clearTimeout(this.toastTimer);
+    this.assignSuccessCount = count;
+    this.assignSuccessConnectorName = connectorName;
+    this.showAssignSuccessToast = true;
+    this.toastTimer = setTimeout(() => this.dismissToast(), 6000);
+  }
+
+  dismissToast(): void {
+    this.showAssignSuccessToast = false;
+  }
+
+  goToUsers(): void {
+    this.dismissToast();
+    this.navigateToIdentities.emit();
   }
   rowMenuOpenId: string | null = null;
   hostedAppsOpenId: string | null = null;
@@ -227,9 +270,9 @@ export class CustomerLocationsComponent {
       addressSub: 'Portland, OR 97201',
       licensesAllocated: 20,
       connectors: [
-        { id: 'c1', name: 'Chicago Gateway 1', type: 'Gateway',    template: '--', hostedApps: 3, hostedAppNames: ['Patient Records Portal', 'Scheduling System', 'Imaging Viewer'],   status: 'Online',   uptime: '--', lastConnected: '--', allocation: '0/25' },
-        { id: 'c2', name: 'Chicago Gateway 2', type: 'Gateway',    template: '--', hostedApps: 2, hostedAppNames: ['Lab Results Portal', 'Pharmacy System'],                           status: 'Online',   uptime: '--', lastConnected: '--', allocation: '0/10' },
-        { id: 'c3', name: 'Chicago Device 1',  type: 'Device',     template: '--', hostedApps: 2, hostedAppNames: ['Remote Desktop', 'File Share'],                                   status: 'Offline',  uptime: '--', lastConnected: '--', allocation: '0/30' },
+        { id: 'c1', name: 'Chicago Gateway 1', type: 'Gateway',    template: '--', hostedApps: 1, hostedAppNames: ['HTTPS'],        status: 'Online',   uptime: '--', lastConnected: '--', allocation: '0/25' },
+        { id: 'c2', name: 'Chicago Gateway 2', type: 'Gateway',    template: '--', hostedApps: 2, hostedAppNames: ['HTTPS', 'SSH'], status: 'Online',   uptime: '--', lastConnected: '--', allocation: '0/10' },
+        { id: 'c3', name: 'Chicago Device 1',  type: 'Device',     template: '--', hostedApps: 1, hostedAppNames: ['RDP'],          status: 'Offline',  uptime: '--', lastConnected: '--', allocation: '0/30' },
       ],
     },
     {
@@ -239,8 +282,8 @@ export class CustomerLocationsComponent {
       addressSub: 'Beaverton, OR 97005',
       licensesAllocated: 15,
       connectors: [
-        { id: 'c7', name: 'Austin Host 3',          type: 'Device',     template: '--', hostedApps: 2, hostedAppNames: ['Patient Records Portal', 'Telehealth Platform'],                 status: 'Degraded', uptime: '--', lastConnected: '--', allocation: '22/25' },
-        { id: 'c8', name: 'New York Clientless 1',  type: 'Clientless', template: '--', hostedApps: 3, hostedAppNames: ['Web Portal', 'Patient Records Portal', 'Scheduling System'], status: 'Online',   uptime: '--', lastConnected: '--', allocation: '9/10'  },
+        { id: 'c7', name: 'Austin Host 3',          type: 'Device',     template: '--', hostedApps: 2, hostedAppNames: ['RDP', 'SSH'], status: 'Degraded', uptime: '--', lastConnected: '--', allocation: '22/25' },
+        { id: 'c8', name: 'New York Clientless 1',  type: 'Clientless', template: '--', hostedApps: 1, hostedAppNames: ['HTTPS'],       status: 'Online',   uptime: '--', lastConnected: '--', allocation: '9/10'  },
       ],
     },
     {
@@ -250,8 +293,8 @@ export class CustomerLocationsComponent {
       addressSub: 'Portland, OR 97201',
       licensesAllocated: 5,
       connectors: [
-        { id: 'c12', name: 'London Gateway 1', type: 'Gateway', template: '--', hostedApps: 2, hostedAppNames: ['Patient Records Portal', 'Imaging Viewer'], status: 'Online',  uptime: '--', lastConnected: '--', allocation: '5/25' },
-        { id: 'c32', name: 'London Device 1',  type: 'Device',  template: '--', hostedApps: 1, hostedAppNames: ['Remote Desktop'],                        status: 'Offline', uptime: '--', lastConnected: '--', allocation: '0/10' },
+        { id: 'c12', name: 'London Gateway 1', type: 'Gateway', template: '--', hostedApps: 1, hostedAppNames: ['HTTPS'], status: 'Online',  uptime: '--', lastConnected: '--', allocation: '5/25' },
+        { id: 'c32', name: 'London Device 1',  type: 'Device',  template: '--', hostedApps: 1, hostedAppNames: ['RDP'],   status: 'Offline', uptime: '--', lastConnected: '--', allocation: '0/10' },
       ],
     },
   ];
@@ -301,6 +344,17 @@ export class CustomerLocationsComponent {
   get activeLocation(): CustomerLocation | null {
     return this.locations.find(l => l.id === this.activeLocationId) ?? null;
   }
+
+  readonly appFriendlyNames: Record<string, string> = {
+    'RDP':   'Remote Desktop',
+    'HTTPS': 'File Share',
+    'SSH':   'Secure Shell',
+  };
+
+  readonly appLabel = (tech: string): string => {
+    const friendly = this.appFriendlyNames[tech];
+    return friendly ? `${tech} / ${friendly}` : tech;
+  };
 
   connectorTypeColor(type: string): string {
     const map: { [key: string]: string } = {
