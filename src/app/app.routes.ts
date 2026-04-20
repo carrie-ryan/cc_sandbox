@@ -11,7 +11,8 @@ import { CustomerSetupProfileComponent } from './components/customer-setup-profi
 import { CustomerSetupInviteUsersComponent } from './components/customer-setup-invite-users/customer-setup-invite-users';
 import { ProviderDashboardComponent } from './components/provider-dashboard/provider-dashboard';
 import { CustomerDetailComponent } from './components/customer-detail/customer-detail';
-import { CustomerDashboardComponent } from './components/customer-dashboard/customer-dashboard';
+import { IanDashboardComponent } from './components/ian-dashboard/ian-dashboard';
+import { MayaDashboardComponent } from './components/maya-dashboard/maya-dashboard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -19,7 +20,8 @@ export const routes: Routes = [
   { path: 'maya-setup', component: MayaSetupComponent },
   { path: 'dashboard', component: ProviderDashboardComponent },
   { path: 'customers/:id', component: CustomerDetailComponent },
-  { path: 'customer-dashboard', component: CustomerDashboardComponent },
+  { path: 'ian-dashboard', component: IanDashboardComponent },
+  { path: 'maya-dashboard', component: MayaDashboardComponent },
   { path: 'provider-setup/overview', component: OverviewPageComponent },
   { path: 'provider-setup/connector-templates', component: ConnectorTemplatesComponent },
   { path: 'provider-setup/locations', component: LocationsComponent },

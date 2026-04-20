@@ -19,7 +19,7 @@ export class App {
 
   constructor(private router: Router) {
     effect(() => {
-      document.documentElement.classList.toggle('dark', this.personaService.darkMode());
+      document.documentElement.classList.toggle('dark', this.personaService.activeDarkMode());
     });
 
     this.router.events.pipe(

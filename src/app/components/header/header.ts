@@ -25,7 +25,7 @@ export class HeaderComponent {
   switchPersona(persona: 'ian' | 'maya') {
     this.personaService.setPersona(persona);
     this.userMenuOpen = false;
-    this.router.navigate([persona === 'maya' ? '/login' : '/customer-dashboard']);
+    this.router.navigate([persona === 'maya' ? '/login' : '/ian-dashboard']);
   }
 
   navigateToDashboard() {
@@ -40,7 +40,8 @@ export class HeaderComponent {
 
   navigateToCustomerDashboard() {
     this.appSwitcherOpen = false;
-    this.router.navigate(['/customer-dashboard']);
+    const route = this.personaService.activePersona() === 'maya' ? '/maya-dashboard' : '/ian-dashboard';
+    this.router.navigate([route]);
   }
 
   navigateToOnboarding() {
@@ -54,7 +55,7 @@ export class HeaderComponent {
   }
 
   get isCustomerDashboard(): boolean {
-    return this.router.url.startsWith('/customer-dashboard');
+    return this.router.url.startsWith('/ian-dashboard') || this.router.url.startsWith('/maya-dashboard');
   }
 
   get isProviderContext(): boolean {

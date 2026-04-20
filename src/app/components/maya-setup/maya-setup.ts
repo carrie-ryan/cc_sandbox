@@ -19,6 +19,6 @@ export class MayaSetupComponent {
   }
 
   goToDashboard() {
-    this.router.navigate(['/customer-dashboard']);
+    this.router.navigate(['/maya-dashboard']);
   }
 }

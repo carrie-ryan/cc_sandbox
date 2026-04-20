@@ -46,207 +46,14 @@ export interface TrafficFilter {
   ianAllows: boolean;
 }
 
-export interface MayaDevice {
-  id: string;
-  name: string;
-  type: 'laptop' | 'phone' | 'tablet';
-  os: string;
-  lastSeen: string;
-  status: 'active' | 'inactive' | 'pending';
-  token?: string;
-}
-
-export interface MayaApp {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  iconColor: string;
-  iconBg: string;
-  status: 'available' | 'active' | 'unavailable';
-}
-
-export interface MayaConnection {
-  status: 'connected' | 'degraded' | 'disconnected';
-  service: string;
-  via: string;
-  location: string;
-  latency: string;
-  throughput: string;
-  sessionStart: string;
-  sessionDuration: string;
-}
-
 @Component({
-  selector: 'app-customer-dashboard',
-  templateUrl: './customer-dashboard.html',
+  selector: 'app-ian-dashboard',
+  templateUrl: './ian-dashboard.html',
   imports: [FormsModule, NgTemplateOutlet, UpperCasePipe, RouterLink, CustomerLocationsComponent, CustomerIdentitiesComponent],
   host: { class: 'flex-1 min-h-0 overflow-hidden' },
 })
-export class CustomerDashboardComponent implements OnDestroy {
+export class IanDashboardComponent implements OnDestroy {
   customer: Customer;
-
-  // Maya's enrolled devices
-  mayaDevices: MayaDevice[] = [
-    { id: 'dev-001', name: 'Maya\'s MacBook Pro',  type: 'laptop', os: 'macOS Sequoia',   lastSeen: 'Just now',     status: 'active'   },
-    { id: 'dev-002', name: 'Maya\'s iPhone 15',    type: 'phone',  os: 'iOS 18',          lastSeen: '3 hours ago',  status: 'active'   },
-    { id: 'dev-003', name: 'Old Work Laptop',      type: 'laptop', os: 'Windows 10',      lastSeen: '47 days ago',  status: 'inactive' },
-  ];
-
-  showAddDevice = false;
-  removingDeviceId: string | null = null;
-
-  openAddDevice() {
-    this.showAddDevice = true;
-  }
-
-  downloadJwt() {
-    const blob = new Blob([''], { type: 'application/jwt' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'activation.jwt';
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  submitActivationToken() {
-    this.mayaDevices = [
-      ...this.mayaDevices,
-      {
-        id: 'dev-' + Date.now(),
-        name: 'New Device',
-        type: 'laptop',
-        os: 'Pending activation',
-        lastSeen: 'Just now',
-        status: 'pending',
-      },
-    ];
-    this.showAddDevice = false;
-  }
-
-  acceptDevice(id: string) {
-    const device = this.mayaDevices.find(d => d.id === id);
-    if (device) {
-      device.status = 'active';
-      device.os = device.type === 'phone' ? 'iOS 18'
-                : device.type === 'tablet' ? 'iPadOS 18'
-                : 'macOS Sequoia';
-    }
-  }
-
-  rejectDevice(id: string) {
-    this.mayaDevices = this.mayaDevices.filter(d => d.id !== id);
-  }
-
-  confirmRemoveDevice(id: string) { this.removingDeviceId = id; }
-  cancelRemoveDevice()             { this.removingDeviceId = null; }
-  removeDevice(id: string) {
-    this.mayaDevices = this.mayaDevices.filter(d => d.id !== id);
-    this.removingDeviceId = null;
-  }
-
-  // Maya's authorized apps
-  mayaApps: MayaApp[] = [
-    { id: 'app-001', name: 'Corporate Network', description: 'Secure tunnel to the company network',       category: 'Network',       iconColor: 'text-blue-600',   iconBg: 'bg-blue-50',   status: 'active'     },
-    { id: 'app-002', name: 'Internal Web Portal', description: 'Company intranet and shared resources',    category: 'Web App',       iconColor: 'text-violet-600', iconBg: 'bg-violet-50', status: 'available'  },
-    { id: 'app-003', name: 'HR Connect',          description: 'Benefits, time-off, and HR self-service',  category: 'Web App',       iconColor: 'text-pink-600',   iconBg: 'bg-pink-50',   status: 'available'  },
-    { id: 'app-004', name: 'Dev Tools',           description: 'Code repos, project tracking, and CI/CD',  category: 'Developer',     iconColor: 'text-teal-600',   iconBg: 'bg-teal-50',   status: 'available'  },
-    { id: 'app-005', name: 'Shared Drives',       description: 'Team file storage and document sharing',   category: 'Files',         iconColor: 'text-amber-600',  iconBg: 'bg-amber-50',  status: 'available'  },
-  ];
-
-  // Maya's personal connection state
-  mayaConnection: MayaConnection = {
-    status: 'connected',
-    service: 'Corporate Network',
-    via: 'Chicago Gateway 2',
-    location: 'Chicago HQ',
-    latency: '12 ms',
-    throughput: '2.4 MB/s',
-    sessionStart: '9:02 AM',
-    sessionDuration: '2h 34m',
-  };
-
-  // Maya diagnostics
-  mayaDiagState: 'idle' | 'running' | 'done' = 'idle';
-  mayaDiagSteps: { label: string; state: 'pending' | 'running' | 'done' | 'warn' | 'fail' }[] = [];
-  mayaDiagResult: { type: 'ok' | 'warn' | 'fail'; headline: string; body: string } | null = null;
-
-  runMayaDiagnostics() {
-    this.mayaDiagState = 'running';
-    this.mayaDiagResult = null;
-    this.mayaDiagSteps = [
-      { label: 'Resolving DNS',                  state: 'pending' },
-      { label: 'Testing latency to gateway',     state: 'pending' },
-      { label: 'Checking for packet loss',       state: 'pending' },
-      { label: 'Verifying gateway health',       state: 'pending' },
-      { label: 'Analyzing throughput',           state: 'pending' },
-    ];
-    let i = 0;
-    const tick = () => {
-      if (i >= this.mayaDiagSteps.length) {
-        this.mayaDiagState = 'done';
-        this.mayaDiagResult = this.buildDiagResult();
-        return;
-      }
-      this.mayaDiagSteps[i].state = 'running';
-      setTimeout(() => {
-        const s = this.mayaConnection.status;
-        const step = this.mayaDiagSteps[i];
-        if (s === 'connected')      { step.state = 'done'; }
-        else if (s === 'degraded')  { step.state = (i === 1 || i === 2) ? 'warn' : 'done'; }
-        else                        { step.state = (i >= 2) ? 'fail' : 'done'; }
-        i++;
-        tick();
-      }, 650);
-    };
-    tick();
-  }
-
-  private buildDiagResult(): { type: 'ok' | 'warn' | 'fail'; headline: string; body: string } {
-    const s = this.mayaConnection.status;
-    if (s === 'connected') {
-      return {
-        type: 'ok',
-        headline: 'Everything looks good',
-        body: `Latency is ${this.mayaConnection.latency} (excellent) and no packet loss was detected. ${this.mayaConnection.via} is responding normally. If a specific app still feels slow, the issue is likely on that app's server — not your connection.`,
-      };
-    }
-    if (s === 'degraded') {
-      return {
-        type: 'warn',
-        headline: 'Elevated latency on your gateway',
-        body: `We detected higher-than-normal latency and some packet loss on ${this.mayaConnection.via}. This is likely causing the slowness you're experiencing. Your IT team has been notified. Try closing and reopening the affected app — if it continues, reconnecting may help.`,
-      };
-    }
-    return {
-      type: 'fail',
-      headline: `Can't reach ${this.mayaConnection.via}`,
-      body: `The gateway your connection routes through appears to be offline or unreachable. This is preventing access to network resources. Please contact your IT administrator or try again in a few minutes.`,
-    };
-  }
-
-  // Maya notification preferences
-  mayaNotifMode: 'quiet' | 'focused' | 'standard' = 'focused';
-  mayaQuietHours = { enabled: true, from: '22:00', to: '08:00' };
-  mayaNotifChannels = { email: true, slack: false };
-  mayaNotifAlerts = {
-    connectionDropped: true,
-    connectionDegraded: true,
-    deviceEnrolled: true,
-    securityAlert: true,
-    sessionExpiring: false,
-    maintenance: false,
-  };
-  mayaNotifSaved = false;
-
-  saveMayaNotifPrefs() {
-    this.mayaNotifSaved = true;
-    setTimeout(() => {
-      this.mayaNotifSaved = false;
-      this.personaService.showSettings.set(false);
-    }, 800);
-  }
 
   killSwitchActive = false;
   killSwitchConfirming = false;
@@ -254,14 +61,12 @@ export class CustomerDashboardComponent implements OnDestroy {
   pausedLocations = new Set<string>();
   pausedConnectors = new Set<string>();
 
-  // Alert action state
   acknowledgedAlerts = new Set<string>();
   restartingConnectors = new Set<string>();
   rotatingCredentials = new Set<string>();
   runningDiagnostics = new Set<string>();
   revokingAccess = new Set<string>();
 
-  // I-6: Provider session approvals
   pendingApprovals: PendingApproval[] = [
     {
       id: 'req-001',
@@ -294,7 +99,6 @@ export class CustomerDashboardComponent implements OnDestroy {
   approveRequest(id: string) { this.approvedRequests.add(id); }
   denyRequest(id: string)    { this.deniedRequests.add(id); }
 
-  // I-5: One-time access timers
   accessTimers: AccessTimer[] = [
     {
       id: 'tmr-001',
@@ -302,7 +106,7 @@ export class CustomerDashboardComponent implements OnDestroy {
       purpose: 'Hardware diagnostics — Austin server rack',
       resources: ['Austin Host 3'],
       durationLabel: '2 hours',
-      remainingSeconds: 2700, // 45 min remaining
+      remainingSeconds: 2700,
       status: 'active',
     },
     {
@@ -311,7 +115,7 @@ export class CustomerDashboardComponent implements OnDestroy {
       purpose: 'Automated credential rotation workflow',
       resources: ['Chicago Gateway 2', 'NY Clientless 1'],
       durationLabel: '20 minutes',
-      remainingSeconds: 720, // 12 min remaining
+      remainingSeconds: 720,
       status: 'active',
     },
   ];
@@ -372,13 +176,12 @@ export class CustomerDashboardComponent implements OnDestroy {
     this.showTimerForm = false;
   }
 
-  // I-7: Traffic filters
   trafficFilters: TrafficFilter[] = [
-    { id: 'tf-001', name: 'Corporate VPN',   protocol: 'HTTPS', connector: 'Chicago Gateway 2', ianAllows: true  },
-    { id: 'tf-002', name: 'SSH Tunnel',       protocol: 'SSH',   connector: 'Chicago Gateway 2', ianAllows: true  },
-    { id: 'tf-003', name: 'Remote Desktop',   protocol: 'RDP',   connector: 'Chicago Device 1',  ianAllows: true  },
-    { id: 'tf-004', name: 'Web Portal',       protocol: 'HTTPS', connector: 'NY Clientless 1',   ianAllows: true  },
-    { id: 'tf-005', name: 'Austin RDP',       protocol: 'RDP',   connector: 'Austin Host 3',     ianAllows: false },
+    { id: 'tf-001', name: 'Corporate VPN',  protocol: 'HTTPS', connector: 'Chicago Gateway 2', ianAllows: true  },
+    { id: 'tf-002', name: 'SSH Tunnel',     protocol: 'SSH',   connector: 'Chicago Gateway 2', ianAllows: true  },
+    { id: 'tf-003', name: 'Remote Desktop', protocol: 'RDP',   connector: 'Chicago Device 1',  ianAllows: true  },
+    { id: 'tf-004', name: 'Web Portal',     protocol: 'HTTPS', connector: 'NY Clientless 1',   ianAllows: true  },
+    { id: 'tf-005', name: 'Austin RDP',     protocol: 'RDP',   connector: 'Austin Host 3',     ianAllows: false },
   ];
 
   toggleFilter(id: string) {
@@ -386,11 +189,9 @@ export class CustomerDashboardComponent implements OnDestroy {
     if (f) f.ianAllows = !f.ianAllows;
   }
 
-  // Identity error inspection
   expandedIdentities = new Set<string>();
   resettingIdentities = new Set<string>();
 
-  // Per-identity diagnostic state
   identityDiagState = new Map<string, 'running' | 'done'>();
   identityDiagSteps = new Map<string, { label: string; state: 'pending' | 'running' | 'done' | 'warn' | 'fail' }[]>();
   identityDiagResult = new Map<string, { type: 'ok' | 'warn' | 'fail'; headline: string; body: string }>();
@@ -411,7 +212,6 @@ export class CustomerDashboardComponent implements OnDestroy {
     }, 3000);
   }
 
-  // I-8: SIEM export & streaming
   siemEnabled = true;
   siemStatus: 'connected' | 'disconnected' | 'error' = 'connected';
   siemProtocol: 'syslog' | 'webhook' | 'cef' = 'webhook';
@@ -446,33 +246,32 @@ export class CustomerDashboardComponent implements OnDestroy {
     setTimeout(() => this.exporting = null, 2500);
   }
 
-  // Licenses
   enrolledLicenses: LicenseEntry[] = [
-    { id: 'lic-001', name: 'Alice Monroe',        type: 'user',   application: 'Corporate VPN',   enrolledAt: 'Jan 12, 2025', lastActive: '2 min ago',    status: 'active'   },
-    { id: 'lic-002', name: 'Bob Carter',           type: 'user',   application: 'Remote Desktop',  enrolledAt: 'Jan 15, 2025', lastActive: '5 min ago',    status: 'active'   },
-    { id: 'lic-003', name: 'Carol Singh',          type: 'user',   application: 'Web Portal',      enrolledAt: 'Feb 3, 2025',  lastActive: '12 min ago',   status: 'active'   },
-    { id: 'lic-004', name: 'Dave Kim',             type: 'user',   application: 'SSH Tunnel',      enrolledAt: 'Feb 8, 2025',  lastActive: '8 min ago',    status: 'active'   },
-    { id: 'lic-005', name: 'Eva Torres',           type: 'user',   application: 'Corporate VPN',   enrolledAt: 'Feb 14, 2025', lastActive: '3 days ago',   status: 'inactive' },
-    { id: 'lic-006', name: 'MacBook-Ops-01',       type: 'device', application: 'Corporate VPN',   enrolledAt: 'Mar 1, 2025',  lastActive: 'Just now',     status: 'active'   },
-    { id: 'lic-007', name: 'WinDesk-Finance-03',   type: 'device', application: 'Finance Portal',  enrolledAt: 'Mar 5, 2025',  lastActive: '1 hour ago',   status: 'active'   },
-    { id: 'lic-008', name: 'iPad-Sales-12',        type: 'device', application: 'Web Portal',      enrolledAt: 'Mar 10, 2025', lastActive: '2 hours ago',  status: 'active'   },
-    { id: 'lic-009', name: 'WinDesk-HR-07',        type: 'device', application: 'HR Connect',      enrolledAt: 'Mar 12, 2025', lastActive: '47 days ago',  status: 'inactive' },
-    { id: 'lic-010', name: 'MacBook-Dev-09',       type: 'device', application: 'Dev Tools',       enrolledAt: 'Mar 15, 2025', lastActive: '30 min ago',   status: 'active'   },
-    { id: 'lic-011', name: 'Frank Nguyen',         type: 'user',   application: 'Corporate VPN',   enrolledAt: 'Mar 16, 2025', lastActive: '45 min ago',   status: 'active'   },
-    { id: 'lic-012', name: 'Grace Patel',          type: 'user',   application: 'Dev Tools',       enrolledAt: 'Mar 17, 2025', lastActive: '1 hour ago',   status: 'active'   },
-    { id: 'lic-013', name: 'WinDesk-Legal-02',     type: 'device', application: 'Corporate VPN',   enrolledAt: 'Mar 18, 2025', lastActive: '20 min ago',   status: 'active'   },
-    { id: 'lic-014', name: 'Henry Walsh',          type: 'user',   application: 'SSH Tunnel',      enrolledAt: 'Mar 19, 2025', lastActive: '6 hours ago',  status: 'active'   },
-    { id: 'lic-015', name: 'iPad-Exec-03',         type: 'device', application: 'Finance Portal',  enrolledAt: 'Mar 19, 2025', lastActive: '4 days ago',   status: 'inactive' },
-    { id: 'lic-016', name: 'Iris Chen',            type: 'user',   application: 'Web Portal',      enrolledAt: 'Mar 20, 2025', lastActive: '3 min ago',    status: 'active'   },
-    { id: 'lic-017', name: 'MacBook-Sales-07',     type: 'device', application: 'Corporate VPN',   enrolledAt: 'Mar 21, 2025', lastActive: 'Just now',     status: 'active'   },
-    { id: 'lic-018', name: 'James O\'Brien',       type: 'user',   application: 'Remote Desktop',  enrolledAt: 'Mar 21, 2025', lastActive: '2 hours ago',  status: 'active'   },
-    { id: 'lic-019', name: 'WinDesk-Ops-11',       type: 'device', application: 'SSH Tunnel',      enrolledAt: 'Mar 22, 2025', lastActive: '15 min ago',   status: 'active'   },
-    { id: 'lic-020', name: 'Karen Liu',            type: 'user',   application: 'HR Connect',      enrolledAt: 'Mar 22, 2025', lastActive: '31 days ago',  status: 'inactive' },
-    { id: 'lic-021', name: 'MacBook-Eng-14',       type: 'device', application: 'Dev Tools',       enrolledAt: 'Mar 23, 2025', lastActive: '10 min ago',   status: 'active'   },
-    { id: 'lic-022', name: 'Liam Foster',          type: 'user',   application: 'Corporate VPN',   enrolledAt: 'Mar 23, 2025', lastActive: '55 min ago',   status: 'active'   },
-    { id: 'lic-023', name: 'WinDesk-Marketing-04', type: 'device', application: 'Web Portal',      enrolledAt: 'Mar 24, 2025', lastActive: '3 hours ago',  status: 'active'   },
-    { id: 'lic-024', name: 'Mia Rossi',            type: 'user',   application: 'Finance Portal',  enrolledAt: 'Mar 24, 2025', lastActive: 'Just now',     status: 'active'   },
-    { id: 'lic-025', name: 'iPad-Field-08',        type: 'device', application: 'Corporate VPN',   enrolledAt: 'Mar 25, 2025', lastActive: '58 days ago',  status: 'inactive' },
+    { id: 'lic-001', name: 'Alice Monroe',        type: 'user',   application: 'Corporate VPN',  enrolledAt: 'Jan 12, 2025', lastActive: '2 min ago',   status: 'active'   },
+    { id: 'lic-002', name: 'Bob Carter',           type: 'user',   application: 'Remote Desktop', enrolledAt: 'Jan 15, 2025', lastActive: '5 min ago',   status: 'active'   },
+    { id: 'lic-003', name: 'Carol Singh',          type: 'user',   application: 'Web Portal',     enrolledAt: 'Feb 3, 2025',  lastActive: '12 min ago',  status: 'active'   },
+    { id: 'lic-004', name: 'Dave Kim',             type: 'user',   application: 'SSH Tunnel',     enrolledAt: 'Feb 8, 2025',  lastActive: '8 min ago',   status: 'active'   },
+    { id: 'lic-005', name: 'Eva Torres',           type: 'user',   application: 'Corporate VPN',  enrolledAt: 'Feb 14, 2025', lastActive: '3 days ago',  status: 'inactive' },
+    { id: 'lic-006', name: 'MacBook-Ops-01',       type: 'device', application: 'Corporate VPN',  enrolledAt: 'Mar 1, 2025',  lastActive: 'Just now',    status: 'active'   },
+    { id: 'lic-007', name: 'WinDesk-Finance-03',   type: 'device', application: 'Finance Portal', enrolledAt: 'Mar 5, 2025',  lastActive: '1 hour ago',  status: 'active'   },
+    { id: 'lic-008', name: 'iPad-Sales-12',        type: 'device', application: 'Web Portal',     enrolledAt: 'Mar 10, 2025', lastActive: '2 hours ago', status: 'active'   },
+    { id: 'lic-009', name: 'WinDesk-HR-07',        type: 'device', application: 'HR Connect',     enrolledAt: 'Mar 12, 2025', lastActive: '47 days ago', status: 'inactive' },
+    { id: 'lic-010', name: 'MacBook-Dev-09',       type: 'device', application: 'Dev Tools',      enrolledAt: 'Mar 15, 2025', lastActive: '30 min ago',  status: 'active'   },
+    { id: 'lic-011', name: 'Frank Nguyen',         type: 'user',   application: 'Corporate VPN',  enrolledAt: 'Mar 16, 2025', lastActive: '45 min ago',  status: 'active'   },
+    { id: 'lic-012', name: 'Grace Patel',          type: 'user',   application: 'Dev Tools',      enrolledAt: 'Mar 17, 2025', lastActive: '1 hour ago',  status: 'active'   },
+    { id: 'lic-013', name: 'WinDesk-Legal-02',     type: 'device', application: 'Corporate VPN',  enrolledAt: 'Mar 18, 2025', lastActive: '20 min ago',  status: 'active'   },
+    { id: 'lic-014', name: 'Henry Walsh',          type: 'user',   application: 'SSH Tunnel',     enrolledAt: 'Mar 19, 2025', lastActive: '6 hours ago', status: 'active'   },
+    { id: 'lic-015', name: 'iPad-Exec-03',         type: 'device', application: 'Finance Portal', enrolledAt: 'Mar 19, 2025', lastActive: '4 days ago',  status: 'inactive' },
+    { id: 'lic-016', name: 'Iris Chen',            type: 'user',   application: 'Web Portal',     enrolledAt: 'Mar 20, 2025', lastActive: '3 min ago',   status: 'active'   },
+    { id: 'lic-017', name: 'MacBook-Sales-07',     type: 'device', application: 'Corporate VPN',  enrolledAt: 'Mar 21, 2025', lastActive: 'Just now',    status: 'active'   },
+    { id: 'lic-018', name: "James O'Brien",        type: 'user',   application: 'Remote Desktop', enrolledAt: 'Mar 21, 2025', lastActive: '2 hours ago', status: 'active'   },
+    { id: 'lic-019', name: 'WinDesk-Ops-11',       type: 'device', application: 'SSH Tunnel',     enrolledAt: 'Mar 22, 2025', lastActive: '15 min ago',  status: 'active'   },
+    { id: 'lic-020', name: 'Karen Liu',            type: 'user',   application: 'HR Connect',     enrolledAt: 'Mar 22, 2025', lastActive: '31 days ago', status: 'inactive' },
+    { id: 'lic-021', name: 'MacBook-Eng-14',       type: 'device', application: 'Dev Tools',      enrolledAt: 'Mar 23, 2025', lastActive: '10 min ago',  status: 'active'   },
+    { id: 'lic-022', name: 'Liam Foster',          type: 'user',   application: 'Corporate VPN',  enrolledAt: 'Mar 23, 2025', lastActive: '55 min ago',  status: 'active'   },
+    { id: 'lic-023', name: 'WinDesk-Marketing-04', type: 'device', application: 'Web Portal',     enrolledAt: 'Mar 24, 2025', lastActive: '3 hours ago', status: 'active'   },
+    { id: 'lic-024', name: 'Mia Rossi',            type: 'user',   application: 'Finance Portal', enrolledAt: 'Mar 24, 2025', lastActive: 'Just now',    status: 'active'   },
+    { id: 'lic-025', name: 'iPad-Field-08',        type: 'device', application: 'Corporate VPN',  enrolledAt: 'Mar 25, 2025', lastActive: '58 days ago', status: 'inactive' },
   ];
   revokingLicenses = new Set<string>();
   licensesPage = 1;
@@ -521,14 +320,12 @@ export class CustomerDashboardComponent implements OnDestroy {
     }, 1500);
   }
 
-  // Navigation
   activeSection: 'overview' | 'connectors' | 'audit' | 'alerts' | 'access' | 'licenses' | 'locations' | 'identities' = 'overview';
 
   get alertBadge(): number { return this.visibleAlerts.length; }
   get connectorBadge(): number { return this.degradedConnectors + this.offlineConnectors; }
   get accessBadge(): number { return this.visibleApprovals.length; }
 
-  // Shared helpers
   constructor(private customerService: CustomerService, public personaService: PersonaService, public onboardingService: OnboardingService) {
     this.customer = this.customerService.getById('acme-corp')!;
     this.timerInterval = setInterval(() => {
@@ -562,7 +359,6 @@ export class CustomerDashboardComponent implements OnDestroy {
     return this.customer.identityList.filter(i => i.status === 'Connected').length;
   }
 
-  // Live Audit search + filter + sort + pagination
   auditSearch = '';
   auditTypeFilter: string = '';
   auditStatusFilter: string = '';
@@ -720,18 +516,18 @@ export class CustomerDashboardComponent implements OnDestroy {
     const isNetworkResource = identity.type === 'gateway' || identity.type === 'clientless' || identity.type === 'sdk';
     const steps = isNetworkResource
       ? [
-          { label: 'Pinging connector endpoint',       state: 'pending' as const },
-          { label: 'Checking tunnel integrity',        state: 'pending' as const },
-          { label: 'Measuring packet loss rate',       state: 'pending' as const },
-          { label: 'Verifying service reachability',   state: 'pending' as const },
-          { label: 'Inspecting dropped connections',   state: 'pending' as const },
+          { label: 'Pinging connector endpoint',     state: 'pending' as const },
+          { label: 'Checking tunnel integrity',      state: 'pending' as const },
+          { label: 'Measuring packet loss rate',     state: 'pending' as const },
+          { label: 'Verifying service reachability', state: 'pending' as const },
+          { label: 'Inspecting dropped connections', state: 'pending' as const },
         ]
       : [
-          { label: 'Resolving identity endpoint',      state: 'pending' as const },
-          { label: 'Testing gateway latency',          state: 'pending' as const },
-          { label: 'Checking for packet loss',         state: 'pending' as const },
-          { label: 'Verifying bound service access',   state: 'pending' as const },
-          { label: 'Inspecting session health',        state: 'pending' as const },
+          { label: 'Resolving identity endpoint',    state: 'pending' as const },
+          { label: 'Testing gateway latency',        state: 'pending' as const },
+          { label: 'Checking for packet loss',       state: 'pending' as const },
+          { label: 'Verifying bound service access', state: 'pending' as const },
+          { label: 'Inspecting session health',      state: 'pending' as const },
         ];
 
     this.identityDiagSteps.set(identity.id, steps);
@@ -807,5 +603,27 @@ export class CustomerDashboardComponent implements OnDestroy {
       this.revokingAccess.delete(resource);
       this.acknowledgedAlerts.add(resource);
     }, 2000);
+  }
+
+  ianNotifMode: 'quiet' | 'focused' | 'standard' = 'standard';
+  ianQuietHours = { enabled: false, from: '22:00', to: '08:00' };
+  ianNotifChannels = { email: true, slack: true };
+  ianNotifAlerts = {
+    connectorDown: true,
+    connectorDegraded: true,
+    newIdentityEnrolled: true,
+    securityAlert: true,
+    accessRequestPending: true,
+    licenseThreshold: false,
+    maintenanceWindow: false,
+  };
+  ianNotifSaved = false;
+
+  saveIanNotifPrefs() {
+    this.ianNotifSaved = true;
+    setTimeout(() => {
+      this.ianNotifSaved = false;
+      this.personaService.showSettings.set(false);
+    }, 800);
   }
 }

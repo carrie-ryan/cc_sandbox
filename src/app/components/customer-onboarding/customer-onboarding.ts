@@ -92,10 +92,10 @@ export class CustomerOnboardingComponent {
 
   finish(): void {
     this.onboardingService.setupReviewed.set(true);
-    this.router.navigate(['/customer-dashboard']);
+    this.router.navigate(['/ian-dashboard']);
   }
 
   skip(): void {
-    this.router.navigate(['/customer-dashboard']);
+    this.router.navigate(['/ian-dashboard']);
   }
 }
