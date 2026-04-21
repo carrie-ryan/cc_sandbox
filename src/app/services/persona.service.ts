@@ -1,44 +1,60 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, WritableSignal } from '@angular/core';
 
 export type Persona = 'ian' | 'maya';
+
+function readPersistedBool(key: string): boolean {
+  return typeof localStorage !== 'undefined' && localStorage.getItem(key) === 'true';
+}
 
 @Injectable({ providedIn: 'root' })
 export class PersonaService {
   activePersona = signal<Persona>('ian');
   showSettings = signal(false);
+  providerContext = signal(false);
 
-  ianDarkMode = signal<boolean>(
-    typeof localStorage !== 'undefined' && localStorage.getItem('ian-dark-mode') === 'true'
-  );
+  ianDarkMode = signal<boolean>(readPersistedBool('ian-dark-mode'));
+  mayaDarkMode = signal<boolean>(readPersistedBool('maya-dark-mode'));
+  alexDarkMode = signal<boolean>(readPersistedBool('alex-dark-mode'));
+  ianBetaMode = signal<boolean>(readPersistedBool('ian-beta-mode'));
+  ianPowerUserMode = signal<boolean>(readPersistedBool('ian-power-user-mode'));
+  alexBetaMode = signal<boolean>(readPersistedBool('alex-beta-mode'));
+  alexPowerUserMode = signal<boolean>(readPersistedBool('alex-power-user-mode'));
 
-  mayaDarkMode = signal<boolean>(
-    typeof localStorage !== 'undefined' && localStorage.getItem('maya-dark-mode') === 'true'
-  );
+  activeDarkMode = computed(() => {
+    if (this.providerContext()) return this.alexDarkMode();
+    return this.activePersona() === 'maya' ? this.mayaDarkMode() : this.ianDarkMode();
+  });
 
-  ianBetaMode = signal<boolean>(
-    typeof localStorage !== 'undefined' && localStorage.getItem('ian-beta-mode') === 'true'
-  );
+  impersonating = signal(false);
+  impersonatedCustomerName = signal('');
+  impersonatedCustomerId = signal('');
 
-  activeDarkMode = computed(() =>
-    this.activePersona() === 'maya' ? this.mayaDarkMode() : this.ianDarkMode()
-  );
+  startImpersonation(customerId: string, customerName: string) {
+    this.impersonating.set(true);
+    this.impersonatedCustomerId.set(customerId);
+    this.impersonatedCustomerName.set(customerName);
+  }
+
+  endImpersonation() {
+    this.impersonating.set(false);
+    this.impersonatedCustomerId.set('');
+    this.impersonatedCustomerName.set('');
+  }
 
   setPersona(persona: Persona) {
     this.activePersona.set(persona);
   }
 
-  toggleIanDarkMode() {
-    this.ianDarkMode.update(v => !v);
-    localStorage.setItem('ian-dark-mode', String(this.ianDarkMode()));
-  }
+  toggleIanDarkMode() { this.persistToggle(this.ianDarkMode, 'ian-dark-mode'); }
+  toggleMayaDarkMode() { this.persistToggle(this.mayaDarkMode, 'maya-dark-mode'); }
+  toggleAlexDarkMode() { this.persistToggle(this.alexDarkMode, 'alex-dark-mode'); }
+  toggleIanBetaMode() { this.persistToggle(this.ianBetaMode, 'ian-beta-mode'); }
+  toggleIanPowerUserMode() { this.persistToggle(this.ianPowerUserMode, 'ian-power-user-mode'); }
+  toggleAlexBetaMode() { this.persistToggle(this.alexBetaMode, 'alex-beta-mode'); }
+  toggleAlexPowerUserMode() { this.persistToggle(this.alexPowerUserMode, 'alex-power-user-mode'); }
 
-  toggleMayaDarkMode() {
-    this.mayaDarkMode.update(v => !v);
-    localStorage.setItem('maya-dark-mode', String(this.mayaDarkMode()));
-  }
-
-  toggleIanBetaMode() {
-    this.ianBetaMode.update(v => !v);
-    localStorage.setItem('ian-beta-mode', String(this.ianBetaMode()));
+  private persistToggle(sig: WritableSignal<boolean>, key: string) {
+    sig.update(v => !v);
+    localStorage.setItem(key, String(sig()));
   }
 }

@@ -1,7 +1,7 @@
 import { Component, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgTemplateOutlet, UpperCasePipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { CustomerLocationsComponent } from '../customer-locations/customer-locations';
 import { CustomerIdentitiesComponent } from '../customer-identities/customer-identities';
 import { CustomerService, Customer, CustomerIdentity } from '../../services/customer.service';
@@ -49,7 +49,7 @@ export interface TrafficFilter {
 @Component({
   selector: 'app-ian-dashboard',
   templateUrl: './ian-dashboard.html',
-  imports: [FormsModule, NgTemplateOutlet, UpperCasePipe, RouterLink, CustomerLocationsComponent, CustomerIdentitiesComponent],
+  imports: [FormsModule, NgTemplateOutlet, UpperCasePipe, CustomerLocationsComponent, CustomerIdentitiesComponent],
   host: { class: 'flex-1 min-h-0 overflow-hidden' },
 })
 export class IanDashboardComponent implements OnDestroy {
@@ -326,7 +326,13 @@ export class IanDashboardComponent implements OnDestroy {
   get connectorBadge(): number { return this.degradedConnectors + this.offlineConnectors; }
   get accessBadge(): number { return this.visibleApprovals.length; }
 
-  constructor(private customerService: CustomerService, public personaService: PersonaService, public onboardingService: OnboardingService) {
+  exitImpersonation() {
+    const customerId = this.personaService.impersonatedCustomerId();
+    this.personaService.endImpersonation();
+    this.router.navigate(['/customers', customerId]);
+  }
+
+  constructor(private customerService: CustomerService, public personaService: PersonaService, public onboardingService: OnboardingService, private router: Router) {
     this.customer = this.customerService.getById('acme-corp')!;
     this.timerInterval = setInterval(() => {
       this.accessTimers.forEach(t => {

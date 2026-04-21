@@ -1,16 +1,25 @@
 @if (customer) {
 <div class="px-8 py-6">
 
-  <!-- Back button -->
-  <button (click)="goBack()" class="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 mb-5 transition-colors">
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
-    </svg>
-    Back to Dashboard
-  </button>
+  <!-- Back button + actions row -->
+  <div class="flex items-center justify-between mb-5">
+    <button (click)="goBack()" class="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+      </svg>
+      Back to Dashboard
+    </button>
+    <button (click)="viewAsCustomer()" class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 rounded-lg transition-colors">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+      </svg>
+      View as customer
+    </button>
+  </div>
 
   <!-- Header card -->
-  <div class="bg-white border border-gray-200 rounded-xl px-6 py-5 mb-6">
+  <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-6 py-5 mb-6">
     <div class="flex items-center justify-between">
       <!-- Left: avatar + name + status -->
       <div class="flex items-center gap-4">
@@ -18,45 +27,45 @@
           {{ customer.initials }}
         </div>
         <div>
-          <h1 class="text-xl font-bold text-gray-900 mb-1">{{ customer.name }}</h1>
+          <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">{{ customer.name }}</h1>
           @if (customer.status === 'Active') {
-            <span class="inline-flex items-center gap-1.5 text-xs font-medium text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
+            <span class="inline-flex items-center gap-1.5 text-xs font-medium text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 px-2 py-0.5 rounded-full">
               <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>Active
             </span>
           }
           @if (customer.status === 'Degraded') {
-            <span class="inline-flex items-center gap-1.5 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+            <span class="inline-flex items-center gap-1.5 text-xs font-medium text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 px-2 py-0.5 rounded-full">
               <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Degraded
             </span>
           }
           @if (customer.status === 'Inactive') {
-            <span class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-500 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded-full">
+            <span class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 px-2 py-0.5 rounded-full">
               <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>Inactive
             </span>
           }
         </div>
       </div>
       <!-- Right: quick stats -->
-      <div class="flex items-center divide-x divide-gray-200">
+      <div class="flex items-center divide-x divide-gray-200 dark:divide-gray-700">
         <div class="px-6 text-center">
-          <p class="text-xl font-bold text-gray-900">{{ customer.locations }}</p>
-          <p class="text-xs text-gray-500 mt-0.5">Locations</p>
+          <p class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ customer.locations }}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Locations</p>
         </div>
         <div class="px-6 text-center">
-          <p class="text-xl font-bold text-gray-900">{{ customer.connectors }}</p>
-          <p class="text-xs text-gray-500 mt-0.5">Connectors</p>
+          <p class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ customer.connectors }}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Connectors</p>
         </div>
         <div class="px-6 text-center">
-          <p class="text-xl font-bold text-gray-900">{{ customer.activeConnections }}</p>
-          <p class="text-xs text-gray-500 mt-0.5">Active Connections</p>
+          <p class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ customer.activeConnections }}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Active Connections</p>
         </div>
         <div class="px-6 text-center">
-          <p class="text-xl font-bold text-gray-900">{{ customer.bandwidthUsed }}</p>
-          <p class="text-xs text-gray-500 mt-0.5">Bandwidth Used</p>
+          <p class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ customer.bandwidthUsed }}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Bandwidth Used</p>
         </div>
         <div class="px-6 text-center">
-          <p class="text-xl font-bold" [class.text-gray-900]="customer.uptime !== '—'" [class.text-gray-400]="customer.uptime === '—'">{{ customer.uptime }}</p>
-          <p class="text-xs text-gray-500 mt-0.5">Uptime</p>
+          <p class="text-xl font-bold" [class]="customer.uptime !== '—' ? 'text-gray-900 dark:text-gray-100' : 'text-gray-400 dark:text-gray-500'">{{ customer.uptime }}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Uptime</p>
         </div>
       </div>
     </div>
@@ -64,15 +73,11 @@
 
   <!-- Date range filter -->
   <div class="flex items-center gap-3 mb-4">
-    <div class="flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
+    <div class="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
       @for (opt of [{key:'24h',label:'24h'},{key:'7d',label:'7d'},{key:'30d',label:'30d'},{key:'custom',label:'Custom'}]; track opt.key) {
         <button (click)="setRange($any(opt.key))"
           class="px-3 py-1.5 text-xs font-medium rounded-md transition-all"
-          [class.bg-white]="activeRange === opt.key"
-          [class.text-gray-900]="activeRange === opt.key"
-          [class.shadow-sm]="activeRange === opt.key"
-          [class.text-gray-500]="activeRange !== opt.key"
-          [class.hover:text-gray-700]="activeRange !== opt.key">
+          [class]="activeRange === opt.key ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'">
           {{ opt.label }}
         </button>
       }
@@ -80,13 +85,13 @@
     @if (activeRange === 'custom') {
       <div class="flex items-center gap-2">
         <input type="date" [value]="customStart" (input)="customStart = $any($event.target).value"
-          class="text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
-        <span class="text-xs text-gray-400">to</span>
+          class="text-xs border border-gray-200 dark:border-gray-600 rounded-lg px-2.5 py-1.5 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+        <span class="text-xs text-gray-400 dark:text-gray-500">to</span>
         <input type="date" [value]="customEnd" (input)="customEnd = $any($event.target).value"
-          class="text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+          class="text-xs border border-gray-200 dark:border-gray-600 rounded-lg px-2.5 py-1.5 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
       </div>
     } @else {
-      <span class="text-xs text-gray-400">
+      <span class="text-xs text-gray-400 dark:text-gray-500">
         @if (activeRange === '24h') { Showing last 24 hours }
         @if (activeRange === '7d') { Showing last 7 days }
         @if (activeRange === '30d') { Showing last 30 days }
@@ -95,22 +100,15 @@
   </div>
 
   <!-- Tab bar -->
-  <div class="flex gap-0 border-b border-gray-200 mb-6">
+  <div class="flex gap-0 border-b border-gray-200 dark:border-gray-700 mb-6">
     @for (tab of tabs; track tab.key) {
       <button (click)="setTab(tab.key)"
         class="px-5 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors"
-        [class.border-blue-600]="activeTab === tab.key"
-        [class.text-blue-600]="activeTab === tab.key"
-        [class.border-transparent]="activeTab !== tab.key"
-        [class.text-gray-500]="activeTab !== tab.key"
-        [class.hover:text-gray-700]="activeTab !== tab.key">
+        [class]="activeTab === tab.key ? 'border-blue-600 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'">
         {{ tab.label }}
         @if (tab.key === 'alerts' && customer.alerts.length > 0) {
           <span class="ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-            [class.bg-red-100]="customer.alertSeverity === 'Critical'"
-            [class.text-red-600]="customer.alertSeverity === 'Critical'"
-            [class.bg-amber-100]="customer.alertSeverity === 'Warning'"
-            [class.text-amber-600]="customer.alertSeverity === 'Warning'">
+            [class]="customer.alertSeverity === 'Critical' ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' : 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'">
             {{ customer.alerts.length }}
           </span>
         }
@@ -127,15 +125,15 @@
     }
 
     <!-- Customize slide-in panel -->
-    <div class="fixed top-0 right-0 h-full w-80 bg-white border-l border-gray-200 shadow-xl z-40 flex flex-col transition-transform duration-300"
+    <div class="fixed top-0 right-0 h-full w-80 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 shadow-xl z-40 flex flex-col transition-transform duration-300"
          [class.translate-x-0]="showCustomizePanel"
          [class.translate-x-full]="!showCustomizePanel">
-      <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-700">
         <div>
-          <h2 class="text-sm font-semibold text-gray-900">Customize Dashboard</h2>
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Customize Dashboard</h2>
           <p class="text-xs text-gray-400 mt-0.5">Toggle widgets on or off and drag to reorder.</p>
         </div>
-        <button (click)="showCustomizePanel = false" class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
+        <button (click)="showCustomizePanel = false" class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
           </svg>
@@ -150,11 +148,7 @@
               (dragstart)="onWidgetDragStart(widget.id)"
               (dragover)="onWidgetDragOver(widget.id, $event)"
               (dragend)="onWidgetDragEnd()"
-              class="flex items-center gap-3 px-3 py-3 rounded-lg border transition-colors cursor-grab"
-              [class.border-blue-300]="widgetDragOverId === widget.id"
-              [class.bg-blue-50]="widgetDragOverId === widget.id"
-              [class.border-gray-200]="widgetDragOverId !== widget.id"
-              [class.bg-gray-50]="widgetDragOverId !== widget.id">
+              [class]="widgetDragOverId === widget.id ? 'flex items-center gap-3 px-3 py-3 rounded-lg border transition-colors cursor-grab border-blue-300 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/30' : 'flex items-center gap-3 px-3 py-3 rounded-lg border transition-colors cursor-grab border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700'">
               <!-- Drag handle -->
               <svg class="w-4 h-4 text-gray-300 shrink-0" fill="currentColor" viewBox="0 0 24 24">
                 <circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
@@ -163,7 +157,7 @@
               </svg>
               <!-- Label + description -->
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-gray-800">{{ widget.label }}</p>
+                <p class="text-sm font-medium text-gray-800 dark:text-gray-100">{{ widget.label }}</p>
                 <p class="text-xs text-gray-400 mt-0.5 leading-snug">{{ widget.description }}</p>
               </div>
               <!-- Toggle -->
@@ -186,7 +180,7 @@
     <!-- Summary toolbar: customize button -->
     <div class="flex items-center justify-end mb-4">
       <button (click)="showCustomizePanel = true"
-        class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 border border-gray-200 bg-white hover:bg-gray-50 px-3 py-1.5 rounded-lg transition-colors shadow-sm">
+        class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 px-3 py-1.5 rounded-lg transition-colors shadow-sm">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/>
         </svg>
@@ -196,11 +190,11 @@
 
     <!-- Dynamic widget grid -->
     @if (enabledWidgets.length === 0) {
-      <div class="flex flex-col items-center justify-center py-20 bg-white border border-gray-200 rounded-xl text-center">
+      <div class="flex flex-col items-center justify-center py-20 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-center">
         <svg class="w-8 h-8 text-gray-300 mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/>
         </svg>
-        <p class="text-sm font-medium text-gray-500">No widgets enabled</p>
+        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">No widgets enabled</p>
         <p class="text-xs text-gray-400 mt-1">Click <span class="font-medium">Customize</span> to add widgets to your dashboard.</p>
       </div>
     } @else {
@@ -210,29 +204,28 @@
           @switch (widget.id) {
 
             @case ('network-health') {
-              <div class="bg-white border border-gray-200 rounded-xl p-5">
-                <h3 class="text-sm font-semibold text-gray-700 mb-4">Network Health</h3>
+              <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+                <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Network Health</h3>
                 <div class="flex flex-col gap-3">
                   <div class="flex items-center justify-between text-sm">
-                    <span class="text-gray-500">Uptime (30d)</span>
-                    <span class="font-semibold" [class.text-green-600]="customer.uptime !== '—'" [class.text-gray-400]="customer.uptime === '—'">{{ customer.uptime }}</span>
+                    <span class="text-gray-500 dark:text-gray-400">Uptime (30d)</span>
+                    <span class="font-semibold" [class]="customer.uptime !== '—' ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-gray-500'">{{ customer.uptime }}</span>
                   </div>
                   <div class="flex items-center justify-between text-sm">
-                    <span class="text-gray-500">Active Connections</span>
-                    <span class="font-semibold text-gray-900">{{ customer.activeConnections }}</span>
+                    <span class="text-gray-500 dark:text-gray-400">Active Connections</span>
+                    <span class="font-semibold text-gray-900 dark:text-gray-100">{{ customer.activeConnections }}</span>
                   </div>
                   <div class="flex items-center justify-between text-sm">
-                    <span class="text-gray-500">Bandwidth Used</span>
-                    <span class="font-semibold text-gray-900">{{ scaleBw(customer.bandwidthUsed) }}</span>
+                    <span class="text-gray-500 dark:text-gray-400">Bandwidth Used</span>
+                    <span class="font-semibold text-gray-900 dark:text-gray-100">{{ scaleBw(customer.bandwidthUsed) }}</span>
                   </div>
                   <div class="flex items-center justify-between text-sm">
-                    <span class="text-gray-500">Open Alerts</span>
+                    <span class="text-gray-500 dark:text-gray-400">Open Alerts</span>
                     @if (customer.alerts.length === 0) {
-                      <span class="text-gray-400">None</span>
+                      <span class="text-gray-400 dark:text-gray-500">None</span>
                     } @else {
                       <span class="font-semibold"
-                        [class.text-red-600]="customer.alertSeverity === 'Critical'"
-                        [class.text-amber-600]="customer.alertSeverity === 'Warning'">
+                        [class]="customer.alertSeverity === 'Critical' ? 'text-red-600 dark:text-red-400' : 'text-amber-600 dark:text-amber-400'">
                         {{ customer.alerts.length }} {{ customer.alertSeverity }}
                       </span>
                     }
@@ -242,8 +235,8 @@
             }
 
             @case ('locations') {
-              <div class="bg-white border border-gray-200 rounded-xl p-5">
-                <h3 class="text-sm font-semibold text-gray-700 mb-4">Locations</h3>
+              <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+                <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Locations</h3>
                 <div class="flex flex-col gap-2.5">
                   @for (loc of customer.locationList; track loc.id) {
                     <div class="flex items-center justify-between text-sm">
@@ -252,7 +245,7 @@
                           [class.bg-green-500]="loc.status === 'Online'"
                           [class.bg-amber-400]="loc.status === 'Degraded'"
                           [class.bg-gray-300]="loc.status === 'Offline'"></span>
-                        <span class="text-gray-700">{{ loc.name }}</span>
+                        <span class="text-gray-700 dark:text-gray-300">{{ loc.name }}</span>
                       </div>
                       <span class="text-gray-400 text-xs">{{ loc.city }}, {{ loc.country }}</span>
                     </div>
@@ -262,8 +255,8 @@
             }
 
             @case ('connectors') {
-              <div class="bg-white border border-gray-200 rounded-xl p-5">
-                <h3 class="text-sm font-semibold text-gray-700 mb-4">Connectors</h3>
+              <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+                <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Connectors</h3>
                 <div class="flex flex-col gap-2.5">
                   @for (con of customer.connectorList; track con.id) {
                     <div class="flex items-center justify-between text-sm">
@@ -272,7 +265,7 @@
                           [class.bg-green-500]="con.status === 'Online'"
                           [class.bg-amber-400]="con.status === 'Degraded'"
                           [class.bg-gray-300]="con.status === 'Offline'"></span>
-                        <span class="text-gray-700 font-mono text-xs">{{ con.id }}</span>
+                        <span class="text-gray-700 dark:text-gray-300 font-mono text-xs">{{ con.id }}</span>
                       </div>
                       <span class="text-gray-400 text-xs capitalize">{{ con.type }}</span>
                     </div>
@@ -283,22 +276,22 @@
 
             @case ('data-usage') {
               @if (bandwidthChart) {
-                <div class="col-span-3 bg-white border border-gray-200 rounded-xl p-5">
+                <div class="col-span-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
                   <div class="flex items-start justify-between mb-4">
                     <div>
-                      <h3 class="text-sm font-semibold text-gray-800">Data Usage</h3>
+                      <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">Data Usage</h3>
                       <p class="text-xs text-gray-400 mt-0.5">Total transmitted and received bandwidth per day</p>
                     </div>
                     <div class="flex items-center gap-4">
                       <div class="flex items-center gap-1.5">
                         <span class="w-3 h-0.5 bg-blue-500 rounded inline-block"></span>
-                        <span class="text-xs text-gray-500">Transmitted</span>
-                        <span class="text-xs font-semibold text-gray-800 ml-1">{{ bandwidthChart.txTotal }} GB</span>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">Transmitted</span>
+                        <span class="text-xs font-semibold text-gray-800 dark:text-gray-100 ml-1">{{ bandwidthChart.txTotal }} GB</span>
                       </div>
                       <div class="flex items-center gap-1.5">
                         <span class="w-3 h-0.5 bg-emerald-500 rounded inline-block"></span>
-                        <span class="text-xs text-gray-500">Received</span>
-                        <span class="text-xs font-semibold text-gray-800 ml-1">{{ bandwidthChart.rxTotal }} GB</span>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">Received</span>
+                        <span class="text-xs font-semibold text-gray-800 dark:text-gray-100 ml-1">{{ bandwidthChart.rxTotal }} GB</span>
                       </div>
                     </div>
                   </div>
@@ -328,24 +321,24 @@
             }
 
             @case ('active-connections') {
-              <div class="bg-white border border-gray-200 rounded-xl p-5">
-                <h3 class="text-sm font-semibold text-gray-700 mb-4">Active Connections</h3>
+              <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+                <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Active Connections</h3>
                 <div class="flex flex-col items-center justify-center py-4 gap-1">
-                  <p class="text-4xl font-bold text-gray-900">{{ customer.activeConnections }}</p>
+                  <p class="text-4xl font-bold text-gray-900 dark:text-gray-100">{{ customer.activeConnections }}</p>
                   <p class="text-xs text-gray-400">connections active now</p>
                 </div>
                 <div class="mt-3 flex flex-col gap-2">
                   @for (conn of customer.connectionList.slice(0, 4); track conn.source) {
                     <div class="flex items-center justify-between text-xs">
-                      <span class="font-mono text-gray-700 truncate max-w-[60%]">{{ conn.source }}</span>
+                      <span class="font-mono text-gray-700 dark:text-gray-300 truncate max-w-[60%]">{{ conn.source }}</span>
                       @if (conn.status === 'Connected') {
-                        <span class="text-green-600 font-medium">Connected</span>
+                        <span class="text-green-600 dark:text-green-400 font-medium">Connected</span>
                       }
                       @if (conn.status === 'Idle') {
                         <span class="text-gray-400">Idle</span>
                       }
                       @if (conn.status === 'Disconnected') {
-                        <span class="text-red-500">Disconnected</span>
+                        <span class="text-red-500 dark:text-red-400">Disconnected</span>
                       }
                     </div>
                   }
@@ -354,54 +347,54 @@
             }
 
             @case ('recent-alerts') {
-              <div class="bg-white border border-gray-200 rounded-xl p-5">
-                <h3 class="text-sm font-semibold text-gray-700 mb-4">Recent Alerts</h3>
+              <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+                <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Recent Alerts</h3>
                 @if (customer.alerts.length === 0) {
                   <div class="flex flex-col items-center justify-center py-6 gap-1.5">
-                    <div class="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center">
+                    <div class="w-10 h-10 bg-green-50 dark:bg-green-900/30 rounded-full flex items-center justify-center">
                       <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                       </svg>
                     </div>
-                    <p class="text-sm font-medium text-gray-700">No active alerts</p>
+                    <p class="text-sm font-medium text-gray-700 dark:text-gray-300">No active alerts</p>
                     <p class="text-xs text-gray-400">Network is operating normally.</p>
                   </div>
                 } @else {
-                  <div class="flex flex-col divide-y divide-gray-100">
+                  <div class="flex flex-col divide-y divide-gray-100 dark:divide-gray-700">
                     @for (alert of customer.alerts.slice(0, 4); track alert.resource) {
                       <div class="py-3 first:pt-0 last:pb-0 flex flex-col gap-1.5">
                         <!-- Resource + description -->
                         <div class="flex items-start gap-2">
                           @if (alert.resourceIcon === 'gateway') {
-                            <svg class="w-3.5 h-3.5 text-green-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <svg class="w-3.5 h-3.5 text-green-600 dark:text-green-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z"/>
                             </svg>
                           }
                           @if (alert.resourceIcon === 'device') {
-                            <svg class="w-3.5 h-3.5 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <svg class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/>
                             </svg>
                           }
                           @if (alert.resourceIcon === 'connector') {
-                            <svg class="w-3.5 h-3.5 text-purple-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <svg class="w-3.5 h-3.5 text-purple-600 dark:text-purple-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/>
                             </svg>
                           }
-                          <p class="text-xs text-gray-700 leading-snug">
-                            <span class="font-semibold text-blue-600">{{ alert.resource }}</span>
+                          <p class="text-xs text-gray-700 dark:text-gray-300 leading-snug">
+                            <span class="font-semibold text-blue-600 dark:text-blue-400">{{ alert.resource }}</span>
                             {{ ' ' + alert.description }}
                           </p>
                         </div>
                         <!-- Type + date -->
                         <div class="flex items-center justify-between pl-5">
-                          <span class="text-xs font-medium text-red-500">{{ alert.type }}</span>
+                          <span class="text-xs font-medium text-red-500 dark:text-red-400">{{ alert.type }}</span>
                           <span class="text-xs text-gray-400">{{ alert.createdAt }}</span>
                         </div>
                       </div>
                     }
                   </div>
                   @if (customer.alerts.length > 4) {
-                    <button (click)="setTab('alerts')" class="mt-3 w-full text-center text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors">
+                    <button (click)="setTab('alerts')" class="mt-3 w-full text-center text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
                       View all {{ customer.alerts.length }} alerts
                     </button>
                   }
@@ -417,27 +410,27 @@
 
   <!-- ── CONNECTIONS TAB ── -->
   @if (activeTab === 'connections') {
-    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden" (click)="showColumnPicker = null">
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden" (click)="showColumnPicker = null">
       <!-- Columns toolbar -->
-      <div class="flex justify-end px-4 py-2 border-b border-gray-100">
+      <div class="flex justify-end px-4 py-2 border-b border-gray-100 dark:border-gray-700">
         <div class="relative">
           <button (click)="showColumnPicker = showColumnPicker === 'connections' ? null : 'connections'; $event.stopPropagation()"
-            class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 border border-gray-200 bg-white hover:bg-gray-50 px-3 py-1.5 rounded-lg transition-colors">
+            class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 px-3 py-1.5 rounded-lg transition-colors">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125z"/>
             </svg>
             Columns
           </button>
           @if (showColumnPicker === 'connections') {
-            <div class="absolute right-0 top-full mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-20 py-1"
+            <div class="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20 py-1"
                  (click)="$event.stopPropagation()">
               @for (c of tableColumns['connections']; track c.id) {
-                <label class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 cursor-pointer"
+                <label class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
                   [class.opacity-50]="c.required" [class.cursor-not-allowed]="c.required">
                   <input type="checkbox" [checked]="c.enabled" [disabled]="c.required"
                     (change)="toggleTableColumn('connections', c.id)"
                     class="rounded accent-blue-600"/>
-                  <span class="text-xs text-gray-700">{{ c.label }}</span>
+                  <span class="text-xs text-gray-700 dark:text-gray-300">{{ c.label }}</span>
                 </label>
               }
             </div>
@@ -445,28 +438,28 @@
         </div>
       </div>
       <table class="w-full text-sm">
-        <thead class="bg-gray-50 border-b border-gray-200">
+        <thead class="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
           <tr>
             @if (col('connections', 'source')) {
-              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Source</th>
+              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Source</th>
             }
             @if (col('connections', 'destination')) {
-              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Destination</th>
+              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Destination</th>
             }
             @if (col('connections', 'application')) {
-              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Application</th>
+              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Application</th>
             }
             @if (col('connections', 'throughput')) {
-              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Throughput</th>
+              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Throughput</th>
             }
             @if (col('connections', 'status')) {
-              <th class="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+              <th class="text-right px-5 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
             }
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-100">
+        <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
           @for (conn of customer.connectionList; track conn.source) {
-            <tr class="hover:bg-gray-50 transition-colors">
+            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
               <!-- Source -->
               @if (col('connections', 'source')) {
                 <td class="px-5 py-3">
@@ -483,7 +476,7 @@
                     @if (conn.sourceType === 'sdk') {
                       <svg class="w-4 h-4 text-orange-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/></svg>
                     }
-                    <span class="font-mono text-xs font-semibold text-gray-800">{{ conn.source }}</span>
+                    <span class="font-mono text-xs font-semibold text-gray-800 dark:text-gray-100">{{ conn.source }}</span>
                   </div>
                 </td>
               }
@@ -503,21 +496,21 @@
                     @if (conn.destinationType === 'sdk') {
                       <svg class="w-4 h-4 text-orange-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/></svg>
                     }
-                    <span class="font-mono text-xs font-semibold text-gray-800">{{ conn.destination }}</span>
+                    <span class="font-mono text-xs font-semibold text-gray-800 dark:text-gray-100">{{ conn.destination }}</span>
                   </div>
                 </td>
               }
               @if (col('connections', 'application')) {
                 <td class="px-4 py-3">
-                  <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-md border text-blue-700 bg-blue-50 border-blue-200">{{ conn.app }}</span>
+                  <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-md border text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700">{{ conn.app }}</span>
                 </td>
               }
               <!-- Throughput with bar -->
               @if (col('connections', 'throughput')) {
                 <td class="px-4 py-3 text-right">
                   <div class="flex flex-col items-end gap-1">
-                    <span class="text-sm font-semibold text-gray-800">{{ conn.throughput }}</span>
-                    <div class="w-20 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                    <span class="text-sm font-semibold text-gray-800 dark:text-gray-100">{{ conn.throughput }}</span>
+                    <div class="w-20 h-1.5 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
                       <div class="h-full bg-green-500 rounded-full" [style.width.%]="conn.throughputPct"></div>
                     </div>
                   </div>
@@ -526,17 +519,17 @@
               @if (col('connections', 'status')) {
                 <td class="px-5 py-3 text-right">
                   @if (conn.status === 'Connected') {
-                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
+                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 px-2 py-0.5 rounded-full">
                       <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>Connected
                     </span>
                   }
                   @if (conn.status === 'Idle') {
-                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-500 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded-full">
+                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 px-2 py-0.5 rounded-full">
                       <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>Idle
                     </span>
                   }
                   @if (conn.status === 'Disconnected') {
-                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full">
+                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 px-2 py-0.5 rounded-full">
                       <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>Disconnected
                     </span>
                   }
@@ -544,7 +537,7 @@
               }
             </tr>
           } @empty {
-            <tr><td [attr.colspan]="visibleColCount('connections')" class="px-5 py-12 text-center text-sm text-gray-400">No active connections.</td></tr>
+            <tr><td [attr.colspan]="visibleColCount('connections')" class="px-5 py-12 text-center text-sm text-gray-400 dark:text-gray-500">No active connections.</td></tr>
           }
         </tbody>
       </table>
@@ -554,27 +547,27 @@
 
   <!-- ── LOCATIONS TAB ── -->
   @if (activeTab === 'locations') {
-    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden" (click)="showColumnPicker = null">
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden" (click)="showColumnPicker = null">
       <!-- Columns toolbar -->
-      <div class="flex justify-end px-4 py-2 border-b border-gray-100">
+      <div class="flex justify-end px-4 py-2 border-b border-gray-100 dark:border-gray-700">
         <div class="relative">
           <button (click)="showColumnPicker = showColumnPicker === 'locations' ? null : 'locations'; $event.stopPropagation()"
-            class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 border border-gray-200 bg-white hover:bg-gray-50 px-3 py-1.5 rounded-lg transition-colors">
+            class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 px-3 py-1.5 rounded-lg transition-colors">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125z"/>
             </svg>
             Columns
           </button>
           @if (showColumnPicker === 'locations') {
-            <div class="absolute right-0 top-full mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-20 py-1"
+            <div class="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20 py-1"
                  (click)="$event.stopPropagation()">
               @for (c of tableColumns['locations']; track c.id) {
-                <label class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 cursor-pointer"
+                <label class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
                   [class.opacity-50]="c.required" [class.cursor-not-allowed]="c.required">
                   <input type="checkbox" [checked]="c.enabled" [disabled]="c.required"
                     (change)="toggleTableColumn('locations', c.id)"
                     class="rounded accent-blue-600"/>
-                  <span class="text-xs text-gray-700">{{ c.label }}</span>
+                  <span class="text-xs text-gray-700 dark:text-gray-300">{{ c.label }}</span>
                 </label>
               }
             </div>
@@ -582,35 +575,35 @@
         </div>
       </div>
       <table class="w-full text-sm">
-        <thead class="bg-gray-50 border-b border-gray-200">
+        <thead class="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
           <tr>
             @if (col('locations', 'location')) {
-              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Location</th>
+              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Location</th>
             }
             @if (col('locations', 'city')) {
-              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">City</th>
+              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">City</th>
             }
             @if (col('locations', 'country')) {
-              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Country</th>
+              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Country</th>
             }
             @if (col('locations', 'connectors')) {
-              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Connectors</th>
+              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Connectors</th>
             }
             @if (col('locations', 'activeConnections')) {
-              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Active Connections</th>
+              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Active Connections</th>
             }
             @if (col('locations', 'usage')) {
-              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Usage</th>
+              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Usage</th>
             }
             @if (col('locations', 'status')) {
-              <th class="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+              <th class="text-right px-5 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
             }
           </tr>
         </thead>
         <tbody>
           @for (loc of customer.locationList; track loc.id) {
             <!-- Location row -->
-            <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
+            <tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
                 (click)="toggleLocation(loc.id)">
               @if (col('locations', 'location')) {
                 <td class="px-5 py-3">
@@ -625,27 +618,27 @@
                       <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
                       <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/>
                     </svg>
-                    <span class="font-medium text-gray-900">{{ loc.name }}</span>
+                    <span class="font-medium text-gray-900 dark:text-gray-100">{{ loc.name }}</span>
                   </div>
                 </td>
               }
               @if (col('locations', 'city')) {
-                <td class="px-4 py-3 text-gray-700">{{ loc.city }}</td>
+                <td class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ loc.city }}</td>
               }
               @if (col('locations', 'country')) {
-                <td class="px-4 py-3 text-gray-700">{{ loc.country }}</td>
+                <td class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ loc.country }}</td>
               }
               @if (col('locations', 'connectors')) {
-                <td class="px-4 py-3 text-right text-gray-700">{{ loc.connectors }}</td>
+                <td class="px-4 py-3 text-right text-gray-700 dark:text-gray-300">{{ loc.connectors }}</td>
               }
               @if (col('locations', 'activeConnections')) {
-                <td class="px-4 py-3 text-right text-gray-700">{{ scaleNum(loc.activeConnections) }}</td>
+                <td class="px-4 py-3 text-right text-gray-700 dark:text-gray-300">{{ scaleNum(loc.activeConnections) }}</td>
               }
               @if (col('locations', 'usage')) {
                 <td class="px-4 py-3 text-right">
                   <div class="flex flex-col items-end gap-1">
-                    <span class="text-sm font-semibold text-gray-800">{{ scaleBw(loc.usageBandwidth) }}</span>
-                    <div class="w-24 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                    <span class="text-sm font-semibold text-gray-800 dark:text-gray-100">{{ scaleBw(loc.usageBandwidth) }}</span>
+                    <div class="w-24 h-1.5 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
                       <div class="h-full bg-green-500 rounded-full" [style.width.%]="loc.usagePct"></div>
                     </div>
                   </div>
@@ -654,17 +647,17 @@
               @if (col('locations', 'status')) {
                 <td class="px-5 py-3 text-right">
                   @if (loc.status === 'Online') {
-                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
+                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 px-2 py-0.5 rounded-full">
                       <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>Online
                     </span>
                   }
                   @if (loc.status === 'Degraded') {
-                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 px-2 py-0.5 rounded-full">
                       <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Degraded
                     </span>
                   }
                   @if (loc.status === 'Offline') {
-                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full">
+                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 px-2 py-0.5 rounded-full">
                       <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>Offline
                     </span>
                   }
@@ -673,48 +666,48 @@
             </tr>
             <!-- Expandable connector sub-table -->
             @if (expandedLocationIds.has(loc.id)) {
-              <tr class="border-b border-gray-100">
+              <tr class="border-b border-gray-100 dark:border-gray-700">
                 <td [attr.colspan]="visibleColCount('locations')" class="px-0 py-0">
-                  <div class="bg-gray-50 border-l-4 border-blue-400 ml-8">
+                  <div class="bg-gray-50 dark:bg-gray-700/50 border-l-4 border-blue-400 ml-8">
                     <!-- Sub-table header -->
-                    <div class="grid grid-cols-[1fr_1fr_2fr_2fr] px-5 py-2 border-b border-gray-200">
-                      <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Connector</span>
-                      <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Type</span>
-                      <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Template</span>
-                      <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Hosted Apps</span>
+                    <div class="grid grid-cols-[1fr_1fr_2fr_2fr] px-5 py-2 border-b border-gray-200 dark:border-gray-600">
+                      <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Connector</span>
+                      <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Type</span>
+                      <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Template</span>
+                      <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Hosted Apps</span>
                     </div>
                     @for (con of connectorsForLocation(loc.name); track con.id) {
-                      <div class="grid grid-cols-[1fr_1fr_2fr_2fr] items-center px-5 py-3 border-b border-gray-100 last:border-b-0 hover:bg-gray-100 transition-colors">
+                      <div class="grid grid-cols-[1fr_1fr_2fr_2fr] items-center px-5 py-3 border-b border-gray-100 dark:border-gray-600 last:border-b-0 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                         <!-- Connector name -->
-                        <span class="text-sm font-medium text-gray-800">{{ con.name }}</span>
+                        <span class="text-sm font-medium text-gray-800 dark:text-gray-100">{{ con.name }}</span>
                         <!-- Type badge -->
                         <div>
                           @if (con.type === 'gateway') {
-                            <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-md">
+                            <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 px-2 py-0.5 rounded-md">
                               <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z"/></svg>
                               Gateway
                             </span>
                           }
                           @if (con.type === 'device') {
-                            <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-md">
+                            <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 px-2 py-0.5 rounded-md">
                               <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/></svg>
                               Device
                             </span>
                           }
                           @if (con.type === 'clientless') {
-                            <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-purple-700 bg-purple-50 border border-purple-200 px-2 py-0.5 rounded-md">
+                            <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-700 px-2 py-0.5 rounded-md">
                               <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"/></svg>
                               Clientless
                             </span>
                           }
                           @if (con.type === 'sdk') {
-                            <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-orange-600 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-md">
+                            <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30 border border-orange-200 dark:border-orange-700 px-2 py-0.5 rounded-md">
                               <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/></svg>
                               SDK
                             </span>
                           }
                           @if (con.type === 'connector') {
-                            <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-600 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded-md">
+                            <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 px-2 py-0.5 rounded-md">
                               <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/></svg>
                               Connector
                             </span>
@@ -725,22 +718,22 @@
                           <span class="text-xs text-gray-400">--</span>
                         } @else {
                           <div class="flex items-center gap-1.5">
-                            <svg class="w-3.5 h-3.5 text-blue-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <svg class="w-3.5 h-3.5 text-blue-500 dark:text-blue-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 01-.657.643 48.39 48.39 0 01-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 01-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 00-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 01-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 00.657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 01-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 005.427-.63 48.05 48.05 0 00.582-4.717.532.532 0 00-.533-.57v0c-.355 0-.676.186-.959.401-.29.221-.634.349-1.003.349-1.035 0-1.875-1.007-1.875-2.25s.84-2.25 1.875-2.25c.37 0 .713.128 1.003.349.283.215.604.401.96.401v0a.656.656 0 00.658-.663 48.422 48.422 0 00-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 01-.61-.58v0z"/>
                             </svg>
-                            <span class="text-xs font-medium text-blue-600">{{ con.template }}</span>
+                            <span class="text-xs font-medium text-blue-600 dark:text-blue-400">{{ con.template }}</span>
                           </div>
                         }
                         <!-- Hosted apps -->
                         <div class="flex items-center gap-1.5 flex-wrap">
                           @for (app of con.hostedApps; track app) {
-                            <span class="text-xs font-medium text-gray-600 bg-white border border-gray-200 px-2 py-0.5 rounded">{{ app }}</span>
+                            <span class="text-xs font-medium text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 px-2 py-0.5 rounded">{{ app }}</span>
                           }
                         </div>
                       </div>
                     }
                     @if (connectorsForLocation(loc.name).length === 0) {
-                      <div class="px-5 py-4 text-xs text-gray-400">No connectors at this location.</div>
+                      <div class="px-5 py-4 text-xs text-gray-400 dark:text-gray-500">No connectors at this location.</div>
                     }
                   </div>
                 </td>
@@ -754,27 +747,27 @@
 
   <!-- ── CONNECTORS TAB ── -->
   @if (activeTab === 'connectors') {
-    <div class="relative bg-white border border-gray-200 rounded-xl overflow-visible" data-connector-card (click)="showColumnPicker = null; connectorMenuOpenId = null">
+    <div class="relative bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-visible" data-connector-card (click)="showColumnPicker = null; connectorMenuOpenId = null">
       <!-- Columns toolbar -->
-      <div class="flex justify-end px-4 py-2 border-b border-gray-100">
+      <div class="flex justify-end px-4 py-2 border-b border-gray-100 dark:border-gray-700">
         <div class="relative">
           <button (click)="showColumnPicker = showColumnPicker === 'connectors' ? null : 'connectors'; $event.stopPropagation()"
-            class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 border border-gray-200 bg-white hover:bg-gray-50 px-3 py-1.5 rounded-lg transition-colors">
+            class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 px-3 py-1.5 rounded-lg transition-colors">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125z"/>
             </svg>
             Columns
           </button>
           @if (showColumnPicker === 'connectors') {
-            <div class="absolute right-0 top-full mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-20 py-1"
+            <div class="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20 py-1"
                  (click)="$event.stopPropagation()">
               @for (c of tableColumns['connectors']; track c.id) {
-                <label class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 cursor-pointer"
+                <label class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
                   [class.opacity-50]="c.required" [class.cursor-not-allowed]="c.required">
                   <input type="checkbox" [checked]="c.enabled" [disabled]="c.required"
                     (change)="toggleTableColumn('connectors', c.id)"
                     class="rounded accent-blue-600"/>
-                  <span class="text-xs text-gray-700">{{ c.label }}</span>
+                  <span class="text-xs text-gray-700 dark:text-gray-300">{{ c.label }}</span>
                 </label>
               }
             </div>
@@ -783,73 +776,76 @@
       </div>
       <div class="overflow-hidden rounded-b-xl">
       <table class="w-full text-sm">
-        <thead class="bg-gray-50 border-b border-gray-200">
+        <thead class="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
           <tr>
-            @if (col('connectors', 'identity')) {
-              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Connectors</th>
+            @if (col('connectors', 'connector')) {
+              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Connectors</th>
             }
             @if (col('connectors', 'application')) {
-              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Application</th>
+              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Application</th>
             }
             @if (col('connectors', 'lastConnected')) {
-              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Last Connected</th>
+              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Last Connected</th>
             }
             @if (col('connectors', 'requests')) {
-              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Requests ↑↓</th>
+              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Requests ↑↓</th>
+            }
+            @if (col('connectors', 'bandwidth')) {
+              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Bandwidth ↑↓</th>
             }
             @if (col('connectors', 'throughput')) {
-              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Throughput ↑↓</th>
+              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Throughput ↑↓</th>
             }
-            <!-- <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Dropped Pkts</th> -->
-            <!-- <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Dropped Conns</th> -->
+            <!-- <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Dropped Pkts</th> -->
+            <!-- <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Dropped Conns</th> -->
             @if (col('connectors', 'uptime')) {
-              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Uptime</th>
+              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Uptime</th>
             }
             @if (col('connectors', 'usage')) {
-              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Usage</th>
+              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Usage</th>
             }
             @if (col('connectors', 'enrollmentStatus')) {
-              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+              <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
             }
-            <th class="px-5 py-3"></th>
+            <th class="text-right px-5 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-100">
+        <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
           @for (connector of customer.connectorList; track connector.id) {
-            <tr class="hover:bg-gray-50 transition-colors">
+            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
               <!-- Connector name + type + status -->
-              @if (col('connectors', 'identity')) {
+              @if (col('connectors', 'connector')) {
                 <td class="px-5 py-3">
                   <div class="flex items-center gap-2.5">
                     @if (connector.type === 'gateway') {
-                      <div class="w-7 h-7 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
-                        <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <div class="w-7 h-7 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center shrink-0">
+                        <svg class="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" d="M5.636 5.636a9 9 0 1012.728 12.728M5.636 5.636L18.364 18.364M12 3v2.25m0 13.5V21m8.25-8.25H18m-13.5 0H2.25"/>
                         </svg>
                       </div>
                     }
                     @if (connector.type === 'device') {
-                      <div class="w-7 h-7 rounded-full bg-violet-100 flex items-center justify-center shrink-0">
-                        <svg class="w-3.5 h-3.5 text-violet-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <div class="w-7 h-7 rounded-full bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center shrink-0">
+                        <svg class="w-3.5 h-3.5 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/>
                         </svg>
                       </div>
                     }
                     @if (connector.type === 'clientless') {
-                      <div class="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                        <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <div class="w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center shrink-0">
+                        <svg class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253"/>
                         </svg>
                       </div>
                     }
                     @if (connector.type === 'sdk' || connector.type === 'connector') {
-                      <div class="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-                        <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <div class="w-7 h-7 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center shrink-0">
+                        <svg class="w-3.5 h-3.5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z"/>
                         </svg>
                       </div>
                     }
-                    <span class="text-sm font-medium text-gray-900">{{ connector.name }}</span>
+                    <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ connector.name }}</span>
                   </div>
                 </td>
               }
@@ -858,7 +854,7 @@
                 <td class="px-4 py-3">
                   <div class="flex flex-wrap gap-1">
                     @for (app of connector.hostedApps; track app) {
-                      <span class="inline-flex items-center text-xs font-medium px-2 py-0.5 rounded-md border text-blue-700 bg-blue-50 border-blue-200">
+                      <span class="inline-flex items-center text-xs font-medium px-2 py-0.5 rounded-md border text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700">
                         {{ app }}
                       </span>
                     }
@@ -867,18 +863,18 @@
               }
               <!-- Last seen -->
               @if (col('connectors', 'lastConnected')) {
-                <td class="px-4 py-3 text-right text-xs text-gray-500">{{ connector.lastSeen }}</td>
+                <td class="px-4 py-3 text-right text-xs text-gray-500 dark:text-gray-400">{{ connector.lastSeen }}</td>
               }
               <!-- Requests -->
               @if (col('connectors', 'requests')) {
-                <td class="px-4 py-3 text-right text-xs text-gray-400">—</td>
+                <td class="px-4 py-3 text-right text-xs text-gray-400 dark:text-gray-500">—</td>
               }
               <!-- Bandwidth -->
               @if (col('connectors', 'bandwidth')) {
                 <td class="px-4 py-3">
                   <div class="flex flex-col items-end gap-1">
-                    <span class="text-xs text-gray-700">{{ scaleBw(connector.usageBandwidth) }}</span>
-                    <div class="w-16 h-1 bg-gray-200 rounded-full overflow-hidden">
+                    <span class="text-xs text-gray-700 dark:text-gray-300">{{ scaleBw(connector.usageBandwidth) }}</span>
+                    <div class="w-16 h-1 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
                       <div class="h-full bg-blue-400 rounded-full" [style.width.%]="connector.usagePct"></div>
                     </div>
                   </div>
@@ -886,12 +882,12 @@
               }
               <!-- Throughput -->
               @if (col('connectors', 'throughput')) {
-                <td class="px-4 py-3 text-right text-xs text-gray-400">—</td>
+                <td class="px-4 py-3 text-right text-xs text-gray-400 dark:text-gray-500">—</td>
               }
               <!-- Uptime -->
               @if (col('connectors', 'uptime')) {
                 <td class="px-4 py-3 text-right">
-                  <span [class]="connector.uptime === '0%' ? 'text-red-500 font-medium' : isUptimeDegraded(connector.uptime) ? 'text-amber-600 font-medium' : 'text-gray-700'">
+                  <span [class]="connector.uptime === '0%' ? 'text-red-500 dark:text-red-400 font-medium' : isUptimeDegraded(connector.uptime) ? 'text-amber-600 dark:text-amber-400 font-medium' : 'text-gray-700 dark:text-gray-300'">
                     {{ connector.uptime }}
                   </span>
                 </td>
@@ -900,8 +896,8 @@
               @if (col('connectors', 'usage')) {
                 <td class="px-4 py-3">
                   <div class="flex flex-col items-end gap-1">
-                    <span class="text-sm font-semibold text-gray-800">{{ scaleBw(connector.usageBandwidth) }}</span>
-                    <div class="w-24 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                    <span class="text-sm font-semibold text-gray-800 dark:text-gray-100">{{ scaleBw(connector.usageBandwidth) }}</span>
+                    <div class="w-24 h-1.5 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
                       <div class="h-full bg-green-500 rounded-full" [style.width.%]="connector.usagePct"></div>
                     </div>
                   </div>
@@ -911,15 +907,15 @@
               @if (col('connectors', 'enrollmentStatus')) {
                 <td class="px-4 py-3 text-right">
                   @if (connector.status === 'Online') {
-                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
+                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 px-2 py-0.5 rounded-full">
                       <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>Online
                     </span>
                   } @else if (connector.status === 'Degraded') {
-                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 px-2 py-0.5 rounded-full">
                       <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>Degraded
                     </span>
                   } @else {
-                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full">
+                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 px-2 py-0.5 rounded-full">
                       <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>Offline
                     </span>
                   }
@@ -928,7 +924,7 @@
               <!-- Three-dot actions menu trigger -->
               <td class="px-5 py-3 text-right" (click)="$event.stopPropagation()">
                 <button (click)="openConnectorMenu(connector.id, $event)"
-                  class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                  class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                   [class.bg-gray-100]="connectorMenuOpenId === connector.id"
                   [class.text-gray-600]="connectorMenuOpenId === connector.id">
                   <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -943,11 +939,11 @@
       </div>
       <!-- Connector row action menu — rendered outside overflow-hidden so it isn't clipped -->
       @if (connectorMenuOpenId) {
-        <div class="absolute right-4 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-20 py-1"
+        <div class="absolute right-4 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20 py-1"
              [style.top.px]="menuPositionTop" [style.bottom.px]="menuPositionBottom" (click)="$event.stopPropagation()">
           @if (activeConnector && activeConnector.status === 'Offline') {
             <button (click)="connectorMenuOpenId = null"
-              class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-green-700 hover:bg-green-50 transition-colors text-left">
+              class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 transition-colors text-left">
               <svg class="w-3.5 h-3.5 text-green-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z"/>
               </svg>
@@ -955,7 +951,7 @@
             </button>
           } @else {
             <button (click)="connectorMenuOpenId = null"
-              class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-amber-700 hover:bg-amber-50 transition-colors text-left">
+              class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-colors text-left">
               <svg class="w-3.5 h-3.5 text-amber-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9v6m-4.5 0V9M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
@@ -969,27 +965,27 @@
 
   <!-- ── USERS TAB ── -->
   @if (activeTab === 'users') {
-    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden" (click)="showColumnPicker = null">
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden" (click)="showColumnPicker = null">
       <!-- Columns toolbar -->
-      <div class="flex justify-end px-4 py-2 border-b border-gray-100">
+      <div class="flex justify-end px-4 py-2 border-b border-gray-100 dark:border-gray-700">
         <div class="relative">
           <button (click)="showColumnPicker = showColumnPicker === 'users' ? null : 'users'; $event.stopPropagation()"
-            class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 border border-gray-200 bg-white hover:bg-gray-50 px-3 py-1.5 rounded-lg transition-colors">
+            class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 px-3 py-1.5 rounded-lg transition-colors">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125z"/>
             </svg>
             Columns
           </button>
           @if (showColumnPicker === 'users') {
-            <div class="absolute right-0 top-full mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-20 py-1"
+            <div class="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20 py-1"
                  (click)="$event.stopPropagation()">
               @for (c of tableColumns['users']; track c.id) {
-                <label class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 cursor-pointer"
+                <label class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
                   [class.opacity-50]="c.required" [class.cursor-not-allowed]="c.required">
                   <input type="checkbox" [checked]="c.enabled" [disabled]="c.required"
                     (change)="toggleTableColumn('users', c.id)"
                     class="rounded accent-blue-600"/>
-                  <span class="text-xs text-gray-700">{{ c.label }}</span>
+                  <span class="text-xs text-gray-700 dark:text-gray-300">{{ c.label }}</span>
                 </label>
               }
             </div>
@@ -997,23 +993,23 @@
         </div>
       </div>
       <table class="w-full text-sm">
-        <thead class="bg-gray-50 border-b border-gray-200">
+        <thead class="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
           <tr>
             @if (col('users', 'user')) {
-              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Provider User</th>
+              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Provider User</th>
             }
             @if (col('users', 'locationRoles')) {
-              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Location Roles</th>
+              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Location Roles</th>
             }
             @if (col('users', 'permissions')) {
-              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Permissions</th>
+              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Permissions</th>
             }
-            <th class="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+            <th class="text-right px-5 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-100">
+        <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
           @for (user of customer.userList; track user.id) {
-            <tr class="hover:bg-gray-50 transition-colors">
+            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
               <!-- Name + email -->
               @if (col('users', 'user')) {
                 <td class="px-5 py-3">
@@ -1022,7 +1018,7 @@
                       <span class="text-xs font-semibold text-white">{{ user.name.split(' ').map(n => n[0]).join('') }}</span>
                     </div>
                     <div>
-                      <div class="font-medium text-gray-900">{{ user.name }}</div>
+                      <div class="font-medium text-gray-900 dark:text-gray-100">{{ user.name }}</div>
                       <div class="text-xs text-gray-400">{{ user.email }}</div>
                     </div>
                   </div>
@@ -1032,21 +1028,21 @@
               @if (col('users', 'locationRoles')) {
                 <td class="px-4 py-3">
                   <div class="flex items-center gap-3">
-                    <span class="text-sm text-gray-700 shrink-0">{{ user.location }}:</span>
+                    <span class="text-sm text-gray-700 dark:text-gray-300 shrink-0">{{ user.location }}:</span>
                     @if (user.role === 'operator') {
-                      <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-violet-700 bg-violet-50 border border-violet-200 px-2.5 py-1 rounded-full">
+                      <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-violet-700 dark:text-violet-300 bg-violet-50 dark:bg-violet-900/30 border border-violet-200 dark:border-violet-700 px-2.5 py-1 rounded-full">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
                         Operator
                       </span>
                     }
                     @if (user.role === 'monitor') {
-                      <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-sky-700 bg-sky-50 border border-sky-200 px-2.5 py-1 rounded-full">
+                      <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-900/30 border border-sky-200 dark:border-sky-700 px-2.5 py-1 rounded-full">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                         Monitor
                       </span>
                     }
                     @if (user.role === 'custom') {
-                      <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full">
+                      <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 px-2.5 py-1 rounded-full">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                         Custom
                       </span>
@@ -1060,28 +1056,28 @@
                   <div class="flex flex-wrap gap-1.5">
                     @if (user.permissions.locations) {
                       <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded border"
-                            [class]="user.permissions.locations === 'manage' ? 'text-indigo-700 bg-indigo-50 border-indigo-200' : 'text-gray-600 bg-gray-50 border-gray-200'">
+                            [class]="user.permissions.locations === 'manage' ? 'text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-900/30 border-indigo-200 dark:border-indigo-700' : 'text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600'">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
                         Locations · {{ user.permissions.locations === 'manage' ? 'Manage' : 'Read Only' }}
                       </span>
                     }
                     @if (user.permissions.connectors) {
                       <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded border"
-                            [class]="user.permissions.connectors === 'manage' ? 'text-indigo-700 bg-indigo-50 border-indigo-200' : 'text-gray-600 bg-gray-50 border-gray-200'">
+                            [class]="user.permissions.connectors === 'manage' ? 'text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-900/30 border-indigo-200 dark:border-indigo-700' : 'text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600'">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z"/></svg>
                         Connectors · {{ user.permissions.connectors === 'manage' ? 'Manage' : 'Read Only' }}
                       </span>
                     }
                     @if (user.permissions.workflows) {
                       <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded border"
-                            [class]="user.permissions.workflows === 'manage' ? 'text-indigo-700 bg-indigo-50 border-indigo-200' : 'text-gray-600 bg-gray-50 border-gray-200'">
+                            [class]="user.permissions.workflows === 'manage' ? 'text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-900/30 border-indigo-200 dark:border-indigo-700' : 'text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600'">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z"/></svg>
                         Workflows · {{ user.permissions.workflows === 'manage' ? 'Manage' : 'Read Only' }}
                       </span>
                     }
                     @if (user.permissions.users) {
                       <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded border"
-                            [class]="user.permissions.users === 'manage' ? 'text-indigo-700 bg-indigo-50 border-indigo-200' : 'text-gray-600 bg-gray-50 border-gray-200'">
+                            [class]="user.permissions.users === 'manage' ? 'text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-900/30 border-indigo-200 dark:border-indigo-700' : 'text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600'">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
                         Users · {{ user.permissions.users === 'manage' ? 'Manage' : 'Read Only' }}
                       </span>
@@ -1092,12 +1088,12 @@
               <!-- Actions -->
               <td class="px-5 py-3 text-right whitespace-nowrap">
                 <div class="flex items-center justify-end gap-1">
-                  <button class="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors">
+                  <button class="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125"/>
                     </svg>
                   </button>
-                  <button class="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors">
+                  <button class="p-1.5 rounded-lg text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
                     </svg>
@@ -1114,37 +1110,37 @@
   <!-- ── RECENT ALERTS TAB ── -->
   @if (activeTab === 'alerts') {
     @if (customer.alerts.length === 0) {
-      <div class="bg-white border border-gray-200 rounded-xl py-16 flex flex-col items-center justify-center text-center">
-        <div class="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center mb-3">
+      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl py-16 flex flex-col items-center justify-center text-center">
+        <div class="w-12 h-12 bg-green-50 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-3">
           <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
           </svg>
         </div>
-        <p class="text-sm font-medium text-gray-700 mb-1">No active alerts</p>
+        <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">No active alerts</p>
         <p class="text-xs text-gray-400">This customer's network is operating normally.</p>
       </div>
     } @else {
-      <div class="bg-white border border-gray-200 rounded-xl overflow-hidden" (click)="showColumnPicker = null">
+      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden" (click)="showColumnPicker = null">
         <!-- Columns toolbar -->
-        <div class="flex justify-end px-4 py-2 border-b border-gray-100">
+        <div class="flex justify-end px-4 py-2 border-b border-gray-100 dark:border-gray-700">
           <div class="relative">
             <button (click)="showColumnPicker = showColumnPicker === 'alerts' ? null : 'alerts'; $event.stopPropagation()"
-              class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 border border-gray-200 bg-white hover:bg-gray-50 px-3 py-1.5 rounded-lg transition-colors">
+              class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 px-3 py-1.5 rounded-lg transition-colors">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125z"/>
               </svg>
               Columns
             </button>
             @if (showColumnPicker === 'alerts') {
-              <div class="absolute right-0 top-full mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-20 py-1"
+              <div class="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20 py-1"
                    (click)="$event.stopPropagation()">
                 @for (c of tableColumns['alerts']; track c.id) {
-                  <label class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 cursor-pointer"
+                  <label class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
                     [class.opacity-50]="c.required" [class.cursor-not-allowed]="c.required">
                     <input type="checkbox" [checked]="c.enabled" [disabled]="c.required"
                       (change)="toggleTableColumn('alerts', c.id)"
                       class="rounded accent-blue-600"/>
-                    <span class="text-xs text-gray-700">{{ c.label }}</span>
+                    <span class="text-xs text-gray-700 dark:text-gray-300">{{ c.label }}</span>
                   </label>
                 }
               </div>
@@ -1152,42 +1148,42 @@
           </div>
         </div>
         <!-- Sub-header -->
-        <div class="grid grid-cols-[1fr_160px_180px_120px] bg-gray-50 border-b border-gray-200 px-5 py-3">
+        <div class="grid grid-cols-[1fr_160px_180px_120px] bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 px-5 py-3">
           @if (col('alerts', 'description')) {
-            <span class="text-xs font-bold uppercase tracking-widest text-gray-500">Alert Description</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Alert Description</span>
           }
           @if (col('alerts', 'created')) {
-            <span class="text-xs font-bold uppercase tracking-widest text-gray-500">Created</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Created</span>
           }
           @if (col('alerts', 'type')) {
-            <span class="text-xs font-bold uppercase tracking-widest text-gray-500">Type</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Type</span>
           }
           @if (col('alerts', 'actions')) {
-            <span class="text-xs font-bold uppercase tracking-widest text-gray-500 text-right">Actions</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 text-right">Actions</span>
           }
         </div>
         @for (alert of customer.alerts; track alert.resource) {
-          <div class="grid grid-cols-[1fr_160px_180px_120px] items-center px-5 py-4 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors">
+          <div class="grid grid-cols-[1fr_160px_180px_120px] items-center px-5 py-4 border-b border-gray-100 dark:border-gray-700 last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
             <!-- Description -->
             @if (col('alerts', 'description')) {
               <div class="flex items-center gap-2.5 pr-4">
                 @if (alert.resourceIcon === 'gateway') {
-                  <svg class="w-4 h-4 text-green-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <svg class="w-4 h-4 text-green-600 dark:text-green-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z"/>
                   </svg>
                 }
                 @if (alert.resourceIcon === 'device') {
-                  <svg class="w-4 h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <svg class="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/>
                   </svg>
                 }
                 @if (alert.resourceIcon === 'connector') {
-                  <svg class="w-4 h-4 text-purple-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <svg class="w-4 h-4 text-purple-600 dark:text-purple-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/>
                   </svg>
                 }
-                <p class="text-sm text-gray-700">
-                  <span class="font-semibold text-blue-600">{{ alert.resource }}</span>
+                <p class="text-sm text-gray-700 dark:text-gray-300">
+                  <span class="font-semibold text-blue-600 dark:text-blue-400">{{ alert.resource }}</span>
                   {{ ' ' + alert.description }}
                 </p>
               </div>
@@ -1219,7 +1215,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
                   </svg>
                 }
-                <span class="text-sm font-medium text-red-500">{{ alert.type }}</span>
+                <span class="text-sm font-medium text-red-500 dark:text-red-400">{{ alert.type }}</span>
               </div>
             }
             <!-- Actions -->
@@ -1240,107 +1236,4 @@
   }
 
 </div>
-}
-
-<!-- ── LOGS PANEL ── -->
-@if (showLogsPanel) {
-  <!-- Backdrop -->
-  <div class="fixed inset-0 bg-black/30 z-40" (click)="showLogsPanel = false"></div>
-
-  <!-- Panel -->
-  <div class="fixed top-0 right-0 h-full w-[680px] bg-white shadow-2xl z-50 flex flex-col">
-
-    <!-- Header -->
-    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 shrink-0">
-      <div>
-        <h2 class="text-base font-semibold text-gray-900">Activity Logs</h2>
-        @if (logsIdentity) {
-          <p class="text-xs text-gray-500 mt-0.5">{{ logsIdentity.name }}</p>
-        }
-      </div>
-      <button (click)="showLogsPanel = false" class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-        </svg>
-      </button>
-    </div>
-
-    <!-- Toolbar -->
-    <div class="flex items-center gap-3 px-6 py-3 border-b border-gray-100 shrink-0 flex-wrap">
-      <!-- Timeframe -->
-      <div class="flex rounded-lg border border-gray-200 overflow-hidden text-xs font-medium">
-        @for (tf of ([{v:'24h',l:'24h'},{v:'7d',l:'7d'},{v:'30d',l:'30d'}]); track tf.v) {
-          <button (click)="logsTimeframe = $any(tf.v)"
-            [class]="logsTimeframe === tf.v ? 'bg-blue-600 text-white px-3 py-1.5' : 'bg-white text-gray-600 hover:bg-gray-50 px-3 py-1.5 transition-colors'">
-            {{ tf.l }}
-          </button>
-        }
-      </div>
-
-      <!-- Status filter -->
-      <div class="flex rounded-lg border border-gray-200 overflow-hidden text-xs font-medium">
-        @for (f of ([{v:'all',l:'All'},{v:'success',l:'Success'},{v:'fail',l:'Failed'}]); track f.v) {
-          <button (click)="logsStatusFilter = $any(f.v)"
-            [class]="logsStatusFilter === f.v ? 'bg-blue-600 text-white px-3 py-1.5' : 'bg-white text-gray-600 hover:bg-gray-50 px-3 py-1.5 transition-colors'">
-            {{ f.l }}
-          </button>
-        }
-      </div>
-
-      <!-- Search -->
-      <div class="relative flex-1 min-w-[160px]">
-        <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
-        </svg>
-        <input [(ngModel)]="logsSearch" placeholder="Search URL or port…"
-          class="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400"/>
-      </div>
-
-      <!-- Count -->
-      <span class="text-xs text-gray-400 shrink-0">{{ filteredLogs.length }} entries</span>
-    </div>
-
-    <!-- Table -->
-    <div class="flex-1 overflow-y-auto">
-      @if (filteredLogs.length === 0) {
-        <div class="flex flex-col items-center justify-center h-40 text-gray-400">
-          <svg class="w-8 h-8 mb-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
-          </svg>
-          <p class="text-sm">No log entries match your filters</p>
-        </div>
-      } @else {
-        <table class="w-full text-xs">
-          <thead class="bg-gray-50 border-b border-gray-200 sticky top-0">
-            <tr>
-              <th class="text-left px-6 py-2.5 font-semibold text-gray-500 uppercase tracking-wider">Timestamp</th>
-              <th class="text-left px-4 py-2.5 font-semibold text-gray-500 uppercase tracking-wider">URL</th>
-              <th class="text-right px-4 py-2.5 font-semibold text-gray-500 uppercase tracking-wider">Port</th>
-              <th class="text-right px-6 py-2.5 font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100">
-            @for (log of filteredLogs; track $index) {
-              <tr class="hover:bg-gray-50 transition-colors">
-                <td class="px-6 py-2.5 text-gray-500 whitespace-nowrap">{{ formatLogTimestamp(log.timestamp) }}</td>
-                <td class="px-4 py-2.5 text-gray-700 font-medium">{{ log.url }}</td>
-                <td class="px-4 py-2.5 text-right text-gray-500 font-mono">{{ log.port }}</td>
-                <td class="px-6 py-2.5 text-right">
-                  @if (log.status === 'success') {
-                    <span class="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
-                      <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>Success
-                    </span>
-                  } @else {
-                    <span class="inline-flex items-center gap-1 text-xs font-medium text-red-700 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full">
-                      <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>Failed
-                    </span>
-                  }
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      }
-    </div>
-  </div>
 }

@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NgTemplateOutlet } from '@angular/common';
 import { CustomerService, Customer } from '../../services/customer.service';
+import { PersonaService } from '../../services/persona.service';
 
 interface KpiStat {
   label: string;
@@ -32,6 +33,9 @@ export class ProviderDashboardComponent {
   filterStatus: 'All' | 'Active' | 'Degraded' | 'Inactive' = 'All';
   filterAlerts: 'All' | 'Has Alerts' | 'No Alerts' = 'All';
   showFilters = false;
+
+  showCustomerPicker = false;
+  pickerSearch = '';
 
   sortCol = 'name';
   sortDir: 'asc' | 'desc' = 'asc';
@@ -125,8 +129,25 @@ export class ProviderDashboardComponent {
     { label: 'Active Connectors', value: '312', sub: 'Across all locations', icon: 'connectors', iconBg: 'bg-teal-50', iconColor: 'text-teal-600' },
   ];
 
-  constructor(private customerService: CustomerService, private router: Router) {
+  constructor(private customerService: CustomerService, private router: Router, public personaService: PersonaService) {
     this.customers = this.customerService.getAll();
+  }
+
+  get pickerCustomers(): Customer[] {
+    const q = this.pickerSearch.toLowerCase().trim();
+    if (!q) return this.customers;
+    return this.customers.filter(c => c.name.toLowerCase().includes(q));
+  }
+
+  openCustomerPicker() {
+    this.pickerSearch = '';
+    this.showCustomerPicker = true;
+  }
+
+  selectCustomerToView(customer: Customer) {
+    this.showCustomerPicker = false;
+    this.personaService.startImpersonation(customer.id, customer.name);
+    this.router.navigate(['/ian-dashboard']);
   }
 
   toggleExpanded(index: number) {

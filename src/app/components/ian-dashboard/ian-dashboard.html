@@ -1,4 +1,24 @@
-<div class="flex h-full">
+<div class="flex flex-col h-full">
+
+@if (personaService.impersonating()) {
+  <div class="flex items-center justify-between gap-4 px-6 py-2.5 bg-amber-50 dark:bg-amber-950 border-b border-amber-200 dark:border-amber-800 shrink-0">
+    <div class="flex items-center gap-2.5 text-sm text-amber-800 dark:text-amber-200">
+      <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+      </svg>
+      <span>You are viewing <strong>{{ personaService.impersonatedCustomerName() }}</strong>'s dashboard</span>
+    </div>
+    <button (click)="exitImpersonation()" class="flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-md bg-amber-100 hover:bg-amber-200 dark:bg-amber-900 dark:hover:bg-amber-800 text-amber-800 dark:text-amber-200 transition-colors">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+      Exit
+    </button>
+  </div>
+}
+
+<div class="flex flex-1 min-h-0 overflow-hidden">
 
   <!-- Left Nav -->
   <div class="w-56 shrink-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col">
@@ -1446,63 +1466,129 @@
           </div>
 
           <!-- Early access -->
-          <div class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
-            <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-400 mb-3">Early access</p>
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+          <div class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-5 flex flex-col gap-5">
+            <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-400">Early access</p>
+
+            <!-- Beta features -->
+            <div>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                    [class.bg-violet-600]="personaService.ianBetaMode()"
+                    [class.bg-violet-100]="!personaService.ianBetaMode()"
+                    [class.dark:bg-violet-500]="personaService.ianBetaMode()"
+                    [class.dark:bg-violet-900\/30]="!personaService.ianBetaMode()">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+                      [class.text-white]="personaService.ianBetaMode()"
+                      [class.text-violet-500]="!personaService.ianBetaMode()"
+                      [class.dark:text-violet-300]="!personaService.ianBetaMode()">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">Beta features</p>
+                      @if (personaService.ianBetaMode()) {
+                        <span class="text-[10px] font-semibold text-violet-600 dark:text-violet-400 bg-violet-100 dark:bg-violet-900\/30 px-1.5 py-0.5 rounded-full">Active</span>
+                      }
+                    </div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Enable experimental features and extended dashboard data</p>
+                  </div>
+                </div>
+                <button (click)="personaService.toggleIanBetaMode()"
+                  class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
                   [class.bg-violet-600]="personaService.ianBetaMode()"
-                  [class.bg-violet-100]="!personaService.ianBetaMode()"
-                  [class.dark:bg-violet-500]="personaService.ianBetaMode()"
-                  [class.dark:bg-violet-900\/30]="!personaService.ianBetaMode()">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
-                    [class.text-white]="personaService.ianBetaMode()"
-                    [class.text-violet-500]="!personaService.ianBetaMode()"
-                    [class.dark:text-violet-300]="!personaService.ianBetaMode()">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5"/>
-                  </svg>
-                </div>
-                <div>
-                  <div class="flex items-center gap-2">
-                    <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">Beta features</p>
-                    @if (personaService.ianBetaMode()) {
-                      <span class="text-[10px] font-semibold text-violet-600 dark:text-violet-400 bg-violet-100 dark:bg-violet-900\/30 px-1.5 py-0.5 rounded-full">Active</span>
-                    }
-                  </div>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">Enable experimental features and extended dashboard data</p>
-                </div>
+                  [class.bg-gray-200]="!personaService.ianBetaMode()"
+                  [class.dark:bg-gray-600]="!personaService.ianBetaMode()"
+                  aria-label="Toggle beta features">
+                  <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform"
+                    [class.translate-x-6]="personaService.ianBetaMode()"
+                    [class.translate-x-1]="!personaService.ianBetaMode()">
+                  </span>
+                </button>
               </div>
-              <button (click)="personaService.toggleIanBetaMode()"
-                class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
-                [class.bg-violet-600]="personaService.ianBetaMode()"
-                [class.bg-gray-200]="!personaService.ianBetaMode()"
-                [class.dark:bg-gray-600]="!personaService.ianBetaMode()"
-                aria-label="Toggle beta features">
-                <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform"
-                  [class.translate-x-6]="personaService.ianBetaMode()"
-                  [class.translate-x-1]="!personaService.ianBetaMode()">
-                </span>
-              </button>
+              @if (personaService.ianBetaMode()) {
+                <div class="mt-3 pt-3 border-t border-violet-100 dark:border-violet-900\/40">
+                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Unlocked for your dashboard</p>
+                  <div class="flex flex-col gap-1.5">
+                    <div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
+                      <span class="w-1.5 h-1.5 rounded-full bg-violet-500 shrink-0"></span>
+                      Extended connector telemetry &amp; raw packet stats
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
+                      <span class="w-1.5 h-1.5 rounded-full bg-violet-500 shrink-0"></span>
+                      Deep-dive diagnostics with per-hop latency data
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
+                      <span class="w-1.5 h-1.5 rounded-full bg-violet-500 shrink-0"></span>
+                      Early access to new dashboard features &amp; layout experiments
+                    </div>
+                  </div>
+                </div>
+              }
             </div>
-            @if (personaService.ianBetaMode()) {
-              <div class="mt-4 pt-4 border-t border-violet-100 dark:border-violet-900\/40">
-                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Unlocked for your dashboard</p>
-                <div class="flex flex-col gap-1.5">
-                  <div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
-                    <span class="w-1.5 h-1.5 rounded-full bg-violet-500 shrink-0"></span>
-                    Extended connector telemetry &amp; raw packet stats
+
+            <div class="border-t border-gray-200 dark:border-gray-700"></div>
+
+            <!-- Power user features -->
+            <div>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                    [class.bg-amber-500]="personaService.ianPowerUserMode()"
+                    [class.bg-amber-100]="!personaService.ianPowerUserMode()"
+                    [class.dark:bg-amber-500]="personaService.ianPowerUserMode()"
+                    [class.dark:bg-amber-900\/30]="!personaService.ianPowerUserMode()">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+                      [class.text-white]="personaService.ianPowerUserMode()"
+                      [class.text-amber-500]="!personaService.ianPowerUserMode()"
+                      [class.dark:text-amber-300]="!personaService.ianPowerUserMode()">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/>
+                    </svg>
                   </div>
-                  <div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
-                    <span class="w-1.5 h-1.5 rounded-full bg-violet-500 shrink-0"></span>
-                    Deep-dive diagnostics with per-hop latency data
-                  </div>
-                  <div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
-                    <span class="w-1.5 h-1.5 rounded-full bg-violet-500 shrink-0"></span>
-                    Early access to new dashboard features &amp; layout experiments
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">Power user features</p>
+                      @if (personaService.ianPowerUserMode()) {
+                        <span class="text-[10px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900\/30 px-1.5 py-0.5 rounded-full">Active</span>
+                      }
+                    </div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Unlock advanced controls, bulk operations, and expert tooling</p>
                   </div>
                 </div>
+                <button (click)="personaService.toggleIanPowerUserMode()"
+                  class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+                  [class.bg-amber-500]="personaService.ianPowerUserMode()"
+                  [class.bg-gray-200]="!personaService.ianPowerUserMode()"
+                  [class.dark:bg-gray-600]="!personaService.ianPowerUserMode()"
+                  aria-label="Toggle power user features">
+                  <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform"
+                    [class.translate-x-6]="personaService.ianPowerUserMode()"
+                    [class.translate-x-1]="!personaService.ianPowerUserMode()">
+                  </span>
+                </button>
               </div>
-            }
+              @if (personaService.ianPowerUserMode()) {
+                <div class="mt-3 pt-3 border-t border-amber-100 dark:border-amber-900\/40">
+                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Unlocked for your dashboard</p>
+                  <div class="flex flex-col gap-1.5">
+                    <div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
+                      <span class="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
+                      Bulk policy management &amp; batch connector operations
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
+                      <span class="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
+                      Advanced audit log filters with raw export
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
+                      <span class="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
+                      Manual override controls for routing &amp; failover
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+
           </div>
 
         </div>
@@ -1538,4 +1624,5 @@
   }
 
 
+</div>
 </div>

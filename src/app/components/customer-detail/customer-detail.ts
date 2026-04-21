@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CustomerService, Customer } from '../../services/customer.service';
-import { LogEntry, generateLogs, formatLogTimestamp, filterLogs } from '../../utils/log.utils';
+import { PersonaService } from '../../services/persona.service';
 
 type Tab = 'summary' | 'connections' | 'locations' | 'connectors' | 'users' | 'alerts';
 
@@ -39,34 +39,6 @@ export class CustomerDetailComponent {
   connectorMenuOpenId: string | null = null;
   menuPositionTop: number | null = null;
   menuPositionBottom: number | null = null;
-
-  // Logs panel
-  showLogsPanel = false;
-  logsIdentityId: string | null = null;
-  logsTimeframe: '24h' | '7d' | '30d' = '7d';
-  logsStatusFilter: 'all' | 'success' | 'fail' = 'all';
-  logsSearch = '';
-  private allLogs: LogEntry[] = [];
-
-  get logsIdentity() {
-    return this.customer?.connectorList.find(c => c.id === this.logsIdentityId) ?? null;
-  }
-
-  get filteredLogs(): LogEntry[] {
-    return filterLogs(this.allLogs, this.logsTimeframe, this.logsStatusFilter, this.logsSearch);
-  }
-
-  openLogs(id: string): void {
-    this.connectorMenuOpenId = null;
-    this.logsIdentityId = id;
-    this.logsTimeframe = '7d';
-    this.logsStatusFilter = 'all';
-    this.logsSearch = '';
-    this.allLogs = generateLogs(id);
-    this.showLogsPanel = true;
-  }
-
-  formatLogTimestamp = formatLogTimestamp;
 
   get activeConnector() {
     return this.customer?.connectorList.find(c => c.id === this.connectorMenuOpenId) ?? null;
@@ -113,7 +85,7 @@ export class CustomerDetailComponent {
       { id: 'status',            label: 'Status',                 enabled: true, required: true },
     ],
     connectors: [
-      { id: 'identity',      label: 'Identity',       enabled: true, required: true },
+      { id: 'connector',      label: 'Connector',       enabled: true, required: true },
       { id: 'application',   label: 'Application',    enabled: true },
       { id: 'lastConnected', label: 'Last Connected',  enabled: true },
       { id: 'requests',      label: 'Requests',       enabled: true },
@@ -206,12 +178,19 @@ export class CustomerDetailComponent {
     private route: ActivatedRoute,
     private customerService: CustomerService,
     private router: Router,
+    private personaService: PersonaService,
   ) {
     const id = this.route.snapshot.paramMap.get('id') ?? '';
     this.customer = this.customerService.getById(id);
     if (!this.customer) {
       this.router.navigate(['/dashboard']);
     }
+  }
+
+  viewAsCustomer() {
+    if (!this.customer) return;
+    this.personaService.startImpersonation(this.customer.id, this.customer.name);
+    this.router.navigate(['/ian-dashboard']);
   }
 
   setTab(tab: Tab) { this.activeTab = tab; }

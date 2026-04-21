@@ -2,17 +2,15 @@ import { Component, effect, inject } from '@angular/core';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { HeaderComponent } from './components/header/header';
-import { SidebarComponent } from './components/sidebar/sidebar';
 import { PersonaService } from './services/persona.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, HeaderComponent, SidebarComponent],
+  imports: [RouterOutlet, HeaderComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class App {
-  showSidebar = true;
   showChrome = true;
 
   private personaService = inject(PersonaService);
@@ -27,7 +25,9 @@ export class App {
     ).subscribe(e => {
       const url = e.urlAfterRedirects;
       this.showChrome = !url.startsWith('/login') && !url.startsWith('/maya-setup');
-      this.showSidebar = url.startsWith('/provider-setup') || url.startsWith('/customer-setup');
+      this.personaService.providerContext.set(
+        url.startsWith('/dashboard') || url.startsWith('/customers')
+      );
     });
   }
 }
