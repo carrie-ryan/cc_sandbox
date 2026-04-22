@@ -9,7 +9,7 @@ import { CustomerService, CustomerConnector } from '../../services/customer.serv
   selector: 'app-customer-identities',
   standalone: true,
   imports: [NgTemplateOutlet, FormsModule],
-  templateUrl: './customer-identities.html',
+  templateUrl: './customer-users.html',
 })
 export class CustomerIdentitiesComponent {
   readonly identityService = inject(IdentityService);

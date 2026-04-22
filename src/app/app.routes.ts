@@ -1,10 +1,10 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './components/login/login';
+import { LoginComponent } from './components/maya-login/maya-login';
 import { MayaSetupComponent } from './components/maya-setup/maya-setup';
 import { CustomerLocationsComponent } from './components/customer-locations/customer-locations';
 import { CustomerOnboardingComponent } from './components/customer-onboarding/customer-onboarding';
 import { ProviderDashboardComponent } from './components/provider-dashboard/provider-dashboard';
-import { CustomerDetailComponent } from './components/customer-detail/customer-detail';
+import { CustomerDetailComponent } from './components/provider-customer-detail/provider-customer-detail';
 import { IanDashboardComponent } from './components/ian-dashboard/ian-dashboard';
 import { MayaDashboardComponent } from './components/maya-dashboard/maya-dashboard';
 

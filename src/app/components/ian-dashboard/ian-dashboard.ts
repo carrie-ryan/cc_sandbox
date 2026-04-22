@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { NgTemplateOutlet, UpperCasePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { CustomerLocationsComponent } from '../customer-locations/customer-locations';
-import { CustomerIdentitiesComponent } from '../customer-identities/customer-identities';
+import { CustomerIdentitiesComponent } from '../customer-users/customer-users';
 import { CustomerService, Customer, CustomerIdentity } from '../../services/customer.service';
 import { PersonaService } from '../../services/persona.service';
 import { OnboardingService } from '../../services/onboarding.service';

@@ -5,7 +5,7 @@ import { PersonaService } from '../../services/persona.service';
 
 @Component({
   selector: 'app-login',
-  templateUrl: './login.html',
+  templateUrl: './maya-login.html',
   imports: [FormsModule],
 })
 export class LoginComponent {

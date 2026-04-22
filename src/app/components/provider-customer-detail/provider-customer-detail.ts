@@ -24,7 +24,7 @@ interface Widget {
 @Component({
   selector: 'app-customer-detail',
   imports: [FormsModule],
-  templateUrl: './customer-detail.html',
+  templateUrl: './provider-customer-detail.html',
 })
 export class CustomerDetailComponent {
   customer: Customer | undefined;
