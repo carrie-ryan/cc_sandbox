@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { LoginComponent } from './components/maya-login/maya-login';
 import { MayaSetupComponent } from './components/maya-setup/maya-setup';
 import { CustomerLocationsComponent } from './components/customer-locations/customer-locations';
+import { CustomerLiveAuditComponent } from './components/customer-live-audit/customer-live-audit';
 import { CustomerOnboardingComponent } from './components/customer-onboarding/customer-onboarding';
 import { ProviderDashboardComponent } from './components/provider-dashboard/provider-dashboard';
 import { CustomerDetailComponent } from './components/provider-customer-detail/provider-customer-detail';
@@ -17,5 +18,6 @@ export const routes: Routes = [
   { path: 'ian-dashboard', component: IanDashboardComponent },
   { path: 'maya-dashboard', component: MayaDashboardComponent },
   { path: 'customer-portal/locations', component: CustomerLocationsComponent },
+  { path: 'customer-portal/live-audit', component: CustomerLiveAuditComponent },
   { path: 'customer-portal/onboarding', component: CustomerOnboardingComponent },
 ];

@@ -8,7 +8,7 @@ export interface MayaDevice {
   type: 'laptop' | 'phone' | 'tablet';
   os: string;
   lastSeen: string;
-  status: 'active' | 'inactive' | 'pending';
+  status: 'active' | 'inactive';
   token?: string;
 }
 
@@ -48,9 +48,20 @@ export class MayaDashboardComponent {
 
   showAddDevice = false;
   removingDeviceId: string | null = null;
+  addDeviceUrlCopied = false;
+
+  private readonly activationUrl =
+    'https://enroll.acmecorp.netfoundry.io/enroll?token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.acme-maya-device-token';
 
   openAddDevice() {
     this.showAddDevice = true;
+  }
+
+  copyDeviceUrl() {
+    navigator.clipboard.writeText(this.activationUrl).then(() => {
+      this.addDeviceUrlCopied = true;
+      setTimeout(() => (this.addDeviceUrlCopied = false), 2000);
+    });
   }
 
   downloadJwt() {
@@ -61,35 +72,6 @@ export class MayaDashboardComponent {
     a.download = 'activation.jwt';
     a.click();
     URL.revokeObjectURL(url);
-  }
-
-  submitActivationToken() {
-    this.mayaDevices = [
-      ...this.mayaDevices,
-      {
-        id: 'dev-' + Date.now(),
-        name: 'New Device',
-        type: 'laptop',
-        os: 'Pending activation',
-        lastSeen: 'Just now',
-        status: 'pending',
-      },
-    ];
-    this.showAddDevice = false;
-  }
-
-  acceptDevice(id: string) {
-    const device = this.mayaDevices.find(d => d.id === id);
-    if (device) {
-      device.status = 'active';
-      device.os = device.type === 'phone' ? 'iOS 18'
-                : device.type === 'tablet' ? 'iPadOS 18'
-                : 'macOS Sequoia';
-    }
-  }
-
-  rejectDevice(id: string) {
-    this.mayaDevices = this.mayaDevices.filter(d => d.id !== id);
   }
 
   confirmRemoveDevice(id: string) { this.removingDeviceId = id; }
@@ -117,64 +99,6 @@ export class MayaDashboardComponent {
     sessionStart: '9:02 AM',
     sessionDuration: '2h 34m',
   };
-
-  mayaDiagState: 'idle' | 'running' | 'done' = 'idle';
-  mayaDiagSteps: { label: string; state: 'pending' | 'running' | 'done' | 'warn' | 'fail' }[] = [];
-  mayaDiagResult: { type: 'ok' | 'warn' | 'fail'; headline: string; body: string } | null = null;
-
-  runMayaDiagnostics() {
-    this.mayaDiagState = 'running';
-    this.mayaDiagResult = null;
-    this.mayaDiagSteps = [
-      { label: 'Resolving DNS',              state: 'pending' },
-      { label: 'Testing latency to gateway', state: 'pending' },
-      { label: 'Checking for packet loss',   state: 'pending' },
-      { label: 'Verifying gateway health',   state: 'pending' },
-      { label: 'Analyzing throughput',       state: 'pending' },
-    ];
-    let i = 0;
-    const tick = () => {
-      if (i >= this.mayaDiagSteps.length) {
-        this.mayaDiagState = 'done';
-        this.mayaDiagResult = this.buildDiagResult();
-        return;
-      }
-      this.mayaDiagSteps[i].state = 'running';
-      setTimeout(() => {
-        const s = this.mayaConnection.status;
-        const step = this.mayaDiagSteps[i];
-        if (s === 'connected')      { step.state = 'done'; }
-        else if (s === 'degraded')  { step.state = (i === 1 || i === 2) ? 'warn' : 'done'; }
-        else                        { step.state = (i >= 2) ? 'fail' : 'done'; }
-        i++;
-        tick();
-      }, 650);
-    };
-    tick();
-  }
-
-  private buildDiagResult(): { type: 'ok' | 'warn' | 'fail'; headline: string; body: string } {
-    const s = this.mayaConnection.status;
-    if (s === 'connected') {
-      return {
-        type: 'ok',
-        headline: 'Everything looks good',
-        body: `Latency is ${this.mayaConnection.latency} (excellent) and no packet loss was detected. ${this.mayaConnection.via} is responding normally. If a specific app still feels slow, the issue is likely on that app's server — not your connection.`,
-      };
-    }
-    if (s === 'degraded') {
-      return {
-        type: 'warn',
-        headline: 'Elevated latency on your gateway',
-        body: `We detected higher-than-normal latency and some packet loss on ${this.mayaConnection.via}. This is likely causing the slowness you're experiencing. Your IT team has been notified. Try closing and reopening the affected app — if it continues, reconnecting may help.`,
-      };
-    }
-    return {
-      type: 'fail',
-      headline: `Can't reach ${this.mayaConnection.via}`,
-      body: `The gateway your connection routes through appears to be offline or unreachable. This is preventing access to network resources. Please contact your IT administrator or try again in a few minutes.`,
-    };
-  }
 
   mayaNotifMode: 'quiet' | 'focused' | 'standard' = 'focused';
   mayaQuietHours = { enabled: true, from: '22:00', to: '08:00' };

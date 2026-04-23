@@ -8,7 +8,9 @@ function readPersistedBool(key: string): boolean {
 
 @Injectable({ providedIn: 'root' })
 export class PersonaService {
-  activePersona = signal<Persona>('ian');
+  activePersona = signal<Persona>(
+    (typeof localStorage !== 'undefined' && localStorage.getItem('active-persona') as Persona) || 'ian'
+  );
   showSettings = signal(false);
   providerContext = signal(false);
 
@@ -43,6 +45,7 @@ export class PersonaService {
 
   setPersona(persona: Persona) {
     this.activePersona.set(persona);
+    localStorage.setItem('active-persona', persona);
   }
 
   toggleIanDarkMode() { this.persistToggle(this.ianDarkMode, 'ian-dark-mode'); }

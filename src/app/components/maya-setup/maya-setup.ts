@@ -6,6 +6,11 @@ import { Router } from '@angular/router';
   templateUrl: './maya-setup.html',
 })
 export class MayaSetupComponent {
+  urlCopied = false;
+
+  private readonly activationUrl =
+    'https://enroll.acmecorp.netfoundry.io/enroll?token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.acme-maya-device-token';
+
   constructor(private router: Router) {}
 
   downloadJwt() {
@@ -16,6 +21,13 @@ export class MayaSetupComponent {
     a.download = 'activation.jwt';
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  copyUrl() {
+    navigator.clipboard.writeText(this.activationUrl).then(() => {
+      this.urlCopied = true;
+      setTimeout(() => (this.urlCopied = false), 2000);
+    });
   }
 
   goToDashboard() {
