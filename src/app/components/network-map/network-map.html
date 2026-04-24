@@ -1,0 +1,254 @@
+<div class="relative w-full h-full rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+
+  <!-- Ocean background -->
+  <div class="absolute inset-0 bg-slate-100 dark:bg-gray-900"></div>
+
+  <!-- Real world map (Natural Earth, equirectangular, public domain) -->
+  <img src="world-map.svg" alt="" aria-hidden="true"
+    class="absolute inset-0 w-full h-full object-fill opacity-30 dark:opacity-20 dark:invert pointer-events-none select-none"
+    style="color: #94a3b8"/>
+
+  <!-- Node + connection overlay SVG — same viewBox as the map SVG so coords align exactly -->
+  <svg viewBox="0 0 1000 500" class="absolute inset-0 w-full h-full" aria-label="Network topology map">
+
+    <!-- Connection lines between nodes -->
+    @for (a of nodes(); track a.location.id) {
+      @for (b of nodes(); track b.location.id) {
+        @if (a.location.id < b.location.id) {
+          <line
+            [attr.x1]="a.x" [attr.y1]="a.y"
+            [attr.x2]="b.x" [attr.y2]="b.y"
+            stroke="currentColor" stroke-width="0.8" stroke-dasharray="3,4" opacity="0.3"
+            class="text-blue-400 dark:text-blue-500"/>
+        }
+      }
+    }
+
+    <!-- Location nodes -->
+    @for (node of nodes(); track node.location.id) {
+      <g [attr.transform]="'translate(' + node.x + ',' + node.y + ')'" class="cursor-pointer"
+        (click)="selectNode(node)" role="button" [attr.aria-label]="node.location.name + ' — ' + node.location.status">
+
+        <!-- Pulse ring for online nodes -->
+        @if (node.location.status === 'Online') {
+          <circle r="14" fill="none" [attr.stroke]="statusColor(node.location.status)" stroke-width="1.5" opacity="0.35">
+            <animate attributeName="r" values="10;16;10" dur="2.5s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.4;0;0.4" dur="2.5s" repeatCount="indefinite"/>
+          </circle>
+        }
+
+        <!-- Outer ring -->
+        <circle r="11"
+          [attr.fill]="isSelected(node) ? statusColor(node.location.status) : 'white'"
+          [attr.stroke]="statusColor(node.location.status)"
+          stroke-width="2.5"/>
+
+        <!-- Inner dot -->
+        <circle r="5"
+          [attr.fill]="isSelected(node) ? 'white' : statusColor(node.location.status)"/>
+
+        <!-- Connector count badge (top-right) — hidden when warning badge occupies that spot -->
+        @if (node.connectors.length > 0 && node.severity === 'none') {
+          <g transform="translate(8,-8)">
+            <circle r="7" fill="#1e40af"/>
+            <text text-anchor="middle" dominant-baseline="central" font-size="7" font-weight="700" fill="white">
+              {{ node.connectors.length }}
+            </text>
+          </g>
+        }
+
+        <!-- Warning badge (top-right) — replaces connector count when issues exist -->
+        @if (node.severity === 'critical') {
+          <g transform="translate(8,-8)">
+            <circle r="8" fill="#dc2626"/>
+            <text text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="700" fill="white">!</text>
+          </g>
+        }
+        @if (node.severity === 'warning') {
+          <g transform="translate(8,-8)">
+            <circle r="8" fill="#d97706"/>
+            <text text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="700" fill="white">!</text>
+          </g>
+        }
+
+        <!-- City label -->
+        <text text-anchor="middle" y="22" font-size="9" font-weight="600"
+          [attr.fill]="isSelected(node) ? statusColor(node.location.status) : '#374151'"
+          class="select-none">
+          {{ node.location.city }}
+        </text>
+      </g>
+    }
+  </svg>
+
+  <!-- Legend -->
+  <div class="absolute bottom-3 left-3 flex items-center gap-3 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2">
+    <span class="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</span>
+    <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-500 shrink-0"></span><span class="text-[10px] text-gray-600 dark:text-gray-300">Online</span></span>
+    <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span><span class="text-[10px] text-gray-600 dark:text-gray-300">Degraded</span></span>
+    <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-500 shrink-0"></span><span class="text-[10px] text-gray-600 dark:text-gray-300">Offline</span></span>
+    <span class="w-px h-3 bg-gray-200 dark:bg-gray-600 mx-1"></span>
+    <span class="flex items-center gap-1">
+      <span class="w-4 h-4 rounded-full bg-amber-500 flex items-center justify-center text-[9px] font-bold text-white shrink-0">!</span>
+      <span class="text-[10px] text-gray-600 dark:text-gray-300">Warning</span>
+    </span>
+    <span class="flex items-center gap-1">
+      <span class="w-4 h-4 rounded-full bg-red-600 flex items-center justify-center text-[9px] font-bold text-white shrink-0">!</span>
+      <span class="text-[10px] text-gray-600 dark:text-gray-300">Critical</span>
+    </span>
+  </div>
+
+  <!-- Drill-down panel -->
+  @if (selectedNode(); as node) {
+    <div class="absolute top-0 right-0 h-full w-72 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 flex flex-col shadow-xl overflow-hidden">
+
+      <!-- Panel header -->
+      <div class="flex items-start justify-between px-4 pt-4 pb-3 border-b border-gray-100 dark:border-gray-700 shrink-0">
+        <div>
+          <p class="text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-0.5">{{ node.location.country }}</p>
+          <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100 leading-tight">{{ node.location.name }}</h3>
+          <span class="inline-flex items-center gap-1 mt-1.5 text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full border {{ locationStatusClass(node.location.status) }}">
+            <span class="w-1.5 h-1.5 rounded-full shrink-0"
+              [class.bg-green-500]="node.location.status === 'Online'"
+              [class.bg-amber-500]="node.location.status === 'Degraded'"
+              [class.bg-red-500]="node.location.status === 'Offline'"></span>
+            {{ node.location.status }}
+          </span>
+        </div>
+        <button (click)="closePanel()" aria-label="Close panel"
+          class="p-1 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors mt-0.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Usage stats -->
+      <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700 shrink-0">
+        <p class="text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2">Usage · Last 30 days</p>
+        <div class="grid grid-cols-2 gap-2">
+          <div class="bg-gray-50 dark:bg-gray-900 rounded-lg px-3 py-2">
+            <p class="text-base font-bold text-gray-900 dark:text-gray-100">{{ node.location.usageBandwidth }}</p>
+            <p class="text-[10px] text-gray-500 dark:text-gray-400">Bandwidth · last 30 days</p>
+          </div>
+          <div class="bg-gray-50 dark:bg-gray-900 rounded-lg px-3 py-2">
+            <p class="text-base font-bold text-gray-900 dark:text-gray-100">{{ node.location.activeConnections }}</p>
+            <p class="text-[10px] text-gray-500 dark:text-gray-400">Active connections</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Connectors list -->
+      <div class="flex-1 overflow-y-auto">
+        <div class="px-4 pt-3 pb-1 shrink-0">
+          <p class="text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+            Connectors ({{ node.connectors.length }})
+          </p>
+        </div>
+
+        @if (node.connectors.length === 0) {
+          <p class="px-4 py-3 text-xs text-gray-400 dark:text-gray-500">No connectors found for this location.</p>
+        }
+
+        @for (cw of node.connectors; track cw.connector.id) {
+          <div class="mx-3 mb-2 rounded-lg border px-3 py-2.5"
+            [class.bg-red-50]="cw.severity === 'critical'"
+            [class.dark:bg-red-900\/20]="cw.severity === 'critical'"
+            [class.border-red-200]="cw.severity === 'critical'"
+            [class.dark:border-red-800]="cw.severity === 'critical'"
+            [class.bg-amber-50]="cw.severity === 'warning'"
+            [class.dark:bg-amber-900\/20]="cw.severity === 'warning'"
+            [class.border-amber-200]="cw.severity === 'warning'"
+            [class.dark:border-amber-800]="cw.severity === 'warning'"
+            [class.bg-gray-50]="cw.severity === 'none'"
+            [class.dark:bg-gray-900]="cw.severity === 'none'"
+            [class.border-gray-100]="cw.severity === 'none'"
+            [class.dark:border-gray-700]="cw.severity === 'none'">
+
+            <div class="flex items-start justify-between gap-2 mb-1.5">
+              <div class="min-w-0 flex items-start gap-1.5">
+                @if (cw.severity !== 'none') {
+                  <svg class="w-3.5 h-3.5 shrink-0 mt-0.5"
+                    [class.text-red-500]="cw.severity === 'critical'"
+                    [class.text-amber-500]="cw.severity === 'warning'"
+                    fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+                  </svg>
+                }
+                <div>
+                  <p class="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate">{{ cw.connector.name }}</p>
+                  <p class="text-[10px] text-gray-400 dark:text-gray-500">{{ connectorTypeLabel(cw.connector.type) }}</p>
+                </div>
+              </div>
+              <span class="inline-flex items-center gap-1 text-[10px] font-semibold shrink-0 mt-0.5" [class]="connectorStatusColor(cw.connector.status)">
+                <span class="w-1.5 h-1.5 rounded-full shrink-0" [class]="connectorStatusDot(cw.connector.status)"></span>
+                {{ cw.connector.status }}
+              </span>
+            </div>
+
+            <!-- Warning details -->
+            @if (cw.severity !== 'none') {
+              <div class="flex items-center gap-3 mb-1.5 px-2 py-1.5 rounded-md"
+                [class.bg-red-100]="cw.severity === 'critical'"
+                [class.dark:bg-red-900\/30]="cw.severity === 'critical'"
+                [class.bg-amber-100]="cw.severity === 'warning'"
+                [class.dark:bg-amber-900\/30]="cw.severity === 'warning'">
+                @if (cw.droppedConnections > 0) {
+                  <span class="text-[10px] font-semibold"
+                    [class.text-red-700]="cw.severity === 'critical'"
+                    [class.dark:text-red-400]="cw.severity === 'critical'"
+                    [class.text-amber-700]="cw.severity === 'warning'"
+                    [class.dark:text-amber-400]="cw.severity === 'warning'">
+                    {{ cw.droppedConnections }} dropped connection{{ cw.droppedConnections !== 1 ? 's' : '' }}
+                  </span>
+                }
+                @if (cw.droppedPackets > 0) {
+                  <span class="text-[10px] font-semibold"
+                    [class.text-red-700]="cw.severity === 'critical'"
+                    [class.dark:text-red-400]="cw.severity === 'critical'"
+                    [class.text-amber-700]="cw.severity === 'warning'"
+                    [class.dark:text-amber-400]="cw.severity === 'warning'">
+                    {{ cw.droppedPackets }} dropped packet{{ cw.droppedPackets !== 1 ? 's' : '' }}
+                  </span>
+                }
+                <span class="text-[10px]"
+                  [class.text-red-500]="cw.severity === 'critical'"
+                  [class.dark:text-red-500]="cw.severity === 'critical'"
+                  [class.text-amber-500]="cw.severity === 'warning'"
+                  [class.dark:text-amber-500]="cw.severity === 'warning'">· Last 24h</span>
+              </div>
+            }
+
+            <!-- Connector usage -->
+            <div class="grid grid-cols-2 gap-x-4 gap-y-1 mt-1.5 pt-1.5 border-t"
+              [class.border-red-200]="cw.severity === 'critical'"
+              [class.dark:border-red-800]="cw.severity === 'critical'"
+              [class.border-amber-200]="cw.severity === 'warning'"
+              [class.dark:border-amber-800]="cw.severity === 'warning'"
+              [class.border-gray-200]="cw.severity === 'none'"
+              [class.dark:border-gray-700]="cw.severity === 'none'">
+              <div>
+                <p class="text-[10px] text-gray-400 dark:text-gray-500">Bandwidth · 30d</p>
+                <p class="text-xs font-semibold text-gray-800 dark:text-gray-200">{{ cw.connector.usageBandwidth }}</p>
+              </div>
+              <div>
+                <p class="text-[10px] text-gray-400 dark:text-gray-500">Last seen</p>
+                <p class="text-xs font-semibold text-gray-800 dark:text-gray-200">{{ cw.connector.lastSeen }}</p>
+              </div>
+              @if (cw.connector.hostedApps && cw.connector.hostedApps.length > 0) {
+                <div class="col-span-2 mt-0.5">
+                  <p class="text-[10px] text-gray-400 dark:text-gray-500 mb-0.5">Hosted apps</p>
+                  <div class="flex gap-1 flex-wrap">
+                    @for (app of cw.connector.hostedApps; track app) {
+                      <span class="text-[10px] bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700 px-1.5 py-0.5 rounded">{{ app }}</span>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

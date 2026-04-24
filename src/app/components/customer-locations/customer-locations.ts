@@ -1,6 +1,7 @@
 import { Component, ElementRef, EventEmitter, Output, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ConnectorAssignment, IdentityService } from '../../services/identity.service';
+import { CustomerService } from '../../services/customer.service';
 
 interface CustomerConnector {
   id: string;
@@ -13,7 +14,9 @@ interface CustomerConnector {
   uptime: string;
   lastConnected: string;
   allocation: string;
+  version: string;
 }
+
 
 interface CustomerLocation {
   id: string;
@@ -34,6 +37,7 @@ export class CustomerLocationsComponent {
 
   private readonly el = inject(ElementRef);
   private readonly identityService = inject(IdentityService);
+  private readonly customerService = inject(CustomerService);
   private previouslyFocusedEl: HTMLElement | null = null;
   private toastTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -257,47 +261,41 @@ export class CustomerLocationsComponent {
   searchQuery = '';
   activeFilter = 'All';
   filters = ['All', 'Location', 'Template', 'Type'];
-  expanded: { [id: string]: boolean } = { 'cloc-1': true };
 
   connectorTypes = ['Device', 'Gateway', 'Clientless', 'SDK Embedded'];
   templates = ['No Template', 'Standard Device', 'Secure Gateway'];
 
-  locations: CustomerLocation[] = [
-    {
-      id: 'cloc-1',
-      name: 'Riverside Main Clinic',
-      address: '789 Medical Plaza',
-      addressSub: 'Portland, OR 97201',
-      licensesAllocated: 20,
-      connectors: [
-        { id: 'c1', name: 'Chicago Gateway 1', type: 'Gateway',    template: '--', hostedApps: 1, hostedAppNames: ['HTTPS'],        status: 'Online',   uptime: '--', lastConnected: '--', allocation: '0/25' },
-        { id: 'c2', name: 'Chicago Gateway 2', type: 'Gateway',    template: '--', hostedApps: 2, hostedAppNames: ['HTTPS', 'SSH'], status: 'Online',   uptime: '--', lastConnected: '--', allocation: '0/10' },
-        { id: 'c3', name: 'Chicago Device 1',  type: 'Device',     template: '--', hostedApps: 1, hostedAppNames: ['RDP'],          status: 'Offline',  uptime: '--', lastConnected: '--', allocation: '0/30' },
-      ],
-    },
-    {
-      id: 'cloc-2',
-      name: 'Riverside Urgent Care',
-      address: '456 Healthcare Way',
-      addressSub: 'Beaverton, OR 97005',
-      licensesAllocated: 15,
-      connectors: [
-        { id: 'c7', name: 'Austin Host 3',          type: 'Device',     template: '--', hostedApps: 2, hostedAppNames: ['RDP', 'SSH'], status: 'Degraded', uptime: '--', lastConnected: '--', allocation: '22/25' },
-        { id: 'c8', name: 'New York Clientless 1',  type: 'Clientless', template: '--', hostedApps: 1, hostedAppNames: ['HTTPS'],       status: 'Online',   uptime: '--', lastConnected: '--', allocation: '9/10'  },
-      ],
-    },
-    {
-      id: 'cloc-3',
-      name: 'Riverside Admin Office',
-      address: '123 Business Center',
-      addressSub: 'Portland, OR 97201',
-      licensesAllocated: 5,
-      connectors: [
-        { id: 'c12', name: 'London Gateway 1', type: 'Gateway', template: '--', hostedApps: 1, hostedAppNames: ['HTTPS'], status: 'Online',  uptime: '--', lastConnected: '--', allocation: '5/25' },
-        { id: 'c32', name: 'London Device 1',  type: 'Device',  template: '--', hostedApps: 1, hostedAppNames: ['RDP'],   status: 'Offline', uptime: '--', lastConnected: '--', allocation: '0/10' },
-      ],
-    },
-  ];
+  private readonly typeLabel: Record<string, string> = {
+    gateway: 'Gateway', device: 'Device', clientless: 'Clientless', sdk: 'SDK Embedded', connector: 'Connector',
+  };
+
+  locations: CustomerLocation[] = (() => {
+    const customer = this.customerService.getById('acme-corp')!;
+    return customer.locationList.map(loc => ({
+      id: loc.id,
+      name: loc.name,
+      address: loc.city,
+      addressSub: loc.country,
+      licensesAllocated: loc.connectors,
+      connectors: customer.connectorList
+        .filter(c => c.location === loc.name)
+        .map(c => ({
+          id: c.id,
+          name: c.name,
+          type: this.typeLabel[c.type] ?? c.type,
+          template: c.template,
+          hostedApps: c.hostedApps.length,
+          hostedAppNames: c.hostedApps,
+          status: c.status,
+          uptime: c.uptime,
+          lastConnected: c.lastSeen,
+          allocation: '0/0',
+          version: c.version,
+        })),
+    }));
+  })();
+
+  expanded: { [id: string]: boolean } = { [this.locations[0]?.id ?? '']: true };
 
   private locationTotals(loc: CustomerLocation): { used: number; total: number } {
     let used = 0, total = 0;
@@ -355,6 +353,29 @@ export class CustomerLocationsComponent {
     const friendly = this.appFriendlyNames[tech];
     return friendly ? `${tech} / ${friendly}` : tech;
   };
+
+  private readonly LATEST_VERSION = '3.4.1';
+
+  private readonly versionOverrides: Record<string, 'pending' | 'failed'> = {
+    'Chicago-Dev-01': 'pending',
+    'Austin-Host-03': 'failed',
+  };
+
+  versionStatusLabel(conn: CustomerConnector): string {
+    const override = this.versionOverrides[conn.id];
+    if (override === 'pending') return 'Update pending';
+    if (override === 'failed') return 'Update failed';
+    if (conn.version === this.LATEST_VERSION) return 'Version up to date';
+    return 'Needs updating';
+  }
+
+  versionStatusClasses(conn: CustomerConnector): string {
+    const override = this.versionOverrides[conn.id];
+    if (override === 'pending') return 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700';
+    if (override === 'failed') return 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-700';
+    if (conn.version === this.LATEST_VERSION) return 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-700';
+    return 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-700';
+  }
 
   connectorTypeColor(type: string): string {
     const map: { [key: string]: string } = {
