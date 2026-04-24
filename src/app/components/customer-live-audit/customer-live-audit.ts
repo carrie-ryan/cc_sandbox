@@ -1,17 +1,46 @@
-import { Component, inject } from '@angular/core';
+import { Component, HostListener, inject } from '@angular/core';
 import { NgTemplateOutlet, UpperCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CustomerService, CustomerIdentity } from '../../services/customer.service';
+import { NetworkMapComponent } from '../network-map/network-map';
 
 @Component({
   selector: 'app-customer-live-audit',
   standalone: true,
-  imports: [NgTemplateOutlet, UpperCasePipe, FormsModule],
+  imports: [NgTemplateOutlet, UpperCasePipe, FormsModule, NetworkMapComponent],
   templateUrl: './customer-live-audit.html',
 })
 export class CustomerLiveAuditComponent {
   private readonly customerService = inject(CustomerService);
   readonly customer = this.customerService.getById('acme-corp')!;
+
+  viewMode: 'split' | 'map' | 'table' = 'split';
+  readonly locations = this.customer.locationList;
+  readonly connectors = this.customer.connectorList;
+
+  mapHeight = 320;
+  private dragging = false;
+  private dragStartY = 0;
+  private dragStartHeight = 0;
+
+  onDragStart(event: MouseEvent): void {
+    this.dragging = true;
+    this.dragStartY = event.clientY;
+    this.dragStartHeight = this.mapHeight;
+    event.preventDefault();
+  }
+
+  @HostListener('document:mousemove', ['$event'])
+  onMouseMove(event: MouseEvent): void {
+    if (!this.dragging) return;
+    const delta = event.clientY - this.dragStartY;
+    this.mapHeight = Math.min(600, Math.max(150, this.dragStartHeight + delta));
+  }
+
+  @HostListener('document:mouseup')
+  onMouseUp(): void {
+    this.dragging = false;
+  }
 
   get activeIdentities(): number {
     return this.customer.identityList.filter(i => i.status === 'Connected').length;
@@ -23,12 +52,12 @@ export class CustomerLiveAuditComponent {
   auditWarningsOnly = false;
   auditPage = 1;
   readonly auditPageSize = 10;
-  auditSortCol: 'entity' | 'type' | 'throughput' | 'lastSeen' | 'status' | null = null;
+  auditSortCol: 'entity' | 'type' | 'usage' | 'lastSeen' | 'status' | null = null;
   auditSortDir: 'asc' | 'desc' = 'asc';
 
   resetAuditPage() { this.auditPage = 1; }
 
-  setAuditSort(col: 'entity' | 'type' | 'throughput' | 'lastSeen' | 'status') {
+  setAuditSort(col: 'entity' | 'type' | 'usage' | 'lastSeen' | 'status') {
     if (this.auditSortCol === col) {
       this.auditSortDir = this.auditSortDir === 'asc' ? 'desc' : 'asc';
     } else {
@@ -78,8 +107,8 @@ export class CustomerLiveAuditComponent {
         }
         case 'type':
           return a.type.localeCompare(b.type) * dir;
-        case 'throughput':
-          return (this.parseThroughput(a.throughputSent) - this.parseThroughput(b.throughputSent)) * dir;
+        case 'usage':
+          return (this.parseThroughput(a.usageBandwidth ?? '') - this.parseThroughput(b.usageBandwidth ?? '')) * dir;
         case 'lastSeen':
           return (this.parseRelativeTime(a.lastConnected) - this.parseRelativeTime(b.lastConnected)) * dir;
         case 'status':
