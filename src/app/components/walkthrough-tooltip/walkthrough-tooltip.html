@@ -1,0 +1,84 @@
+@if (walkthrough.isActive()) {
+
+  <!-- Highlight ring around target element -->
+  @if (highlightRect()) {
+    <div class="fixed pointer-events-none z-[60] rounded-lg ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-gray-900 transition-all duration-200"
+      [style.top.px]="highlightRect()!.top - 4"
+      [style.left.px]="highlightRect()!.left - 4"
+      [style.width.px]="highlightRect()!.width + 8"
+      [style.height.px]="highlightRect()!.height + 8">
+    </div>
+  }
+
+  <!-- Tooltip card -->
+  <div class="fixed z-[61] w-80 bg-blue-700 dark:bg-blue-800 rounded-xl shadow-2xl text-white"
+    [style.top.px]="position().top"
+    [style.left.px]="position().left">
+
+    <!-- Arrow -->
+    @if (position().arrowSide === 'top') {
+      <div class="absolute -top-2 w-4 h-2 overflow-hidden"
+        [style.left.px]="position().arrowOffset - 8">
+        <div class="w-4 h-4 bg-blue-700 dark:bg-blue-800 rotate-45 translate-y-1 shadow-md"></div>
+      </div>
+    }
+    @if (position().arrowSide === 'bottom') {
+      <div class="absolute -bottom-2 w-4 h-2 overflow-hidden"
+        [style.left.px]="position().arrowOffset - 8">
+        <div class="w-4 h-4 bg-blue-700 dark:bg-blue-800 rotate-45 -translate-y-1 shadow-md"></div>
+      </div>
+    }
+    @if (position().arrowSide === 'left') {
+      <div class="absolute -left-2 h-4 w-2 overflow-hidden"
+        [style.top.px]="position().arrowOffset - 8">
+        <div class="w-4 h-4 bg-blue-700 dark:bg-blue-800 rotate-45 translate-x-1 shadow-md"></div>
+      </div>
+    }
+    @if (position().arrowSide === 'right') {
+      <div class="absolute -right-2 h-4 w-2 overflow-hidden"
+        [style.top.px]="position().arrowOffset - 8">
+        <div class="w-4 h-4 bg-blue-700 dark:bg-blue-800 rotate-45 -translate-x-1 shadow-md"></div>
+      </div>
+    }
+
+    <!-- Content -->
+    <div class="px-5 pt-5 pb-4">
+      <p class="text-sm font-bold mb-2">{{ walkthrough.currentStep.title }}</p>
+      <p class="text-sm leading-relaxed text-blue-100">{{ walkthrough.currentStep.body }}</p>
+    </div>
+
+    <!-- Footer -->
+    <div class="flex items-center justify-between px-5 py-3 border-t border-blue-600 dark:border-blue-700">
+      <div class="flex items-center gap-3">
+        <!-- Back arrow (hidden on first step) -->
+        @if (!walkthrough.isFirstStep) {
+          <button (click)="prev()"
+            class="p-1 rounded hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors"
+            aria-label="Previous step">
+            <svg class="w-4 h-4 text-blue-200" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>
+            </svg>
+          </button>
+        } @else {
+          <div class="w-6"></div>
+        }
+        <span class="text-xs text-blue-200 font-medium tabular-nums">
+          {{ walkthrough.currentStepIndex() + 1 }}/{{ walkthrough.totalSteps }}
+        </span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button (click)="skip()"
+          class="text-xs text-blue-200 hover:text-white px-2 py-1 rounded transition-colors">
+          Skip
+        </button>
+        <button (click)="next()"
+          class="text-xs font-semibold bg-white text-blue-700 hover:bg-blue-50 px-4 py-1.5 rounded-lg transition-colors">
+          {{ walkthrough.isLastStep ? 'Done' : 'Next' }}
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+}

@@ -1,6 +1,5 @@
-import { Component, ElementRef, EventEmitter, Output, inject } from '@angular/core';
+import { Component, ElementRef, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ConnectorAssignment, IdentityService } from '../../services/identity.service';
 import { CustomerService } from '../../services/customer.service';
 
 interface CustomerConnector {
@@ -27,22 +26,24 @@ interface CustomerLocation {
   connectors: CustomerConnector[];
 }
 
+interface ConnectorApp {
+  protocol: string;
+  name: string;
+  roles: string[];
+}
+
 @Component({
   selector: 'app-customer-locations',
   imports: [FormsModule],
   templateUrl: './customer-locations.html',
 })
 export class CustomerLocationsComponent {
-  @Output() navigateToIdentities = new EventEmitter<void>();
-
   private readonly el = inject(ElementRef);
-  private readonly identityService = inject(IdentityService);
   private readonly customerService = inject(CustomerService);
   private previouslyFocusedEl: HTMLElement | null = null;
-  private toastTimer: ReturnType<typeof setTimeout> | null = null;
 
   get isAnyModalOpen(): boolean {
-    return this.showDeployModal || this.showAddConnectorModal || this.showBulkUploadModal || this.showAssignChoiceModal;
+    return this.showAddConnectorModal;
   }
 
   private saveFocus(): void {
@@ -69,185 +70,9 @@ export class CustomerLocationsComponent {
     }, 50);
   }
 
-  showAssignSuccessToast = false;
-  assignSuccessCount = 0;
-  assignSuccessConnectorName = '';
-
   showAddConnectorModal = false;
-  showAssignChoiceModal = false;
-  showDeployModal = false;
-  showBulkUploadModal = false;
-  assignConnector: CustomerConnector | null = null;
-  bulkUploadStep: 'upload' | 'preview' = 'upload';
-  bulkUploadFileName = '';
-  bulkUploadPreviewRows: Array<{ label: string; email: string }> = [];
-  bulkUploadError = '';
-  bulkUploadParsing = false;
-  deployLabel = '';
-  deployEmail = '';
-  deployToken = '';
-  tokenCopied = false;
-  tokenEmailSent = false;
 
-  openAssignChoiceModal(connector: CustomerConnector): void {
-    this.saveFocus();
-    this.assignConnector = connector;
-    this.showAssignChoiceModal = true;
-    this.focusFirstInDialog();
-  }
-
-  closeAssignChoiceModal(): void {
-    this.showAssignChoiceModal = false;
-    this.restoreFocus();
-  }
-
-  openDeployModal(): void {
-    this.showAssignChoiceModal = false;
-    this.deployLabel = '';
-    this.deployEmail = '';
-    this.deployToken = '';
-    this.tokenCopied = false;
-    this.tokenEmailSent = false;
-    this.showDeployModal = true;
-    this.focusFirstInDialog();
-  }
-
-  closeDeployModal(): void {
-    this.showDeployModal = false;
-    this.restoreFocus();
-  }
-
-  generateToken(): void {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    const segment = (len: number) => Array.from({ length: len }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-    this.deployToken = `${segment(8)}-${segment(4)}-${segment(4)}-${segment(4)}-${segment(12)}`;
-    this.tokenCopied = false;
-  }
-
-  copyToken(): void {
-    navigator.clipboard.writeText(this.deployToken);
-    this.tokenCopied = true;
-    setTimeout(() => this.tokenCopied = false, 2000);
-  }
-
-  emailToken(): void {
-    this.tokenEmailSent = true;
-    setTimeout(() => this.tokenEmailSent = false, 2000);
-  }
-
-  confirmDeploy(): void {
-    if (!this.deployLabel.trim() || !this.deployEmail.trim()) return;
-    const connectorName = this.assignConnector?.name ?? '';
-    const assignment: ConnectorAssignment | undefined = this.assignConnector ? {
-      id: this.assignConnector.id,
-      name: this.assignConnector.name,
-      apps: this.assignConnector.hostedAppNames,
-      status: 'Pending',
-      activated: '--',
-    } : undefined;
-    this.identityService.add(this.deployLabel.trim(), this.deployEmail.trim(), assignment);
-    this.showDeployModal = false;
-    this.restoreFocus();
-    this.showToast(1, connectorName);
-  }
-
-  openBulkUploadModal(): void {
-    this.showAssignChoiceModal = false;
-    this.bulkUploadStep = 'upload';
-    this.bulkUploadFileName = '';
-    this.bulkUploadPreviewRows = [];
-    this.bulkUploadError = '';
-    this.bulkUploadParsing = false;
-    this.showBulkUploadModal = true;
-    this.focusFirstInDialog();
-  }
-
-  closeBulkUploadModal(): void {
-    this.showBulkUploadModal = false;
-    this.restoreFocus();
-  }
-
-  onBulkFileSelected(event: Event): void {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (!file) return;
-    this.bulkUploadFileName = file.name;
-    this.bulkUploadError = '';
-    this.bulkUploadParsing = true;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const text = (e.target as FileReader).result as string;
-      this.parseBulkCsv(text);
-      this.bulkUploadParsing = false;
-    };
-    reader.onerror = () => {
-      this.bulkUploadError = 'Failed to read the file. Please try again.';
-      this.bulkUploadParsing = false;
-    };
-    reader.readAsText(file);
-  }
-
-  private parseBulkCsv(text: string): void {
-    const lines = text.split(/\r?\n/).filter(l => l.trim());
-    if (lines.length < 2) {
-      this.bulkUploadError = 'File must contain a header row and at least one data row.';
-      return;
-    }
-    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
-    const labelIdx = headers.indexOf('label');
-    const emailIdx = headers.indexOf('email');
-    if (labelIdx === -1) {
-      this.bulkUploadError = 'CSV must include a "label" column.';
-      return;
-    }
-    const rows: Array<{ label: string; email: string }> = [];
-    for (let i = 1; i < lines.length; i++) {
-      const cols = lines[i].split(',').map(c => c.trim());
-      const label = cols[labelIdx] ?? '';
-      const email = emailIdx !== -1 ? (cols[emailIdx] ?? '') : '';
-      if (label) rows.push({ label, email });
-    }
-    if (rows.length === 0) {
-      this.bulkUploadError = 'No valid rows found in the file.';
-      return;
-    }
-    this.bulkUploadPreviewRows = rows;
-    this.bulkUploadStep = 'preview';
-  }
-
-  confirmBulkUpload(): void {
-    const count = this.bulkUploadPreviewRows.length;
-    const connectorName = this.assignConnector?.name ?? '';
-    const assignment: ConnectorAssignment | undefined = this.assignConnector ? {
-      id: this.assignConnector.id,
-      name: this.assignConnector.name,
-      apps: this.assignConnector.hostedAppNames,
-      status: 'Pending',
-      activated: '--',
-    } : undefined;
-    this.identityService.addBulk(this.bulkUploadPreviewRows, assignment);
-    this.showBulkUploadModal = false;
-    this.restoreFocus();
-    this.showToast(count, connectorName);
-  }
-
-  private showToast(count: number, connectorName: string): void {
-    if (this.toastTimer) clearTimeout(this.toastTimer);
-    this.assignSuccessCount = count;
-    this.assignSuccessConnectorName = connectorName;
-    this.showAssignSuccessToast = true;
-    this.toastTimer = setTimeout(() => this.dismissToast(), 6000);
-  }
-
-  dismissToast(): void {
-    this.showAssignSuccessToast = false;
-  }
-
-  goToUsers(): void {
-    this.dismissToast();
-    this.navigateToIdentities.emit();
-  }
   rowMenuOpenId: string | null = null;
-  hostedAppsOpenId: string | null = null;
   editingConnectorId: string | null = null;
   editingConnectorName = '';
   activeLocationId: string | null = null;
@@ -296,6 +121,18 @@ export class CustomerLocationsComponent {
   })();
 
   expanded: { [id: string]: boolean } = { [this.locations[0]?.id ?? '']: true };
+  connectorExpanded: Record<string, boolean> = {};
+  appEnabled: Record<string, boolean> = {};
+
+  readonly providerName = 'Central Square';
+
+  private readonly appRoleMap: Record<string, Record<string, string[]>> = {
+    'Chicago-GW-01': { CAD: ['End User', 'IT Admin'] },
+    'Chicago-GW-02': { RMS: ['IT Admin', 'Supervisor'] },
+    'Chicago-Dev-02': { 'Criminal Profiling System': ['IT Admin', 'Supervisor'], 'Patrol Route Optimizer': ['End User', 'IT Admin'] },
+    'NY-CL-01':      { GIS: ['End User', 'IT Admin', 'Supervisor'] },
+    'London-GW-01':  { CIM: ['IT Admin', 'Supervisor'] },
+  };
 
   private locationTotals(loc: CustomerLocation): { used: number; total: number } {
     let used = 0, total = 0;
@@ -344,9 +181,10 @@ export class CustomerLocationsComponent {
   }
 
   readonly appFriendlyNames: Record<string, string> = {
-    'RDP':   'Remote Desktop',
-    'HTTPS': 'File Share',
-    'SSH':   'Secure Shell',
+    'CAD': 'Computer-Aided Dispatch',
+    'RMS': 'Records Management System',
+    'GIS': 'GIS Mapping',
+    'CIM': 'Common Informatics Module',
   };
 
   readonly appLabel = (tech: string): string => {
@@ -356,14 +194,14 @@ export class CustomerLocationsComponent {
 
   private readonly LATEST_VERSION = '3.4.1';
 
-  private readonly versionOverrides: Record<string, 'pending' | 'failed'> = {
-    'Chicago-Dev-01': 'pending',
+  private readonly versionOverrides: Record<string, 'required' | 'failed'> = {
+    'Chicago-Dev-01': 'required',
     'Austin-Host-03': 'failed',
   };
 
   versionStatusLabel(conn: CustomerConnector): string {
     const override = this.versionOverrides[conn.id];
-    if (override === 'pending') return 'Update pending';
+    if (override === 'required') return 'Update required';
     if (override === 'failed') return 'Update failed';
     if (conn.version === this.LATEST_VERSION) return 'Version up to date';
     return 'Needs updating';
@@ -371,7 +209,7 @@ export class CustomerLocationsComponent {
 
   versionStatusClasses(conn: CustomerConnector): string {
     const override = this.versionOverrides[conn.id];
-    if (override === 'pending') return 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700';
+    if (override === 'required') return 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700';
     if (override === 'failed') return 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-700';
     if (conn.version === this.LATEST_VERSION) return 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-700';
     return 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-700';
@@ -420,6 +258,38 @@ export class CustomerLocationsComponent {
 
   isConnectorPaused(id: string): boolean {
     return this.pausedConnectors.has(id);
+  }
+
+  toggleConnectorExpand(connId: string, event: Event): void {
+    event.stopPropagation();
+    this.connectorExpanded[connId] = !this.connectorExpanded[connId];
+  }
+
+  getConnectorApps(conn: CustomerConnector): ConnectorApp[] {
+    return conn.hostedAppNames.map(protocol => ({
+      protocol,
+      name: this.appFriendlyNames[protocol] ?? protocol,
+      roles: this.appRoleMap[conn.id]?.[protocol] ?? [],
+    }));
+  }
+
+  getConnectorRoles(conn: CustomerConnector): string[] {
+    const roles = new Set<string>();
+    for (const protocol of conn.hostedAppNames) {
+      for (const r of (this.appRoleMap[conn.id]?.[protocol] ?? [])) {
+        roles.add(r);
+      }
+    }
+    return [...roles];
+  }
+
+  isAppEnabled(connId: string, protocol: string): boolean {
+    return this.appEnabled[`${connId}::${protocol}`] !== false;
+  }
+
+  toggleAppEnabled(connId: string, protocol: string): void {
+    const key = `${connId}::${protocol}`;
+    this.appEnabled[key] = !this.isAppEnabled(connId, protocol);
   }
 
   openAddConnector(locationId: string): void {

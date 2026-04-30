@@ -1,12 +1,14 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CustomerLocationsComponent } from '../customer-locations/customer-locations';
 import { CustomerIdentitiesComponent } from '../customer-users/customer-users';
 import { CustomerLiveAuditComponent } from '../customer-live-audit/customer-live-audit';
+import { WalkthroughTooltipComponent } from '../walkthrough-tooltip/walkthrough-tooltip';
 import { CustomerService, Customer } from '../../services/customer.service';
 import { PersonaService } from '../../services/persona.service';
 import { OnboardingService } from '../../services/onboarding.service';
+import { WalkthroughService } from '../../services/walkthrough.service';
 
 export interface PendingApproval {
   id: string;
@@ -49,10 +51,10 @@ export interface TrafficFilter {
 @Component({
   selector: 'app-ian-dashboard',
   templateUrl: './ian-dashboard.html',
-  imports: [FormsModule, CustomerLocationsComponent, CustomerIdentitiesComponent, CustomerLiveAuditComponent],
+  imports: [FormsModule, CustomerLocationsComponent, CustomerIdentitiesComponent, CustomerLiveAuditComponent, WalkthroughTooltipComponent],
   host: { class: 'flex-1 min-h-0 overflow-hidden' },
 })
-export class IanDashboardComponent implements OnDestroy {
+export class IanDashboardComponent implements OnInit, OnDestroy {
   customer: Customer;
 
   killSwitchActive = false;
@@ -263,7 +265,8 @@ export class IanDashboardComponent implements OnDestroy {
     }, 1500);
   }
 
-  activeSection: 'overview' | 'connectors' | 'audit' | 'alerts' | 'access' | 'licenses' | 'locations' | 'identities' = 'overview';
+  activeSection: 'overview' | 'connectors' | 'audit' | 'alerts' | 'access' | 'licenses' | 'network' = 'overview';
+  networkTab: 'locations' | 'users' = 'locations';
 
   get alertBadge(): number { return this.visibleAlerts.length; }
   get connectorBadge(): number { return this.degradedConnectors + this.offlineConnectors; }
@@ -275,7 +278,7 @@ export class IanDashboardComponent implements OnDestroy {
     this.router.navigate(['/customers', customerId]);
   }
 
-  constructor(private customerService: CustomerService, public personaService: PersonaService, public onboardingService: OnboardingService, private router: Router) {
+  constructor(private customerService: CustomerService, public personaService: PersonaService, public onboardingService: OnboardingService, public walkthroughService: WalkthroughService, private router: Router) {
     this.customer = this.customerService.getById('acme-corp')!;
     this.timerInterval = setInterval(() => {
       this.accessTimers.forEach(t => {
@@ -286,6 +289,12 @@ export class IanDashboardComponent implements OnDestroy {
         }
       });
     }, 1000);
+  }
+
+  ngOnInit() {
+    if (!this.walkthroughService.hasCompletedTour()) {
+      setTimeout(() => this.walkthroughService.startTour(), 400);
+    }
   }
 
   ngOnDestroy() {

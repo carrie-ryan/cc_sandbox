@@ -8,9 +8,17 @@ export interface ConnectorWithWarnings {
   severity: 'none' | 'warning' | 'critical';
 }
 
+export interface UserWithWarnings {
+  identity: CustomerIdentity;
+  droppedPackets: number;
+  droppedConnections: number;
+  severity: 'none' | 'warning' | 'critical';
+}
+
 export interface MapNode {
   location: CustomerLocation;
   connectors: ConnectorWithWarnings[];
+  users: UserWithWarnings[];
   x: number;
   y: number;
   severity: 'none' | 'warning' | 'critical';
@@ -78,14 +86,21 @@ export class NetworkMapComponent {
           return { connector: c, droppedPackets: packets, droppedConnections: connections, severity: connectorSeverity(packets, connections) };
         });
 
-      // Location severity = worst connector severity
-      const severity = connectorsWithWarnings.some(c => c.severity === 'critical') ? 'critical'
-        : connectorsWithWarnings.some(c => c.severity === 'warning') ? 'warning'
+      const usersWithWarnings: UserWithWarnings[] = this.identities()
+        .filter(i => i.type === 'user' && i.location === loc.name)
+        .map(i => ({ identity: i, droppedPackets: i.droppedPackets, droppedConnections: i.droppedConnections, severity: connectorSeverity(i.droppedPackets, i.droppedConnections) }));
+
+      // Location severity = worst of connectors and users
+      const allSeverities = [...connectorsWithWarnings.map(c => c.severity), ...usersWithWarnings.map(u => u.severity)];
+      const severity = allSeverities.some(s => s === 'critical') ? 'critical'
+        : allSeverities.some(s => s === 'warning') ? 'warning'
         : 'none';
 
-      return { location: loc, connectors: connectorsWithWarnings, severity, ...getCityCoords(loc.city) };
+      return { location: loc, connectors: connectorsWithWarnings, users: usersWithWarnings, severity, ...getCityCoords(loc.city) };
     });
   });
+
+  selectedUsers = computed(() => this.selectedNode()?.users ?? []);
 
   selectNode(node: MapNode) {
     const current = this.selectedNode();
@@ -123,6 +138,22 @@ export class NetworkMapComponent {
       gateway: 'Gateway', device: 'Device', clientless: 'Clientless', sdk: 'SDK', connector: 'Connector',
     };
     return map[type] ?? type;
+  }
+
+  severityCardClass(severity: 'none' | 'warning' | 'critical'): string {
+    if (severity === 'critical') return 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800';
+    if (severity === 'warning')  return 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800';
+    return 'bg-gray-50 dark:bg-gray-900 border-gray-100 dark:border-gray-700';
+  }
+
+  warningRowClass(severity: 'warning' | 'critical'): string {
+    return severity === 'critical' ? 'bg-red-100 dark:bg-red-900/30' : 'bg-amber-100 dark:bg-amber-900/30';
+  }
+
+  severityBorderClass(severity: 'none' | 'warning' | 'critical'): string {
+    if (severity === 'critical') return 'border-red-200 dark:border-red-800';
+    if (severity === 'warning')  return 'border-amber-200 dark:border-amber-800';
+    return 'border-gray-200 dark:border-gray-700';
   }
 
   locationStatusClass(status: 'Online' | 'Degraded' | 'Offline'): string {

@@ -1,41 +1,39 @@
 import { Component, ElementRef, inject } from '@angular/core';
-import { NgTemplateOutlet } from '@angular/common';
+import { NgTemplateOutlet, NgStyle } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LogEntry, generateLogs, formatLogTimestamp, filterLogs } from '../../utils/log.utils';
-import { IdentityService, DeployedEntry, ConnectorAssignment } from '../../services/identity.service';
-import { CustomerService, CustomerConnector } from '../../services/customer.service';
+import { IdentityService, DeployedEntry } from '../../services/identity.service';
+
+interface AvailableRole {
+  id: string;
+  name: string;
+  description: string;
+  modelTypes: string[];
+}
+
+type ModalTab = 'individual' | 'bulk';
 
 @Component({
   selector: 'app-customer-identities',
   standalone: true,
-  imports: [NgTemplateOutlet, FormsModule],
+  imports: [NgTemplateOutlet, NgStyle, FormsModule],
   templateUrl: './customer-users.html',
 })
 export class CustomerIdentitiesComponent {
   readonly identityService = inject(IdentityService);
-  private readonly customerService = inject(CustomerService);
   private readonly el = inject(ElementRef);
   private previouslyFocusedEl: HTMLElement | null = null;
   private addUserToastTimer: ReturnType<typeof setTimeout> | null = null;
   menuOpenId: string | null = null;
-  subMenuOpenId: string | null = null;
 
-  get connectors(): CustomerConnector[] {
-    return this.customerService.getById('acme-corp')?.connectorList ?? [];
-  }
+  readonly availableRoles: AvailableRole[] = [
+    { id: 'role-it-admin',   name: 'IT Admin',   description: 'Full access to manage IT infrastructure and configurations.', modelTypes: ['Device', 'Gateway'] },
+    { id: 'role-supervisor', name: 'Supervisor', description: 'View and manage team resources and reports.',                  modelTypes: ['Gateway'] },
+    { id: 'role-end-user',   name: 'End User',   description: 'Standard access to assigned applications and resources.',     modelTypes: ['Device'] },
+  ];
 
-  readonly appFriendlyNames: Record<string, string> = {
-    'RDP':   'Remote Desktop',
-    'HTTPS': 'File Share',
-    'SSH':   'Secure Shell',
-  };
+  // ── Multi-select ──────────────────────────────────────────────────────────
 
-  readonly appLabel = (tech: string): string => {
-    const friendly = this.appFriendlyNames[tech];
-    return friendly ? `${tech} / ${friendly}` : tech;
-  };
-
-  // Multi-select
   selectedIds = new Set<string>();
 
   isSelected(id: string): boolean { return this.selectedIds.has(id); }
@@ -59,50 +57,39 @@ export class CustomerIdentitiesComponent {
 
   clearSelection(): void { this.selectedIds = new Set(); }
 
-  collapseAll(): void { this.expandedIds = new Set(); }
+  // ── Bulk assign roles modal ───────────────────────────────────────────────
 
-  // Expandable rows
-  expandedIds = new Set<string>();
+  showBulkRoleModal   = false;
+  bulkRoleSelectedIds = new Set<string>();
 
-  isExpanded(id: string): boolean { return this.expandedIds.has(id); }
+  get isAnyBulkRoleModalOpen(): boolean { return this.showBulkRoleModal; }
 
-  toggleExpand(id: string): void {
-    const next = new Set(this.expandedIds);
-    if (next.has(id)) next.delete(id); else next.add(id);
-    this.expandedIds = next;
+  openBulkRoleModal(): void {
+    this.bulkRoleSelectedIds = new Set();
+    this.showBulkRoleModal   = true;
   }
 
-  // Assign to connector modal
-  showAssignModal = false;
-  assignConnectorIds = new Set<string>();
-  assignComplete = false;
+  closeBulkRoleModal(): void { this.showBulkRoleModal = false; }
 
-  get selectedConnectors(): CustomerConnector[] {
-    return this.connectors.filter(c => this.assignConnectorIds.has(c.id));
+  isBulkRoleSelected(roleId: string): boolean { return this.bulkRoleSelectedIds.has(roleId); }
+
+  toggleBulkRole(roleId: string): void {
+    const next = new Set(this.bulkRoleSelectedIds);
+    if (next.has(roleId)) next.delete(roleId); else next.add(roleId);
+    this.bulkRoleSelectedIds = next;
   }
 
-  get canConfirmAssign(): boolean {
-    return this.assignConnectorIds.size > 0;
+  applyBulkRoles(): void {
+    if (this.bulkRoleSelectedIds.size === 0) return;
+    this.identityService.mergeRoles([...this.selectedIds], [...this.bulkRoleSelectedIds]);
+    this.closeBulkRoleModal();
+    this.clearSelection();
   }
 
-  openAssignModal(): void {
-    this.assignConnectorIds = new Set();
-    this.showAssignModal = true;
-  }
-
-  closeAssignModal(): void {
-    this.showAssignModal = false;
-  }
-
-  openAssignForSingle(id: string): void {
-    this.selectedIds = new Set([id]);
-    this.menuOpenId = null;
-    this.openAssignModal();
-  }
+  // ── Modal helpers ─────────────────────────────────────────────────────────
 
   get isAnyModalOpen(): boolean {
-    return this.showAssignModal || this.showLogsView ||
-      this.showAddUserChoiceModal || this.showAddUserDeployModal || this.showAddUserBulkModal;
+    return this.showLogsView || this.showAddUserModal || this.showBulkRoleModal;
   }
 
   private saveFocus(): void {
@@ -126,174 +113,173 @@ export class CustomerIdentitiesComponent {
     }, 50);
   }
 
-  // Add User — choice modal
-  showAddUserChoiceModal = false;
+  // ── Add User Modal ────────────────────────────────────────────────────────
+
+  showAddUserModal = false;
+  addUserTab: ModalTab = 'individual';
+
+  addUserName = '';
+  addUserEmail = '';
+  selectedRoleIds = new Set<string>();
+
+  bulkFile: File | null = null;
+  bulkDragging = false;
+  bulkPreviewRows: Array<{ name: string; email: string; roles: string[] }> = [];
+  bulkParseError = '';
 
   openAddUserModal(): void {
     this.saveFocus();
-    this.showAddUserChoiceModal = true;
+    this.addUserTab = 'individual';
+    this.addUserName = '';
+    this.addUserEmail = '';
+    this.selectedRoleIds = new Set();
+    this.bulkFile = null;
+    this.bulkDragging = false;
+    this.bulkPreviewRows = [];
+    this.bulkParseError = '';
+    this.showAddUserModal = true;
     this.focusFirstInDialog();
   }
 
-  closeAddUserChoiceModal(): void {
-    this.showAddUserChoiceModal = false;
+  closeAddUserModal(): void {
+    this.showAddUserModal = false;
     this.restoreFocus();
   }
 
-  // Shared connector selection for add user flows
-  addUserConnectorIds = new Set<string>();
+  isRoleSelected(roleId: string): boolean { return this.selectedRoleIds.has(roleId); }
 
-  get addUserSelectedConnectors(): typeof this.connectors {
-    return this.connectors.filter(c => this.addUserConnectorIds.has(c.id));
+  toggleRole(roleId: string): void {
+    const next = new Set(this.selectedRoleIds);
+    if (next.has(roleId)) next.delete(roleId); else next.add(roleId);
+    this.selectedRoleIds = next;
   }
 
-  toggleAddUserConnector(id: string): void {
-    const next = new Set(this.addUserConnectorIds);
-    if (next.has(id)) next.delete(id); else next.add(id);
-    this.addUserConnectorIds = next;
+  get canSaveIndividual(): boolean {
+    return !!this.addUserName.trim() && !!this.addUserEmail.trim();
   }
 
-  // Add User — single deploy modal
-  showAddUserDeployModal = false;
-  addUserStep: 'form' | 'connectors' = 'form';
-  addUserDeployLabel = '';
-  addUserDeployEmail = '';
-
-  openAddUserDeployModal(): void {
-    this.showAddUserChoiceModal = false;
-    this.addUserDeployLabel = '';
-    this.addUserDeployEmail = '';
-    this.addUserStep = 'form';
-    this.addUserConnectorIds = new Set();
-    this.showAddUserDeployModal = true;
-    this.focusFirstInDialog();
-  }
-
-  closeAddUserDeployModal(): void {
-    this.showAddUserDeployModal = false;
-    this.restoreFocus();
-  }
-
-  advanceSingleToConnectors(): void {
-    if (!this.addUserDeployLabel.trim() || !this.addUserDeployEmail.trim()) return;
-    this.addUserStep = 'connectors';
-    this.focusFirstInDialog();
-  }
-
-  skipAndFinalizeAddSingleUser(): void {
-    this.addUserConnectorIds = new Set();
-    this.finalizeAddSingleUser();
-  }
-
-  finalizeAddSingleUser(): void {
-    const entry = this.identityService.add(this.addUserDeployLabel.trim(), this.addUserDeployEmail.trim());
-    if (this.addUserConnectorIds.size > 0) {
-      const assignments = this.addUserSelectedConnectors.map(c => ({
-        id: c.id, name: c.name, apps: c.hostedApps, status: 'Pending' as const,
-      }));
-      this.identityService.assignToConnectors([entry.id], assignments);
-    }
-    this.showAddUserDeployModal = false;
-    this.restoreFocus();
+  saveIndividualUser(): void {
+    if (!this.canSaveIndividual) return;
+    this.identityService.add(
+      this.addUserName.trim(),
+      this.addUserEmail.trim(),
+      [...this.selectedRoleIds],
+    );
+    this.closeAddUserModal();
     this.triggerAddUserToast(1);
   }
 
-  // Add User — bulk upload modal
-  showAddUserBulkModal = false;
-  bulkUploadStep: 'upload' | 'preview' | 'connectors' = 'upload';
-  bulkUploadFileName = '';
-  bulkUploadPreviewRows: Array<{ label: string; email: string }> = [];
-  bulkUploadError = '';
-  bulkUploadParsing = false;
+  get canSubmitBulk(): boolean { return this.bulkPreviewRows.length > 0; }
 
-  openAddUserBulkModal(): void {
-    this.showAddUserChoiceModal = false;
-    this.bulkUploadStep = 'upload';
-    this.bulkUploadFileName = '';
-    this.bulkUploadPreviewRows = [];
-    this.bulkUploadError = '';
-    this.bulkUploadParsing = false;
-    this.addUserConnectorIds = new Set();
-    this.showAddUserBulkModal = true;
-    this.focusFirstInDialog();
+  onBulkDragOver(event: DragEvent): void {
+    event.preventDefault();
+    this.bulkDragging = true;
   }
 
-  closeAddUserBulkModal(): void {
-    this.showAddUserBulkModal = false;
-    this.restoreFocus();
+  onBulkDragLeave(): void { this.bulkDragging = false; }
+
+  onBulkDrop(event: DragEvent): void {
+    event.preventDefault();
+    this.bulkDragging = false;
+    const file = event.dataTransfer?.files[0];
+    if (file) this.readAndParseCsv(file);
   }
 
-  onBulkFileSelected(event: Event): void {
+  onBulkFileSelect(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
-    if (!file) return;
-    this.bulkUploadFileName = file.name;
-    this.bulkUploadError = '';
-    this.bulkUploadParsing = true;
+    if (file) this.readAndParseCsv(file);
+  }
+
+  clearBulkFile(): void {
+    this.bulkFile = null;
+    this.bulkPreviewRows = [];
+    this.bulkParseError = '';
+  }
+
+  private readAndParseCsv(file: File): void {
+    this.bulkFile = file;
+    this.bulkPreviewRows = [];
+    this.bulkParseError = '';
     const reader = new FileReader();
-    reader.onload = (e) => {
-      this.parseBulkCsv((e.target as FileReader).result as string);
-      this.bulkUploadParsing = false;
-    };
-    reader.onerror = () => {
-      this.bulkUploadError = 'Failed to read the file. Please try again.';
-      this.bulkUploadParsing = false;
-    };
+    reader.onload = (e) => this.parseBulkCsv((e.target as FileReader).result as string);
+    reader.onerror = () => { this.bulkParseError = 'Failed to read the file. Please try again.'; };
     reader.readAsText(file);
   }
 
   private parseBulkCsv(text: string): void {
     const lines = text.split(/\r?\n/).filter(l => l.trim());
     if (lines.length < 2) {
-      this.bulkUploadError = 'File must contain a header row and at least one data row.';
+      this.bulkParseError = 'File must contain a header row and at least one data row.';
       return;
     }
     const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
-    const labelIdx = headers.indexOf('label');
+    const nameIdx  = headers.indexOf('name');
     const emailIdx = headers.indexOf('email');
-    if (labelIdx === -1) {
-      this.bulkUploadError = 'CSV must include a "label" column.';
+    const roleIdx  = headers.indexOf('role');
+    if (nameIdx === -1 || emailIdx === -1) {
+      this.bulkParseError = 'CSV must include "name" and "email" columns.';
       return;
     }
-    const rows: Array<{ label: string; email: string }> = [];
+    const rows: Array<{ name: string; email: string; roles: string[] }> = [];
     for (let i = 1; i < lines.length; i++) {
-      const cols = lines[i].split(',').map(c => c.trim());
-      const label = cols[labelIdx] ?? '';
-      const email = emailIdx !== -1 ? (cols[emailIdx] ?? '') : '';
-      if (label) rows.push({ label, email });
+      const cols  = lines[i].split(',').map(c => c.trim());
+      const name  = cols[nameIdx]  ?? '';
+      const email = cols[emailIdx] ?? '';
+      const roles = roleIdx !== -1
+        ? (cols[roleIdx] ?? '').split('|').map(r => r.trim()).filter(Boolean)
+        : [];
+      if (name) rows.push({ name, email, roles });
     }
     if (rows.length === 0) {
-      this.bulkUploadError = 'No valid rows found in the file.';
+      this.bulkParseError = 'No valid rows found in the file.';
       return;
     }
-    this.bulkUploadPreviewRows = rows;
-    this.bulkUploadStep = 'preview';
+    this.bulkPreviewRows = rows;
   }
 
-  advanceBulkToConnectors(): void {
-    this.bulkUploadStep = 'connectors';
-    this.focusFirstInDialog();
-  }
-
-  skipAndFinalizeBulkUpload(): void {
-    this.addUserConnectorIds = new Set();
-    this.finalizeBulkUpload();
-  }
-
-  finalizeBulkUpload(): void {
-    const count = this.bulkUploadPreviewRows.length;
-    const entries = this.identityService.addBulk(this.bulkUploadPreviewRows);
-    if (this.addUserConnectorIds.size > 0) {
-      const assignments = this.addUserSelectedConnectors.map(c => ({
-        id: c.id, name: c.name, apps: c.hostedApps, status: 'Pending' as const,
-      }));
-      this.identityService.assignToConnectors(entries.map(e => e.id), assignments);
-    }
-    this.showAddUserBulkModal = false;
-    this.restoreFocus();
+  submitBulkUsers(): void {
+    if (!this.canSubmitBulk) return;
+    this.identityService.addBulk(
+      this.bulkPreviewRows.map(r => ({
+        label: r.name,
+        email: r.email,
+        roles: r.roles
+          .map(name => this.availableRoles.find(
+            role => role.name.toLowerCase() === name.toLowerCase()
+          )?.id)
+          .filter((id): id is string => !!id),
+      }))
+    );
+    const count = this.bulkPreviewRows.length;
+    this.closeAddUserModal();
     this.triggerAddUserToast(count);
   }
 
-  // Add User — success toast
+  // ── Reissue token ─────────────────────────────────────────────────────────
+
+  reissuedEntryId: string | null = null;
+
+  reissueToken(id: string): void {
+    this.identityService.reissueToken(id);
+    this.menuOpenId = null;
+    this.reissuedEntryId = id;
+    setTimeout(() => { if (this.reissuedEntryId === id) this.reissuedEntryId = null; }, 3000);
+  }
+
+  // ── Delete ────────────────────────────────────────────────────────────────
+
+  deleteUser(id: string): void {
+    this.identityService.remove(id);
+    this.menuOpenId = null;
+    if (this.selectedIds.has(id)) {
+      const next = new Set(this.selectedIds);
+      next.delete(id);
+      this.selectedIds = next;
+    }
+  }
+
+  // ── Success toast ─────────────────────────────────────────────────────────
+
   showAddUserSuccessToast = false;
   addUserSuccessCount = 0;
 
@@ -308,38 +294,8 @@ export class CustomerIdentitiesComponent {
     this.showAddUserSuccessToast = false;
   }
 
-  toggleAssignConnector(id: string): void {
-    const next = new Set(this.assignConnectorIds);
-    if (next.has(id)) next.delete(id); else next.add(id);
-    this.assignConnectorIds = next;
-  }
+  // ── Logs view ─────────────────────────────────────────────────────────────
 
-  confirmAssign(): void {
-    if (!this.canConfirmAssign) return;
-    const assignments: ConnectorAssignment[] = this.selectedConnectors.map(c => ({
-      id: c.id,
-      name: c.name,
-      apps: c.hostedApps,
-      status: 'Pending' as const,
-    }));
-    this.identityService.assignToConnectors([...this.selectedIds], assignments);
-    this.showAssignModal = false;
-    this.selectedIds = new Set();
-    this.assignComplete = true;
-    setTimeout(() => this.assignComplete = false, 3000);
-  }
-
-  // Per-connector reissue confirmation
-  reissuedKey: string | null = null;
-
-  reissueConnectorToken(entryId: string, assignmentId: string): void {
-    this.identityService.reissueConnectorToken(entryId, assignmentId);
-    const key = entryId + '::' + assignmentId;
-    this.reissuedKey = key;
-    setTimeout(() => { if (this.reissuedKey === key) this.reissuedKey = null; }, 3000);
-  }
-
-  // Logs view
   showLogsView = false;
   activeLogsEntry: DeployedEntry | null = null;
   logsTimeframe: '24h' | '7d' | '30d' = '7d';
@@ -367,6 +323,8 @@ export class CustomerIdentitiesComponent {
   }
 
   formatLogTimestamp = formatLogTimestamp;
+
+  // ── Table data & filtering ────────────────────────────────────────────────
 
   get entries(): DeployedEntry[] { return this.identityService.entries; }
 
@@ -424,12 +382,7 @@ export class CustomerIdentitiesComponent {
   get filteredEntries(): DeployedEntry[] {
     let entries = this.entries.filter(e => {
       if (this.connectionFilter !== 'all' && e.connection !== this.connectionFilter) return false;
-      if (this.statusFilter !== 'all') {
-        const matches = e.connectorAssignments?.length
-          ? e.connectorAssignments.some(a => a.status === this.statusFilter)
-          : e.enrollmentStatus === this.statusFilter;
-        if (!matches) return false;
-      }
+      if (this.statusFilter !== 'all' && e.enrollmentStatus !== this.statusFilter) return false;
       if (this.search) {
         const q = this.search.toLowerCase();
         return e.label.toLowerCase().includes(q) || e.email.toLowerCase().includes(q) || e.token.toLowerCase().includes(q);
@@ -458,5 +411,36 @@ export class CustomerIdentitiesComponent {
     }
 
     return entries;
+  }
+
+  // ── Display helpers ───────────────────────────────────────────────────────
+
+  entryRoles(entry: DeployedEntry): AvailableRole[] {
+    return (entry.roles ?? [])
+      .map(id => this.availableRoles.find(r => r.id === id))
+      .filter((r): r is AvailableRole => !!r);
+  }
+
+  roleBadgeStyle(index: number): { 'background-color': string; color: string; 'border-color': string } {
+    const colors = [
+      { bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe' },
+      { bg: '#f0fdf4', color: '#15803d', border: '#bbf7d0' },
+      { bg: '#faf5ff', color: '#7e22ce', border: '#e9d5ff' },
+      { bg: '#fff7ed', color: '#c2410c', border: '#fed7aa' },
+      { bg: '#fdf2f8', color: '#be185d', border: '#fbcfe8' },
+      { bg: '#f0fdfa', color: '#0f766e', border: '#99f6e4' },
+    ];
+    const c = colors[index % colors.length];
+    return { 'background-color': c.bg, color: c.color, 'border-color': c.border };
+  }
+
+  modelTypeBadgeStyle(type: string): { 'background-color': string; color: string } {
+    switch (type) {
+      case 'Device':       return { 'background-color': '#dbeafe', color: '#1d4ed8' };
+      case 'Gateway':      return { 'background-color': '#dcfce7', color: '#15803d' };
+      case 'Clientless':   return { 'background-color': '#f3e8ff', color: '#7e22ce' };
+      case 'SDK Embedded': return { 'background-color': '#ffedd5', color: '#c2410c' };
+      default:             return { 'background-color': '#f3f4f6', color: '#374151' };
+    }
   }
 }

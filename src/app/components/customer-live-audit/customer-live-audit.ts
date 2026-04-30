@@ -18,6 +18,11 @@ export class CustomerLiveAuditComponent {
   readonly locations = this.customer.locationList;
   readonly connectors = this.customer.connectorList;
 
+  get filteredLocations() {
+    if (!this.auditLocationFilter) return this.locations;
+    return this.locations.filter(l => l.name === this.auditLocationFilter);
+  }
+
   mapHeight = 320;
   private dragging = false;
   private dragStartY = 0;
@@ -48,16 +53,17 @@ export class CustomerLiveAuditComponent {
 
   auditSearch = '';
   auditTypeFilter: string = '';
+  auditLocationFilter: string = '';
   auditStatusFilter: string = '';
   auditWarningsOnly = false;
   auditPage = 1;
   readonly auditPageSize = 10;
-  auditSortCol: 'entity' | 'type' | 'usage' | 'lastSeen' | 'status' | null = null;
+  auditSortCol: 'entity' | 'type' | 'location' | 'usage' | 'lastSeen' | 'status' | null = null;
   auditSortDir: 'asc' | 'desc' = 'asc';
 
   resetAuditPage() { this.auditPage = 1; }
 
-  setAuditSort(col: 'entity' | 'type' | 'usage' | 'lastSeen' | 'status') {
+  setAuditSort(col: 'entity' | 'type' | 'location' | 'usage' | 'lastSeen' | 'status') {
     if (this.auditSortCol === col) {
       this.auditSortDir = this.auditSortDir === 'asc' ? 'desc' : 'asc';
     } else {
@@ -85,11 +91,37 @@ export class CustomerLiveAuditComponent {
     return parseFloat(m[1]) * (m[2] === 'GB' ? 1024 : 1);
   }
 
+  resolveLocation(identity: CustomerIdentity): string {
+    if (identity.location) return identity.location;
+    return this.customer.connectorList.find(c => c.name === identity.name)?.location ?? '—';
+  }
+
+  readonly appFriendlyNames: Record<string, string> = {
+    'RDP':   'Remote Desktop',
+    'HTTPS': 'File Share',
+    'SSH':   'Secure Shell',
+    'TCP':   'Network Access',
+  };
+
+  readonly appLabel = (tech: string): string => {
+    const friendly = this.appFriendlyNames[tech];
+    return friendly ? `${tech} / ${friendly}` : tech;
+  };
+
+  resolveApps(identity: CustomerIdentity): string[] {
+    if (identity.type !== 'user') {
+      const connector = this.customer.connectorList.find(c => c.name === identity.name);
+      if (connector?.hostedApps?.length) return connector.hostedApps.map(this.appLabel);
+    }
+    return identity.boundServices.map(s => s.name);
+  }
+
   get filteredIdentities() {
     const search = this.auditSearch.toLowerCase().trim();
     const list = this.customer.identityList.filter(i => {
       if (search && !i.name.toLowerCase().includes(search)) return false;
       if (this.auditTypeFilter && i.type !== this.auditTypeFilter) return false;
+      if (this.auditLocationFilter && this.resolveLocation(i) !== this.auditLocationFilter) return false;
       if (this.auditStatusFilter && i.status !== this.auditStatusFilter) return false;
       if (this.auditWarningsOnly && i.droppedPackets === 0 && i.droppedConnections === 0) return false;
       return true;
@@ -107,6 +139,8 @@ export class CustomerLiveAuditComponent {
         }
         case 'type':
           return a.type.localeCompare(b.type) * dir;
+        case 'location':
+          return this.resolveLocation(a).localeCompare(this.resolveLocation(b)) * dir;
         case 'usage':
           return (this.parseThroughput(a.usageBandwidth ?? '') - this.parseThroughput(b.usageBandwidth ?? '')) * dir;
         case 'lastSeen':
@@ -141,6 +175,26 @@ export class CustomerLiveAuditComponent {
   }
 
   expandedIdentities = new Set<string>();
+
+  expandedRowClass(identity: CustomerIdentity): string {
+    if (!this.expandedIdentities.has(identity.id)) return '';
+    return identity.droppedConnections >= 3
+      ? 'bg-red-50 dark:bg-red-900/30'
+      : 'bg-amber-50 dark:bg-amber-900/30';
+  }
+
+  expandedCardClass(identity: CustomerIdentity): string {
+    return identity.droppedConnections >= 3
+      ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+      : 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800';
+  }
+
+  warningBadgeClass(identity: CustomerIdentity): string {
+    return identity.droppedConnections >= 3
+      ? 'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700 text-red-700 dark:text-red-300 hover:bg-red-100'
+      : 'bg-amber-50 dark:bg-amber-900/30 border-amber-200 dark:border-amber-700 text-amber-800 dark:text-amber-300 hover:bg-amber-100';
+  }
+
   resettingIdentities = new Set<string>();
   restartingConnectors = new Set<string>();
   identityDiagState = new Map<string, 'running' | 'done'>();
