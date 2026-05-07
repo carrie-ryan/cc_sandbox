@@ -2,7 +2,7 @@
 <div [attr.inert]="isAnyModalOpen ? '' : null">
   <div class="mb-5">
     <h1 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1">Users</h1>
-    <p class="text-sm text-gray-500 dark:text-gray-400">Manage users, enrollment, and tokens.</p>
+    <p class="text-sm text-gray-500 dark:text-gray-400">Manage users, identities, and tokens.</p>
   </div>
 
   <!-- Search + filters -->
@@ -15,7 +15,7 @@
         class="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 dark:focus:ring-blue-400"/>
     </div>
     <select [(ngModel)]="statusFilter" (ngModelChange)="identitiesPage = 1"
-      aria-label="Filter by enrollment status"
+      aria-label="Filter by identity status"
       class="text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700 bg-white dark:border-gray-600 dark:text-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700">
       <option value="all">All Statuses</option>
       <option value="Enrolled">Enrolled</option>
@@ -54,6 +54,24 @@
     <div class="flex items-center justify-between gap-3 mb-3 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg dark:bg-blue-900/30 dark:border-blue-700">
       <span class="text-xs font-medium text-blue-700 dark:text-blue-300">{{ selectedIds.size }} user{{ selectedIds.size === 1 ? '' : 's' }} selected</span>
       <div class="flex items-center gap-3">
+        @if (!selectedAllEnabled) {
+          <button (click)="bulkEnable()"
+            class="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg bg-green-600 text-white hover:bg-green-700 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-1">
+            <svg aria-hidden="true" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5.636 5.636a9 9 0 1012.728 12.728M12 3v9"/>
+            </svg>
+            Enable
+          </button>
+        }
+        @if (!selectedAllDisabled) {
+          <button (click)="bulkDisable()"
+            class="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+            <svg aria-hidden="true" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+            </svg>
+            Disable
+          </button>
+        }
         <button (click)="openBulkRoleModal()"
           class="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
           <svg aria-hidden="true" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -61,6 +79,20 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z"/>
           </svg>
           Assign Roles
+        </button>
+        <button (click)="downloadTokens()"
+          class="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+          <svg aria-hidden="true" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+          </svg>
+          Download Token(s)
+        </button>
+        <button (click)="bulkDelete()"
+          class="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-1 dark:border-red-700 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50">
+          <svg aria-hidden="true" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
+          </svg>
+          Delete
         </button>
         <button (click)="clearSelection()" class="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline underline-offset-2 motion-safe:transition-colors">
           Clear selection
@@ -87,22 +119,30 @@
             <span class="inline-flex items-center gap-1">Email Address <ng-container *ngTemplateOutlet="sortIcon; context: { col: 'email' }"></ng-container></span>
           </th>
           <th class="text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 px-5 py-3">Role(s)</th>
-          <th (click)="setSort('enrollmentStatus')" [attr.aria-sort]="sortCol === 'enrollmentStatus' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'" class="text-xs font-bold uppercase tracking-wider px-5 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-700 motion-safe:transition-colors" [class.text-blue-600]="sortCol === 'enrollmentStatus'" [class.text-gray-600]="sortCol !== 'enrollmentStatus'" [class.dark:text-gray-300]="sortCol !== 'enrollmentStatus'">
-            <span class="inline-flex items-center gap-1">Enrollment Status <ng-container *ngTemplateOutlet="sortIcon; context: { col: 'enrollmentStatus' }"></ng-container></span>
+          <th (click)="setSort('identityStatus')" [attr.aria-sort]="sortCol === 'identityStatus' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'" class="text-xs font-bold uppercase tracking-wider px-5 py-3 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-700 motion-safe:transition-colors" [class.text-blue-600]="sortCol === 'identityStatus'" [class.text-gray-600]="sortCol !== 'identityStatus'" [class.dark:text-gray-300]="sortCol !== 'identityStatus'">
+            <span class="inline-flex items-center gap-1">Identity Status <ng-container *ngTemplateOutlet="sortIcon; context: { col: 'identityStatus' }"></ng-container></span>
           </th>
           <th class="text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 px-5 py-3 text-right">Actions</th>
         </tr>
       </thead>
       <tbody>
         @for (entry of pagedEntries; track entry.id) {
-          <tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50/40 dark:hover:bg-gray-700 transition-colors" [class.bg-blue-50]="isSelected(entry.id)" [class.dark:bg-blue-900/20]="isSelected(entry.id)">
+          <tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50/40 dark:hover:bg-gray-700 transition-colors"
+            [class.opacity-50]="!entry.enabled"
+            [class.bg-blue-50]="isSelected(entry.id)"
+            [class.dark:bg-blue-900/20]="isSelected(entry.id)">
             <td class="px-5 py-3.5 w-8">
               <input type="checkbox" [checked]="isSelected(entry.id)" (change)="toggleSelect(entry.id)"
                 [attr.aria-label]="'Select ' + entry.label"
                 class="w-3.5 h-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer dark:border-gray-600"/>
             </td>
             <td class="px-5 py-3.5">
-              <span class="text-sm font-semibold text-gray-800 dark:text-gray-100">{{ entry.label }}</span>
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-semibold text-gray-800 dark:text-gray-100">{{ entry.label }}</span>
+                @if (!entry.enabled) {
+                  <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400">Disabled</span>
+                }
+              </div>
             </td>
             <td class="px-5 py-3.5 text-sm" [class]="entry.email ? 'text-gray-600 dark:text-gray-300' : 'text-gray-400 dark:text-gray-500'">{{ entry.email || '—' }}</td>
             <td class="px-5 py-3.5">
@@ -122,9 +162,9 @@
                   <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
                   Token reissued
                 </span>
-              } @else if (entry.enrollmentStatus === 'Enrolled') {
+              } @else if (entry.identityStatus === 'Enrolled') {
                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Enrolled</span>
-              } @else if (entry.enrollmentStatus === 'Expired Token') {
+              } @else if (entry.identityStatus === 'Expired Token') {
                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">Expired Token</span>
               } @else {
                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">Pending</span>
@@ -152,7 +192,20 @@
                       </svg>
                       View Logs
                     </button>
-                    @if (entry.enrollmentStatus === 'Expired Token') {
+                    <button (click)="toggle(entry.id)" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700 motion-safe:transition-colors text-left">
+                      @if (entry.enabled) {
+                        <svg aria-hidden="true" class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                        </svg>
+                        Disable
+                      } @else {
+                        <svg aria-hidden="true" class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M5.636 5.636a9 9 0 1012.728 12.728M12 3v9"/>
+                        </svg>
+                        Enable
+                      }
+                    </button>
+                    @if (entry.identityStatus === 'Expired Token') {
                       <button (click)="reissueToken(entry.id)" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-amber-700 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-900/20 motion-safe:transition-colors text-left">
                         <svg aria-hidden="true" class="w-3.5 h-3.5 text-amber-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/>
@@ -176,40 +229,53 @@
       </tbody>
     </table>
     @if (filteredEntries.length === 0) {
-      <div aria-live="polite" class="py-10 text-center text-sm text-gray-400 dark:text-gray-300">No entries match your search or filters.</div>
+      <div aria-live="polite" class="py-10 text-center text-sm text-gray-400 dark:text-gray-300">No users match your search or filters.</div>
     }
-    @if (filteredEntries.length > identitiesPageSize) {
+    @if (filteredEntries.length > 0) {
       <div class="flex items-center justify-between px-5 py-3 border-t border-gray-100 dark:border-gray-700">
-        <span class="text-xs text-gray-400 dark:text-gray-300">
-          {{ identitiesPageStart }}–{{ identitiesPageEnd }} of {{ filteredEntries.length }}
-        </span>
-        <div class="flex items-center gap-1">
-          <button (click)="identitiesPage = identitiesPage - 1" [disabled]="identitiesPage === 1"
-            class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 transition-colors disabled:opacity-30 disabled:pointer-events-none">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>
-            </svg>
-          </button>
-          @for (p of identitiesPages; track p) {
-            <button (click)="identitiesPage = p"
-              class="w-7 h-7 text-xs rounded-lg transition-colors"
-              [class.bg-blue-600]="identitiesPage === p"
-              [class.text-white]="identitiesPage === p"
-              [class.font-semibold]="identitiesPage === p"
-              [class.text-gray-500]="identitiesPage !== p"
-              [class.dark:text-gray-300]="identitiesPage !== p"
-              [class.hover:bg-gray-100]="identitiesPage !== p"
-              [class.dark:hover:bg-gray-700]="identitiesPage !== p">
-              {{ p }}
-            </button>
-          }
-          <button (click)="identitiesPage = identitiesPage + 1" [disabled]="identitiesPage === identitiesPageCount"
-            class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 transition-colors disabled:opacity-30 disabled:pointer-events-none">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
-            </svg>
-          </button>
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-1.5">
+            <label for="users-page-size-select" class="text-xs text-gray-400 dark:text-gray-300">Rows per page</label>
+            <select id="users-page-size-select" [(ngModel)]="identitiesPageSize" (ngModelChange)="identitiesPage = 1" aria-label="Rows per page"
+              class="text-xs border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700 bg-white dark:border-gray-600 dark:text-gray-300 dark:bg-gray-800">
+              @for (size of identitiesPageSizeOptions; track size) {
+                <option [ngValue]="size">{{ size }}</option>
+              }
+            </select>
+          </div>
+          <span class="text-xs text-gray-400 dark:text-gray-300">
+            {{ identitiesPageStart }}–{{ identitiesPageEnd }} of {{ filteredEntries.length }}
+          </span>
         </div>
+        @if (identitiesPageCount > 1) {
+          <div class="flex items-center gap-1">
+            <button (click)="identitiesPage = identitiesPage - 1" [disabled]="identitiesPage === 1"
+              class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 transition-colors disabled:opacity-30 disabled:pointer-events-none">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>
+              </svg>
+            </button>
+            @for (p of identitiesPages; track p) {
+              <button (click)="identitiesPage = p"
+                class="w-7 h-7 text-xs rounded-lg transition-colors"
+                [class.bg-blue-600]="identitiesPage === p"
+                [class.text-white]="identitiesPage === p"
+                [class.font-semibold]="identitiesPage === p"
+                [class.text-gray-500]="identitiesPage !== p"
+                [class.dark:text-gray-300]="identitiesPage !== p"
+                [class.hover:bg-gray-100]="identitiesPage !== p"
+                [class.dark:hover:bg-gray-700]="identitiesPage !== p">
+                {{ p }}
+              </button>
+            }
+            <button (click)="identitiesPage = identitiesPage + 1" [disabled]="identitiesPage === identitiesPageCount"
+              class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 transition-colors disabled:opacity-30 disabled:pointer-events-none">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
+              </svg>
+            </button>
+          </div>
+        }
       </div>
     }
   </div>
@@ -324,7 +390,7 @@
       <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
         {{ addUserSuccessCount === 1 ? 'User added successfully' : addUserSuccessCount + ' users added successfully' }}
       </p>
-      <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Enrollment token{{ addUserSuccessCount === 1 ? '' : 's' }} generated.</p>
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Identity token{{ addUserSuccessCount === 1 ? '' : 's' }} generated.</p>
     </div>
     <button (click)="dismissAddUserToast()" aria-label="Dismiss notification"
       class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-0.5 rounded shrink-0 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
@@ -423,10 +489,10 @@
                     @if (role.description) {
                       <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 mb-2">{{ role.description }}</p>
                     }
-                    @if (role.modelTypes.length > 0) {
+                    @if (role.connectors.length > 0) {
                       <div class="flex flex-wrap gap-1.5 mt-1">
-                        @for (mt of role.modelTypes; track mt) {
-                          <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold" [ngStyle]="modelTypeBadgeStyle(mt)">{{ mt }}</span>
+                        @for (ct of role.connectors; track ct; let mi = $index) {
+                          <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold" [ngStyle]="connectorBadgeStyle(mi)">{{ ct }}</span>
                         }
                       </div>
                     }
@@ -435,6 +501,20 @@
               }
             </div>
           </div>
+
+          <!-- Token Expiration -->
+          <div>
+            <label for="user-token-expiration" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">
+              Identity Token Expiration <span class="text-red-500">*</span>
+            </label>
+            <div class="flex items-center gap-2">
+              <input id="user-token-expiration" [(ngModel)]="tokenExpirationWeeks" type="number" min="1" max="52"
+                class="w-24 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:focus:ring-blue-400"/>
+              <span class="text-sm text-gray-500 dark:text-gray-400">weeks</span>
+            </div>
+            <p class="mt-1.5 text-xs text-gray-400 dark:text-gray-500">The number of weeks a token is active for, after which a new token will need to be reissued.</p>
+          </div>
+
         </div>
 
         <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 shrink-0">
@@ -447,133 +527,176 @@
             <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/>
             </svg>
-            Add user &amp; Send Token
+            Add User &amp; Send Token
           </button>
         </div>
       }
 
       <!-- ── Bulk Upload tab ── -->
       @if (addUserTab === 'bulk') {
-        <div class="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4">
+        <div class="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-5">
 
-          <p class="text-xs text-gray-500 dark:text-gray-400">
-            Upload a CSV file to add multiple users at once. An enrollment token will be sent to each user's email address automatically.
-          </p>
+          <!-- CSV Import -->
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <p class="text-sm font-medium text-gray-700 dark:text-gray-200">Import from CSV</p>
+              <button (click)="downloadCsvTemplate()" type="button"
+                class="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 rounded">
+                <svg aria-hidden="true" class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+                </svg>
+                Download template
+              </button>
+            </div>
 
-          <!-- CSV format -->
-          <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 dark:bg-gray-900 dark:border-gray-700">
-            <div class="flex items-center gap-1.5 mb-2">
-              <svg aria-hidden="true" class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
-              </svg>
-              <span class="text-xs font-medium text-gray-600 dark:text-gray-300">Required CSV format</span>
-            </div>
-            <div class="font-mono text-xs text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded px-3 py-2 space-y-0.5 mb-2">
-              <p class="text-gray-400 dark:text-gray-500">name, email, role</p>
-              <p>Jane Smith, jane&#64;company.com, IT Admin | Supervisor</p>
-            </div>
-            <p class="text-[11px] text-gray-400 dark:text-gray-500">Separate multiple roles with a pipe character ( | )</p>
+            @if (!bulkFile) {
+              <label for="bulk-csv-file-input"
+                class="flex flex-col items-center justify-center gap-2 border-2 border-dashed rounded-lg px-4 py-6 cursor-pointer motion-safe:transition-colors"
+                [class]="bulkDragging
+                  ? 'border-blue-400 bg-blue-50 dark:border-blue-500 dark:bg-blue-900/20'
+                  : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:border-blue-600 dark:hover:bg-gray-700/50'"
+                (dragover)="onBulkDragOver($event)"
+                (dragleave)="onBulkDragLeave()"
+                (drop)="onBulkDrop($event)">
+                <svg aria-hidden="true" class="w-7 h-7 text-gray-300 dark:text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+                </svg>
+                <div class="text-center">
+                  <span class="text-xs font-medium text-blue-600 dark:text-blue-400">Click to upload</span>
+                  <span class="text-xs text-gray-500 dark:text-gray-400"> or drag and drop</span>
+                </div>
+                <p class="text-[11px] text-gray-400 dark:text-gray-500">CSV with "name" and "email" columns</p>
+                <input id="bulk-csv-file-input" type="file" accept=".csv" class="sr-only" (change)="onBulkFileSelect($event)"/>
+              </label>
+              @if (bulkParseError) {
+                <p role="alert" class="text-xs text-red-600 dark:text-red-400 mt-1.5 flex items-center gap-1.5">
+                  <svg aria-hidden="true" class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>
+                  </svg>
+                  {{ bulkParseError }}
+                </p>
+              }
+            } @else {
+              <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                <div class="flex items-center justify-between px-3 py-2 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700">
+                  <div class="flex items-center gap-2 min-w-0">
+                    <svg aria-hidden="true" class="w-3.5 h-3.5 text-green-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+                    </svg>
+                    <span class="text-xs font-medium text-gray-700 dark:text-gray-200 truncate">{{ bulkFile.name }}</span>
+                    <span class="text-xs text-gray-400 dark:text-gray-500 shrink-0">— {{ bulkPreviewRows.length }} user{{ bulkPreviewRows.length === 1 ? '' : 's' }}</span>
+                  </div>
+                  <button (click)="clearBulkFile()" type="button"
+                    class="text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 motion-safe:transition-colors shrink-0 ml-2 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-1 rounded">
+                    Remove
+                  </button>
+                </div>
+                <div class="max-h-44 overflow-y-auto">
+                  <table class="w-full text-xs">
+                    <thead class="bg-gray-50 dark:bg-gray-700/60 sticky top-0">
+                      <tr>
+                        <th class="text-left px-3 py-2 font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</th>
+                        <th class="text-left px-3 py-2 font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Email</th>
+                        <th class="text-left px-3 py-2 font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Role(s)</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                      @for (row of bulkPreviewRows; track $index) {
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                          <td class="px-3 py-2 font-medium text-gray-800 dark:text-gray-100">{{ row.name }}</td>
+                          <td class="px-3 py-2 text-gray-500 dark:text-gray-400">{{ row.email || '—' }}</td>
+                          <td class="px-3 py-2 text-gray-500 dark:text-gray-400">{{ row.roles.length ? row.roles.join(', ') : '—' }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              @if (bulkParseError) {
+                <p role="alert" class="text-xs text-red-600 dark:text-red-400 mt-1.5 flex items-center gap-1.5">
+                  <svg aria-hidden="true" class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>
+                  </svg>
+                  {{ bulkParseError }}
+                </p>
+              }
+            }
           </div>
 
-          <!-- Available roles -->
-          @if (availableRoles.length > 0) {
+          @if (!bulkFile) {
+            <!-- Divider -->
+            <div class="flex items-center gap-3 -my-1">
+              <div class="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
+              <span class="text-xs text-gray-400 dark:text-gray-500 select-none">or enter manually</span>
+              <div class="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
+            </div>
+
+            <!-- Users textarea -->
             <div>
-              <p class="text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">Available roles</p>
-              <div class="flex flex-wrap gap-1.5">
-                @for (role of availableRoles; track role.id; let ri = $index) {
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full border text-xs font-semibold" [ngStyle]="roleBadgeStyle(ri)">{{ role.name }}</span>
+              <label for="bulk-users-text" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">
+                Users <span class="text-red-500">*</span>
+              </label>
+              <textarea id="bulk-users-text" [(ngModel)]="bulkManualText" rows="5"
+                placeholder="Jane Smith, jane@company.com&#10;Bob Jones, bob@company.com"
+                class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 dark:focus:ring-blue-400 font-mono resize-none"></textarea>
+              <div class="flex items-center justify-between mt-1.5">
+                <p class="text-xs text-gray-400 dark:text-gray-500">Enter one user per line: name, email</p>
+                @if (parsedManualRows.length > 0) {
+                  <span class="text-xs font-medium text-blue-600 dark:text-blue-400 shrink-0 ml-3">{{ parsedManualRows.length }} user{{ parsedManualRows.length === 1 ? '' : 's' }}</span>
+                }
+              </div>
+            </div>
+
+            <!-- Assign Roles -->
+            <div>
+              <p class="text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                Assign Roles
+                <span class="text-xs text-gray-400 font-normal ml-1">(optional — select one or more)</span>
+              </p>
+              <div class="flex flex-col gap-2">
+                @for (role of availableRoles; track role.id) {
+                  <div class="flex items-start gap-3 border rounded-lg p-3 cursor-pointer select-none motion-safe:transition-colors"
+                    [class]="isRoleSelected(role.id)
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-500'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 hover:bg-blue-50/40 dark:hover:border-blue-600 dark:hover:bg-blue-900/10'"
+                    (click)="toggleRole(role.id)"
+                    role="checkbox"
+                    [attr.aria-checked]="isRoleSelected(role.id)"
+                    tabindex="0"
+                    (keydown.space)="$event.preventDefault(); toggleRole(role.id)">
+                    <input type="checkbox" [checked]="isRoleSelected(role.id)" tabindex="-1" aria-hidden="true"
+                      class="mt-0.5 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-0 shrink-0 pointer-events-none dark:border-gray-600"/>
+                    <div class="flex-1 min-w-0">
+                      <span class="text-sm font-semibold text-gray-900 dark:text-gray-100 block">{{ role.name }}</span>
+                      @if (role.description) {
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 mb-2">{{ role.description }}</p>
+                      }
+                      @if (role.connectors.length > 0) {
+                        <div class="flex flex-wrap gap-1.5 mt-1">
+                          @for (ct of role.connectors; track ct; let mi = $index) {
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold" [ngStyle]="connectorBadgeStyle(mi)">{{ ct }}</span>
+                          }
+                        </div>
+                      }
+                    </div>
+                  </div>
                 }
               </div>
             </div>
           }
 
-          <!-- Drag-and-drop zone -->
-          <div class="border-2 rounded-xl flex items-center justify-center motion-safe:transition-colors"
-            [class]="bulkDragging
-              ? 'border-blue-400 bg-blue-50/40 dark:bg-blue-900/20 border-solid min-h-36'
-              : bulkFile
-                ? 'border-solid border-gray-200 dark:border-gray-700'
-                : 'border-dashed border-gray-200 dark:border-gray-700 min-h-36'"
-            (dragover)="onBulkDragOver($event)"
-            (dragleave)="onBulkDragLeave()"
-            (drop)="onBulkDrop($event)">
-
-            @if (bulkFile) {
-              <div class="flex items-center justify-between gap-3 w-full px-4 py-3">
-                <div class="flex items-center gap-2.5 min-w-0">
-                  <svg aria-hidden="true" class="w-5 h-5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
-                  </svg>
-                  <span class="text-sm font-medium text-gray-700 dark:text-gray-200 truncate">{{ bulkFile.name }}</span>
-                </div>
-                <button (click)="clearBulkFile(); $event.stopPropagation()"
-                  class="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-red-600 border border-gray-200 hover:border-red-300 hover:bg-red-50 px-2.5 py-1 rounded-lg motion-safe:transition-colors dark:text-gray-400 dark:border-gray-600 dark:hover:bg-red-900/20 dark:hover:text-red-400 shrink-0">
-                  <svg aria-hidden="true" class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-                  </svg>
-                  Remove
-                </button>
-              </div>
-            } @else {
-              <div class="flex flex-col items-center gap-3 py-8 px-6 text-center">
-                <svg aria-hidden="true" class="w-8 h-8 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
-                </svg>
-                <div>
-                  <p class="text-sm font-medium text-gray-600 dark:text-gray-300">Drag and drop your CSV file here</p>
-                  <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">or</p>
-                </div>
-                <label class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer motion-safe:transition-colors dark:text-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:hover:bg-gray-600">
-                  <svg aria-hidden="true" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 016 3.75h3.879a1.5 1.5 0 011.06.44l2.122 2.12a1.5 1.5 0 001.06.44H18A2.25 2.25 0 0120.25 9v.776"/>
-                  </svg>
-                  Browse file
-                  <input type="file" accept=".csv" class="hidden" (change)="onBulkFileSelect($event)">
-                </label>
-              </div>
-            }
+          <!-- Token Expiration -->
+          <div>
+            <label for="bulk-user-token-expiration" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">
+              Identity Token Expiration <span class="text-red-500">*</span>
+            </label>
+            <div class="flex items-center gap-2">
+              <input id="bulk-user-token-expiration" [(ngModel)]="tokenExpirationWeeks" type="number" min="1" max="52"
+                class="w-24 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:focus:ring-blue-400"/>
+              <span class="text-sm text-gray-500 dark:text-gray-400">weeks</span>
+            </div>
+            <p class="mt-1.5 text-xs text-gray-400 dark:text-gray-500">The number of weeks a token is active for, after which a token will need to be reissued.</p>
           </div>
-
-          <!-- Parse error -->
-          @if (bulkParseError) {
-            <div role="alert" class="flex items-start gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2.5 dark:bg-red-900/30 dark:border-red-700">
-              <svg aria-hidden="true" class="w-4 h-4 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
-              </svg>
-              <p class="text-xs text-red-700 dark:text-red-300">{{ bulkParseError }}</p>
-            </div>
-          }
-
-          <!-- Preview table -->
-          @if (bulkPreviewRows.length > 0) {
-            <div>
-              <p class="text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
-                {{ bulkPreviewRows.length }} user{{ bulkPreviewRows.length === 1 ? '' : 's' }} ready to import
-              </p>
-              <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden max-h-52 overflow-y-auto">
-                <table class="w-full text-xs">
-                  <thead class="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700 sticky top-0">
-                    <tr>
-                      <th class="text-left px-3 py-2 font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-8">#</th>
-                      <th class="text-left px-3 py-2 font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</th>
-                      <th class="text-left px-3 py-2 font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Email</th>
-                      <th class="text-left px-3 py-2 font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Role(s)</th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                    @for (row of bulkPreviewRows; track $index) {
-                      <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-                        <td class="px-3 py-2 text-gray-400 dark:text-gray-500">{{ $index + 1 }}</td>
-                        <td class="px-3 py-2 font-medium text-gray-800 dark:text-gray-100">{{ row.name }}</td>
-                        <td class="px-3 py-2 text-gray-500 dark:text-gray-400">{{ row.email || '—' }}</td>
-                        <td class="px-3 py-2 text-gray-500 dark:text-gray-400">{{ row.roles.length ? row.roles.join(', ') : '—' }}</td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          }
 
         </div>
 
@@ -587,7 +710,7 @@
             <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/>
             </svg>
-            Add Users &amp; Send Tokens
+            Add {{ allBulkRows.length || '' }} User{{ allBulkRows.length === 1 ? '' : 's' }} &amp; Send Tokens
           </button>
         </div>
       }
@@ -650,10 +773,10 @@
                 @if (role.description) {
                   <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ role.description }}</p>
                 }
-                @if (role.modelTypes.length > 0) {
+                @if (role.connectors.length > 0) {
                   <div class="flex flex-wrap gap-1.5 mt-1.5">
-                    @for (mt of role.modelTypes; track mt) {
-                      <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold" [ngStyle]="modelTypeBadgeStyle(mt)">{{ mt }}</span>
+                    @for (ct of role.connectors; track ct; let mi = $index) {
+                      <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold" [ngStyle]="connectorBadgeStyle(mi)">{{ ct }}</span>
                     }
                   </div>
                 }

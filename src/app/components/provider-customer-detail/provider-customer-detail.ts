@@ -93,7 +93,7 @@ export class CustomerDetailComponent {
       { id: 'throughput',    label: 'Throughput',     enabled: true },
       { id: 'uptime',        label: 'Uptime',         enabled: true },
       { id: 'usage',         label: 'Usage',          enabled: true },
-      { id: 'enrollmentStatus', label: 'Status',           enabled: true },
+      { id: 'identityStatus', label: 'Status',             enabled: true },
     ],
     users: [
       { id: 'user',           label: 'User',           enabled: true, required: true },

@@ -6,59 +6,36 @@
     <p class="text-sm text-gray-500 dark:text-gray-400">View connectors and their associated applications across your locations. If needed, a connector's connectivity can be paused or brought back online. You can also control what provisioned applications are available. You can disable any application but cannot add new ones beyond what has been provisioned by your provider. Disabling an application will affect any role that uses that application. If any additional changes are required, please reach out to your provider.</p>
   </div>
 
-  <!-- License pool summary -->
-  <!-- RESOURCE ALLOCATIONS (commented out)
-  <div class="grid grid-cols-3 gap-4 mb-4">
-    <div class="bg-white border border-gray-200 rounded-lg px-5 py-4">
-      <p class="text-xs text-gray-400 uppercase tracking-wider font-semibold mb-1">Total Allocated Network Resources</p>
-      <p class="text-2xl font-bold text-gray-900">{{ totalLicenses }}</p>
-      <p class="text-xs text-gray-400 mt-0.5">Allocated by your provider</p>
-    </div>
-    <div class="bg-white border border-gray-200 rounded-lg px-5 py-4">
-      <p class="text-xs text-gray-400 uppercase tracking-wider font-semibold mb-1">Network Resources In Use</p>
-      <p class="text-2xl font-bold"
-        [class.text-amber-600]="licenseWarning"
-        [class.text-blue-600]="!licenseWarning">{{ usedLicenses }}</p>
-      <p class="text-xs text-gray-400 mt-0.5">{{ licenseUsagePct }}% of total</p>
-    </div>
-    <div class="bg-white rounded-lg px-5 py-4 border"
-      [class.border-amber-300]="licenseWarning"
-      [class.border-gray-200]="!licenseWarning">
-      <p class="text-xs uppercase tracking-wider font-semibold mb-1"
-        [class.text-amber-500]="licenseWarning"
-        [class.text-gray-400]="!licenseWarning">Network Resources Available</p>
-      <p class="text-2xl font-bold"
-        [class.text-amber-600]="licenseWarning"
-        [class.text-green-600]="!licenseWarning">{{ availableLicenses }}</p>
-      <p class="text-xs text-gray-400 mt-0.5">Ready to assign</p>
-    </div>
-  </div>
-
-  Warning banner
-  @if (licenseWarning) {
-    <div aria-live="polite" aria-atomic="true" class="flex items-start gap-2.5 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-6">
-      <svg aria-hidden="true" class="w-4 h-4 text-amber-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
-      </svg>
-      <p class="text-sm text-amber-800">You're approaching your connector license limit. Contact your provider to increase your allocation before new connectors can be added.</p>
-    </div>
-  }
-  END RESOURCE ALLOCATIONS -->
-
-  <!-- Search -->
+  <!-- Search + filters -->
   <div class="flex items-center gap-2 flex-wrap mb-3">
-    <div class="relative w-72">
+    <div class="relative flex-1 min-w-[160px]">
       <svg aria-hidden="true" class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
       </svg>
       <input
         [(ngModel)]="searchQuery"
+        (ngModelChange)="locationsPage = 1"
         type="text"
         aria-label="Search locations or connectors"
         placeholder="Search..."
         class="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 dark:focus:ring-blue-400"
       />
     </div>
+    <select [(ngModel)]="connectionFilter" (ngModelChange)="locationsPage = 1"
+      aria-label="Filter by connection"
+      class="text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700 bg-white dark:border-gray-600 dark:text-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700">
+      <option value="all">All Connections</option>
+      <option value="Online">Online</option>
+      <option value="Offline">Offline</option>
+    </select>
+    <select [(ngModel)]="enrollmentStatusFilter" (ngModelChange)="locationsPage = 1"
+      aria-label="Filter by status"
+      class="text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700 bg-white dark:border-gray-600 dark:text-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700">
+      <option value="all">All Statuses</option>
+      <option value="Enrolled">Enrolled</option>
+      <option value="Pending">Pending</option>
+      <option value="Expired Token">Expired Token</option>
+    </select>
   </div>
 
   <!-- Main card -->
@@ -70,11 +47,12 @@
         <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/50">
           <th class="text-left text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 px-5 py-3 w-[28%]">Location Name</th>
           <th class="text-left text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 px-4 py-3 w-[22%]">Details</th>
+          <th class="px-5 py-3 w-[20%]"><span class="sr-only">Actions</span></th>
           <!-- RESOURCE ALLOCATIONS (commented out) <th class="text-left text-xs font-bold uppercase tracking-wider text-gray-600 px-4 py-3 w-[50%]">Total Allocated Resources</th> END RESOURCE ALLOCATIONS -->
         </tr>
       </thead>
       <tbody>
-        @for (loc of locations; track loc.id) {
+        @for (loc of pagedLocations; track loc.id) {
 
           <!-- Location row -->
           <tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50/40 dark:hover:bg-gray-700/40 transition-colors">
@@ -110,23 +88,38 @@
               </div>
             </td>
 
-            <!-- Total Allocated Connectors -->
-            <!-- RESOURCE ALLOCATIONS (commented out)
-            <td class="px-4 py-3.5">
-              <div class="flex items-center gap-2.5">
-                <span class="text-sm font-medium" [class]="locationUsagePct(loc) >= 0.8 ? 'text-amber-600' : 'text-gray-700'">{{ locationAllocation(loc) }}</span>
-                @if (locationUsagePct(loc) >= 0.8) {
-                  <span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
-                    <svg aria-hidden="true" class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+            <!-- Add Connector + Reissue Expired Tokens -->
+            <td class="px-5 py-3.5 text-right">
+              <div class="flex items-center justify-end gap-2">
+                @if (expiredConnectorCountForLocation(loc) > 0) {
+                  <button (click)="bulkReissueExpiredTokensForLocation(loc); $event.stopPropagation()"
+                    [attr.aria-label]="'Reissue expired tokens for ' + loc.name"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium whitespace-nowrap text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/50 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-1">
+                    <svg aria-hidden="true" class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"/>
                     </svg>
-                    Near capacity
+                    Reissue Expired Tokens
+                    <span class="bg-red-200 text-red-800 dark:bg-red-800 dark:text-red-200 font-bold px-1.5 py-0.5 rounded-full text-[10px] leading-none">{{ expiredConnectorCountForLocation(loc) }}</span>
+                  </button>
+                }
+                @if (bulkReissueCompleteLocationId === loc.id) {
+                  <span aria-live="polite" class="inline-flex items-center gap-1 text-xs text-green-700 dark:text-green-300 font-medium shrink-0">
+                    <svg aria-hidden="true" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+                    </svg>
+                    Tokens reissued
                   </span>
                 }
+                <button (click)="openAddConnector(loc.id); $event.stopPropagation()"
+                  [attr.aria-label]="'Add connector to ' + loc.name"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium whitespace-nowrap text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/40 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
+                  <svg aria-hidden="true" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                  </svg>
+                  Add Connector(s)
+                </button>
               </div>
             </td>
-            END RESOURCE ALLOCATIONS -->
-
           </tr>
 
           <!-- Expanded connector rows -->
@@ -134,19 +127,113 @@
             <tr class="border-b border-gray-100 dark:border-gray-700">
               <td colspan="4" class="p-0">
 
+                <!-- Bulk action bar -->
+                @if (selectedConnectorsForLocation(loc).length > 0) {
+                  <div class="flex items-center gap-3 px-4 py-2.5 bg-blue-50 dark:bg-blue-900/20 border-b border-blue-200 dark:border-blue-800">
+                    <!-- Left: count + download + helper text -->
+                    <span class="text-xs font-medium text-blue-700 dark:text-blue-300 shrink-0">
+                      {{ selectedConnectorsForLocation(loc).length }} connector{{ selectedConnectorsForLocation(loc).length === 1 ? '' : 's' }} selected
+                    </span>
+                    @if (tokenEligibleForLocation(loc).length > 0) {
+                      <button (click)="bulkDownloadTokens(loc)"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 shrink-0">
+                        <svg aria-hidden="true" class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+                        </svg>
+                        Download Tokens ({{ tokenEligibleForLocation(loc).length }})
+                      </button>
+                      @if (tokenEligibleForLocation(loc).length < selectedConnectorsForLocation(loc).length) {
+                        <span class="text-xs text-gray-500 dark:text-gray-400 italic">
+                          ↳ {{ selectedConnectorsForLocation(loc).length - tokenEligibleForLocation(loc).length }} enrolled connector{{ selectedConnectorsForLocation(loc).length - tokenEligibleForLocation(loc).length === 1 ? '' : 's' }} excluded
+                        </span>
+                      }
+                    }
+                    <!-- Right: enable/disable + clear -->
+                    <div class="ml-auto flex items-center gap-2 shrink-0">
+                      @if (!allSelectedEnabledForLocation(loc)) {
+                        <button (click)="bulkEnableConnectors(loc)"
+                          class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-green-700 dark:text-green-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500">
+                          <svg aria-hidden="true" class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5.636 5.636a9 9 0 1012.728 12.728M12 3v9"/>
+                          </svg>
+                          Enable
+                        </button>
+                      }
+                      @if (!allSelectedDisabledForLocation(loc)) {
+                        <button (click)="bulkDisableConnectors(loc)"
+                          class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500">
+                          <svg aria-hidden="true" class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                          </svg>
+                          Disable
+                        </button>
+                      }
+                      <button (click)="clearLocationSelection(loc)"
+                        class="text-xs text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded">
+                        Clear selection
+                      </button>
+                    </div>
+                  </div>
+                }
+
                 <!-- Connector sub-header -->
-                <div class="grid grid-cols-[3rem_2fr_1.5fr_1.5fr_1.5fr_5rem] gap-x-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700 px-2 py-2">
+                <div class="grid grid-cols-[2rem_2.5rem_1fr_1fr_1fr_1fr_1fr_5rem] gap-x-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700 px-2 py-2">
+                  <div class="flex items-center justify-center">
+                    <input type="checkbox"
+                      [checked]="allConnectorsSelectedForLocation(loc)"
+                      (change)="toggleSelectAllForLocation(loc)"
+                      aria-label="Select all connectors"
+                      class="h-3.5 w-3.5 rounded border-gray-300 dark:border-gray-500 text-blue-600 focus:ring-blue-500 focus:ring-offset-0 dark:bg-gray-700 cursor-pointer"/>
+                  </div>
                   <div></div>
-                  <div class="text-[10px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300">Connector</div>
-                  <div class="text-[10px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300">Type</div>
+                  <button (click)="setConnectorSort('name')"
+                    [attr.aria-sort]="connectorSortCol === 'name' ? (connectorSortDir === 'asc' ? 'ascending' : 'descending') : 'none'"
+                    class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider cursor-pointer select-none hover:text-gray-900 dark:hover:text-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
+                    [class.text-blue-600]="connectorSortCol === 'name'" [class.dark:text-blue-400]="connectorSortCol === 'name'"
+                    [class.text-gray-600]="connectorSortCol !== 'name'" [class.dark:text-gray-300]="connectorSortCol !== 'name'">
+                    Connector
+                    <ng-container [ngTemplateOutlet]="connSortIcon" [ngTemplateOutletContext]="{ col: 'name' }"></ng-container>
+                  </button>
+                  <button (click)="setConnectorSort('type')"
+                    [attr.aria-sort]="connectorSortCol === 'type' ? (connectorSortDir === 'asc' ? 'ascending' : 'descending') : 'none'"
+                    class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider cursor-pointer select-none hover:text-gray-900 dark:hover:text-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
+                    [class.text-blue-600]="connectorSortCol === 'type'" [class.dark:text-blue-400]="connectorSortCol === 'type'"
+                    [class.text-gray-600]="connectorSortCol !== 'type'" [class.dark:text-gray-300]="connectorSortCol !== 'type'">
+                    Type
+                    <ng-container [ngTemplateOutlet]="connSortIcon" [ngTemplateOutletContext]="{ col: 'type' }"></ng-container>
+                  </button>
                   <div class="text-[10px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300">Associated Roles</div>
-                  <div class="text-[10px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300">Connection</div>
-                  <!-- RESOURCE ALLOCATIONS (commented out) <div class="text-[10px] font-bold uppercase tracking-wider text-gray-600">Resource Allocations</div> END RESOURCE ALLOCATIONS -->
+                  <button (click)="setConnectorSort('status')"
+                    [attr.aria-sort]="connectorSortCol === 'status' ? (connectorSortDir === 'asc' ? 'ascending' : 'descending') : 'none'"
+                    class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider cursor-pointer select-none hover:text-gray-900 dark:hover:text-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
+                    [class.text-blue-600]="connectorSortCol === 'status'" [class.dark:text-blue-400]="connectorSortCol === 'status'"
+                    [class.text-gray-600]="connectorSortCol !== 'status'" [class.dark:text-gray-300]="connectorSortCol !== 'status'">
+                    Status
+                    <ng-container [ngTemplateOutlet]="connSortIcon" [ngTemplateOutletContext]="{ col: 'status' }"></ng-container>
+                  </button>
+                  <button (click)="setConnectorSort('connection')"
+                    [attr.aria-sort]="connectorSortCol === 'connection' ? (connectorSortDir === 'asc' ? 'ascending' : 'descending') : 'none'"
+                    class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider cursor-pointer select-none hover:text-gray-900 dark:hover:text-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
+                    [class.text-blue-600]="connectorSortCol === 'connection'" [class.dark:text-blue-400]="connectorSortCol === 'connection'"
+                    [class.text-gray-600]="connectorSortCol !== 'connection'" [class.dark:text-gray-300]="connectorSortCol !== 'connection'">
+                    Connection
+                    <ng-container [ngTemplateOutlet]="connSortIcon" [ngTemplateOutletContext]="{ col: 'connection' }"></ng-container>
+                  </button>
                   <div class="text-[10px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 text-right pr-3">Actions</div>
                 </div>
 
-                @for (conn of loc.connectors; track conn.id) {
-                  <div class="grid grid-cols-[3rem_2fr_1.5fr_1.5fr_1.5fr_5rem] gap-x-4 items-center px-2 py-3 border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50/50 dark:hover:bg-gray-700/50">
+                @for (conn of filteredConnectors(loc); track conn.id) {
+                  <div class="grid grid-cols-[2rem_2.5rem_1fr_1fr_1fr_1fr_1fr_5rem] gap-x-4 items-center px-2 py-3 border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50/50 dark:hover:bg-gray-700/50"
+                    [class.bg-blue-50]="isConnectorSelected(conn.id)"
+                    [class.dark:bg-blue-900/10]="isConnectorSelected(conn.id)"
+                    [class.opacity-50]="isConnectorDisabled(conn.id)">
+                    <div class="flex items-center justify-center">
+                      <input type="checkbox"
+                        [checked]="isConnectorSelected(conn.id)"
+                        (change)="toggleConnectorSelect(conn.id)"
+                        [attr.aria-label]="'Select ' + conn.name"
+                        class="h-3.5 w-3.5 rounded border-gray-300 dark:border-gray-500 text-blue-600 focus:ring-blue-500 focus:ring-offset-0 dark:bg-gray-700 cursor-pointer"/>
+                    </div>
                     <div class="flex items-center justify-center">
                       <button
                         (click)="toggleConnectorExpand(conn.id, $event)"
@@ -171,7 +258,12 @@
                           class="w-full border border-blue-400 rounded px-2 py-0.5 text-sm text-gray-900 dark:bg-gray-700 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           [attr.autofocus]="true" />
                       } @else {
-                        <span class="text-sm text-gray-800 dark:text-gray-100 font-medium">{{ conn.name }}</span>
+                        <div class="flex items-center gap-1.5">
+                          <span class="text-sm text-gray-800 dark:text-gray-100 font-medium">{{ conn.name }}</span>
+                          @if (isConnectorDisabled(conn.id)) {
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400">Disabled</span>
+                          }
+                        </div>
                         @if (versionStatusLabel(conn) === 'Version up to date') {
                           <span class="inline-flex items-center gap-1 w-fit text-[10px] text-gray-400 dark:text-gray-500 leading-tight">
                             <svg aria-hidden="true" class="w-2.5 h-2.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
@@ -209,7 +301,17 @@
                         }
                       }
                     </div>
-                    <!-- Status -->
+                    <!-- Enrollment Status -->
+                    <div>
+                      @if (getConnectorEnrollmentStatus(conn) === 'Enrolled') {
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Enrolled</span>
+                      } @else if (getConnectorEnrollmentStatus(conn) === 'Expired Token') {
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">Expired Token</span>
+                      } @else {
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">Pending</span>
+                      }
+                    </div>
+                    <!-- Connection -->
                     <div>
                       @if (conn.status === 'Online') {
                         <span class="inline-flex items-center gap-1.5 text-xs font-medium text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 px-2 py-0.5 rounded-full">
@@ -241,6 +343,13 @@
                       </button>
                       @if (rowMenuOpenId === conn.id) {
                         <div class="absolute right-3 top-8 z-20 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1" (click)="$event.stopPropagation()">
+                          <button (click)="openLogs(conn)"
+                            class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 motion-safe:transition-colors text-left">
+                            <svg aria-hidden="true" class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+                            </svg>
+                            View Logs
+                          </button>
                           @if (conn.status === 'Offline') {
                             <button (click)="rowMenuOpenId = null"
                               class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-green-700 dark:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/20 motion-safe:transition-colors text-left">
@@ -256,6 +365,31 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9v6m-4.5 0V9M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                               </svg>
                               Pause Connectivity
+                            </button>
+                            @if (conn.status === 'Online') {
+                              <button (click)="toggleConnectorDisabled(conn)"
+                                class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 motion-safe:transition-colors text-left">
+                                @if (isConnectorDisabled(conn.id)) {
+                                  <svg aria-hidden="true" class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5.636 5.636a9 9 0 1012.728 12.728M12 3v9"/>
+                                  </svg>
+                                  Enable
+                                } @else {
+                                  <svg aria-hidden="true" class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                                  </svg>
+                                  Disable
+                                }
+                              </button>
+                            }
+                          }
+                          @if (getConnectorEnrollmentStatus(conn) === 'Expired Token') {
+                            <button (click)="reissueToken(conn)"
+                              class="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-amber-700 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-900/20 motion-safe:transition-colors text-left">
+                              <svg aria-hidden="true" class="w-3.5 h-3.5 text-amber-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/>
+                              </svg>
+                              Reissue Token
                             </button>
                           }
 
@@ -316,5 +450,414 @@
       </tbody>
     </table>
 
+    @if (filteredLocations.length === 0) {
+      <div aria-live="polite" class="py-10 text-center text-sm text-gray-400 dark:text-gray-300">No locations match your search or filters.</div>
+    }
+    @if (filteredLocations.length > 0) {
+      <div class="flex items-center justify-between px-5 py-3 border-t border-gray-100 dark:border-gray-700">
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-1.5">
+            <label for="locations-page-size-select" class="text-xs text-gray-400 dark:text-gray-300">Rows per page</label>
+            <select id="locations-page-size-select" [(ngModel)]="locationsPageSize" (ngModelChange)="locationsPage = 1" aria-label="Rows per page"
+              class="text-xs border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700 bg-white dark:border-gray-600 dark:text-gray-300 dark:bg-gray-800">
+              @for (size of locationsPageSizeOptions; track size) {
+                <option [ngValue]="size">{{ size }}</option>
+              }
+            </select>
+          </div>
+          <span class="text-xs text-gray-400 dark:text-gray-300">{{ locationsPageStart }}–{{ locationsPageEnd }} of {{ filteredLocations.length }}</span>
+        </div>
+        @if (locationsPageCount > 1) {
+          <div class="flex items-center gap-1">
+            <button (click)="locationsPage = locationsPage - 1" [disabled]="locationsPage === 1"
+              class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 transition-colors disabled:opacity-30 disabled:pointer-events-none">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>
+              </svg>
+            </button>
+            @for (p of locationsPages; track p) {
+              <button (click)="locationsPage = p"
+                class="w-7 h-7 text-xs rounded-lg transition-colors"
+                [class.bg-blue-600]="locationsPage === p" [class.text-white]="locationsPage === p" [class.font-semibold]="locationsPage === p"
+                [class.text-gray-500]="locationsPage !== p" [class.dark:text-gray-300]="locationsPage !== p"
+                [class.hover:bg-gray-100]="locationsPage !== p" [class.dark:hover:bg-gray-700]="locationsPage !== p">
+                {{ p }}
+              </button>
+            }
+            <button (click)="locationsPage = locationsPage + 1" [disabled]="locationsPage === locationsPageCount"
+              class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 transition-colors disabled:opacity-30 disabled:pointer-events-none">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
+              </svg>
+            </button>
+          </div>
+        }
+      </div>
+    }
+
   </div>
 </div>
+
+<!-- ── ADD CONNECTOR MODAL ── -->
+@if (showAddConnectorModal && activeLocation) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4" (keydown.escape)="closeAddConnector()">
+    <div class="absolute inset-0 bg-black/30" (click)="closeAddConnector()"></div>
+    <div role="dialog" aria-modal="true" aria-labelledby="add-connector-title"
+      class="relative w-full max-w-xl bg-white dark:bg-gray-800 rounded-xl shadow-2xl flex flex-col overflow-hidden max-h-[90vh]">
+
+      <!-- Header -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 shrink-0">
+        <div>
+          <h2 id="add-connector-title" class="text-base font-semibold text-gray-900 dark:text-gray-100">Add Connector</h2>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ activeLocation.name }}</p>
+        </div>
+        <button (click)="closeAddConnector()" aria-label="Close dialog"
+          class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
+          <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Tabs -->
+      <div class="flex border-b border-gray-200 dark:border-gray-700 shrink-0 px-6">
+        <button (click)="addConnectorTab = 'single'"
+          class="py-3 px-1 mr-5 text-sm font-medium border-b-2 -mb-px motion-safe:transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-t"
+          [class.border-blue-600]="addConnectorTab === 'single'"
+          [class.text-blue-600]="addConnectorTab === 'single'"
+          [class.dark:text-blue-400]="addConnectorTab === 'single'"
+          [class.dark:border-blue-400]="addConnectorTab === 'single'"
+          [class.border-transparent]="addConnectorTab !== 'single'"
+          [class.text-gray-500]="addConnectorTab !== 'single'"
+          [class.dark:text-gray-400]="addConnectorTab !== 'single'"
+          [class.hover:text-gray-700]="addConnectorTab !== 'single'"
+          [class.dark:hover:text-gray-300]="addConnectorTab !== 'single'">
+          Single Add
+        </button>
+        <button (click)="addConnectorTab = 'bulk'"
+          class="py-3 px-1 text-sm font-medium border-b-2 -mb-px motion-safe:transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-t"
+          [class.border-blue-600]="addConnectorTab === 'bulk'"
+          [class.text-blue-600]="addConnectorTab === 'bulk'"
+          [class.dark:text-blue-400]="addConnectorTab === 'bulk'"
+          [class.dark:border-blue-400]="addConnectorTab === 'bulk'"
+          [class.border-transparent]="addConnectorTab !== 'bulk'"
+          [class.text-gray-500]="addConnectorTab !== 'bulk'"
+          [class.dark:text-gray-400]="addConnectorTab !== 'bulk'"
+          [class.hover:text-gray-700]="addConnectorTab !== 'bulk'"
+          [class.dark:hover:text-gray-300]="addConnectorTab !== 'bulk'">
+          Bulk Add
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-5">
+
+        @if (addConnectorTab === 'single') {
+
+          <!-- Name field -->
+          <div>
+            <label for="new-connector-name" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              New Connector Name <span aria-hidden="true" class="text-red-500">*</span>
+            </label>
+            <input id="new-connector-name" [(ngModel)]="connectorName" type="text"
+              placeholder="e.g. Chicago-GW-03"
+              class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-gray-100 dark:bg-gray-700 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"/>
+          </div>
+
+          <!-- Connector catalog -->
+          <div>
+            <div class="flex items-center gap-1.5 mb-2">
+              <p class="text-xs font-medium text-gray-700 dark:text-gray-300">
+                Select Parent Connector <span aria-hidden="true" class="text-red-500">*</span>
+              </p>
+              <div class="relative group">
+                <button type="button" aria-label="Learn about parent connectors"
+                  class="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-full">
+                  <svg aria-hidden="true" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd"/>
+                  </svg>
+                </button>
+                <div role="tooltip"
+                  class="pointer-events-none absolute left-1/2 -translate-x-1/2 top-full mt-2 w-64 rounded-lg bg-gray-900 dark:bg-gray-700 px-3 py-2 text-xs text-gray-100 shadow-lg opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity z-50">
+                  Note: A parent connector is the template for the new connector. The new connector inherits all settings from the parent — including type, applications, and associated roles — and is differentiated only by its new name.
+                  <span class="absolute left-1/2 -translate-x-1/2 bottom-full w-0 h-0 border-x-4 border-x-transparent border-b-4 border-b-gray-900 dark:border-b-gray-700"></span>
+                </div>
+              </div>
+            </div>
+            <div role="radiogroup" aria-label="Connector type" class="flex flex-col gap-2">
+              @for (item of activeLocationCatalog; track item.id) {
+                <label [for]="'catalog-' + item.id"
+                  [class]="'flex items-start gap-3 p-3 rounded-lg border cursor-pointer motion-safe:transition-colors ' + catalogItemClasses(item.id)">
+                  <input [id]="'catalog-' + item.id" type="radio" name="connector-catalog"
+                    [checked]="isCatalogItemSelected(item.id)"
+                    (change)="selectCatalogItem(item.id)"
+                    class="mt-0.5 h-4 w-4 border-gray-300 dark:border-gray-500 text-blue-600 focus:ring-blue-500 shrink-0"/>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <span class="text-sm font-medium text-gray-800 dark:text-gray-100">{{ item.name }}</span>
+                      <span class="text-[10px] font-medium px-1.5 py-0.5 rounded" [class]="connectorTypeColor(item.type)">{{ item.type }}</span>
+                    </div>
+                    @if (item.apps.length > 0) {
+                      <div class="mt-1.5 flex flex-wrap gap-x-2 gap-y-0.5">
+                        @for (app of item.apps; track app) {
+                          <span class="inline-flex items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400">
+                            <svg aria-hidden="true" class="w-2.5 h-2.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z"/>
+                            </svg>
+                            {{ appFriendlyNames[app] ? (app + ' / ' + appFriendlyNames[app]) : app }}
+                          </span>
+                        }
+                      </div>
+                    } @else {
+                      <p class="mt-1 text-[11px] text-gray-400 dark:text-gray-500">No applications</p>
+                    }
+                  </div>
+                </label>
+              }
+            </div>
+          </div>
+
+          <!-- Token Expiration -->
+          <div>
+            <label for="connector-token-expiration" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              Token Expiration <span aria-hidden="true" class="text-red-500">*</span>
+            </label>
+            <div class="flex items-center gap-2">
+              <input id="connector-token-expiration" [(ngModel)]="tokenExpirationWeeks" type="number" min="1" max="52"
+                class="w-24 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-700 dark:text-gray-100 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"/>
+              <span class="text-sm text-gray-500 dark:text-gray-400">weeks</span>
+            </div>
+            <p class="mt-1.5 text-xs text-gray-400 dark:text-gray-500">The number of weeks a token is active for, after which a new token will need to be reissued.</p>
+          </div>
+
+        } @else {
+
+          <!-- Bulk tab instructions + template download -->
+          <div>
+            <p class="text-xs text-gray-600 dark:text-gray-400 mb-1">
+              Upload a CSV with a <strong class="font-medium text-gray-700 dark:text-gray-300">Connector Name</strong> and <strong class="font-medium text-gray-700 dark:text-gray-300">Parent Connector</strong> column. Each row creates one new connector at this location.
+            </p>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mb-3">Note: The parent connector is the template your new connectors will be based on, inheriting its type, applications, and associated roles.</p>
+            <button (click)="downloadBulkCsvTemplate()"
+              class="inline-flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded mb-4">
+              <svg aria-hidden="true" class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+              </svg>
+              Download CSV Template
+            </button>
+
+            @if (!hasBulkCsvData) {
+              <!-- Drop zone -->
+              <label for="bulk-csv-input"
+                class="flex flex-col items-center justify-center gap-2 w-full rounded-lg border-2 border-dashed px-6 py-10 cursor-pointer motion-safe:transition-colors"
+                [class.border-blue-400]="bulkCsvDragOver"
+                [class.bg-blue-50]="bulkCsvDragOver"
+                [class.dark:bg-blue-900/10]="bulkCsvDragOver"
+                [class.border-gray-300]="!bulkCsvDragOver"
+                [class.dark:border-gray-600]="!bulkCsvDragOver"
+                [class.hover:border-blue-400]="!bulkCsvDragOver"
+                [class.dark:hover:border-blue-500]="!bulkCsvDragOver"
+                (dragover)="$event.preventDefault(); bulkCsvDragOver = true"
+                (dragleave)="bulkCsvDragOver = false"
+                (drop)="onBulkCsvDrop($event)">
+                <svg aria-hidden="true" class="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m6.75 12H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+                </svg>
+                <span class="text-sm text-gray-500 dark:text-gray-400">Drag & drop your CSV here, or <span class="text-blue-600 dark:text-blue-400 font-medium">browse</span></span>
+                <span class="text-xs text-gray-400 dark:text-gray-500">.csv files only</span>
+                <input id="bulk-csv-input" type="file" accept=".csv" class="sr-only" (change)="onBulkCsvFileInput($event)"/>
+              </label>
+              @if (bulkCsvError) {
+                <p class="mt-2 text-xs text-red-600 dark:text-red-400">{{ bulkCsvError }}</p>
+              }
+            } @else {
+              <!-- Preview table -->
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-medium text-gray-700 dark:text-gray-300">{{ bulkCsvRows.length }} connector{{ bulkCsvRows.length === 1 ? '' : 's' }} to add</span>
+                <button (click)="clearBulkCsv()"
+                  class="text-xs text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded">
+                  Remove file
+                </button>
+              </div>
+              <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                <table class="w-full text-xs">
+                  <thead class="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                      <th class="text-left px-3 py-2 font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Connector Name</th>
+                      <th class="text-left px-3 py-2 font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Parent Connector</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                    @for (row of bulkCsvRows; track $index) {
+                      <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <td class="px-3 py-2 text-gray-800 dark:text-gray-200 font-medium">{{ row.name }}</td>
+                        <td class="px-3 py-2">
+                          @if (row.catalogId) {
+                            <span class="text-gray-700 dark:text-gray-300">{{ row.catalogName }}</span>
+                          } @else {
+                            <span class="inline-flex items-center gap-1 text-red-600 dark:text-red-400">
+                              <svg aria-hidden="true" class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+                              </svg>
+                              {{ row.catalogName || 'Missing' }} — not recognized
+                            </span>
+                          }
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+
+          <!-- Token Expiration (bulk) -->
+          <div>
+            <label for="bulk-connector-token-expiration" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              Token Expiration <span aria-hidden="true" class="text-red-500">*</span>
+            </label>
+            <div class="flex items-center gap-2">
+              <input id="bulk-connector-token-expiration" [(ngModel)]="tokenExpirationWeeks" type="number" min="1" max="52"
+                class="w-24 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-700 dark:text-gray-100 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"/>
+              <span class="text-sm text-gray-500 dark:text-gray-400">weeks</span>
+            </div>
+            <p class="mt-1.5 text-xs text-gray-400 dark:text-gray-500">The number of weeks a token is active for, after which a new token will need to be reissued.</p>
+          </div>
+
+        }
+
+      </div>
+
+      <!-- Footer -->
+      <div class="flex items-center justify-end gap-2 px-6 py-4 border-t border-gray-200 dark:border-gray-700 shrink-0 bg-gray-50 dark:bg-gray-800/50">
+        <button (click)="closeAddConnector()"
+          class="px-3.5 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500">
+          Cancel
+        </button>
+        @if (addConnectorTab === 'single') {
+          <button (click)="addConnectors()" [disabled]="!canAddConnectors"
+            class="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed dark:focus-visible:ring-offset-gray-800">
+            Add Connector(s)
+          </button>
+        } @else {
+          <button (click)="submitBulkConnectors()" [disabled]="!canSubmitBulkConnectors"
+            class="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed dark:focus-visible:ring-offset-gray-800">
+            Add {{ bulkCsvRows.length || '' }} Connector{{ bulkCsvRows.length === 1 ? '' : 's' }}
+          </button>
+        }
+      </div>
+
+    </div>
+  </div>
+}
+
+<!-- ── LOGS DRAWER ── -->
+@if (showLogsView && activeConnector) {
+  <div class="fixed inset-0 z-50 flex justify-end">
+    <div class="absolute inset-0 bg-black/30" (click)="closeLogs()"></div>
+    <div role="dialog" aria-modal="true" aria-labelledby="connector-logs-title" class="relative w-[700px] h-full bg-white shadow-2xl flex flex-col overflow-hidden dark:bg-gray-800">
+
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 shrink-0">
+        <div>
+          <h2 id="connector-logs-title" class="text-base font-semibold text-gray-900 dark:text-gray-100">Activity Logs</h2>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 font-mono">{{ activeConnector.name }}</p>
+        </div>
+        <button (click)="closeLogs()" aria-label="Close logs" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded motion-safe:transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1">
+          <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="flex items-center gap-3 px-6 py-3 border-b border-gray-100 dark:border-gray-700 shrink-0 flex-wrap">
+        <div class="flex rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden text-xs font-medium">
+          @for (tf of ([{v:'24h',l:'24h'},{v:'7d',l:'7d'},{v:'30d',l:'30d'}]); track tf.v) {
+            <button (click)="logsTimeframe = $any(tf.v)"
+              class="focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+              [class]="logsTimeframe === tf.v ? 'bg-blue-600 text-white px-3 py-1.5' : 'bg-white text-gray-600 hover:bg-gray-50 px-3 py-1.5 motion-safe:transition-colors dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'">
+              {{ tf.l }}
+            </button>
+          }
+        </div>
+        <div class="flex rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden text-xs font-medium">
+          @for (f of ([{v:'all',l:'All'},{v:'success',l:'Success'},{v:'fail',l:'Failed'}]); track f.v) {
+            <button (click)="logsStatusFilter = $any(f.v)"
+              class="focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+              [class]="logsStatusFilter === f.v ? 'bg-blue-600 text-white px-3 py-1.5' : 'bg-white text-gray-600 hover:bg-gray-50 px-3 py-1.5 motion-safe:transition-colors dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'">
+              {{ f.l }}
+            </button>
+          }
+        </div>
+        <div class="relative flex-1 min-w-[160px]">
+          <svg aria-hidden="true" class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
+          </svg>
+          <input [(ngModel)]="logsSearch" aria-label="Search logs" placeholder="Search URL or port…"
+            class="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 dark:focus:ring-blue-400"/>
+        </div>
+        <span class="text-xs text-gray-400 dark:text-gray-200 shrink-0">{{ filteredLogs.length }} entries</span>
+      </div>
+
+      <div class="flex-1 overflow-y-auto">
+        @if (filteredLogs.length === 0) {
+          <div aria-live="polite" class="flex flex-col items-center justify-center h-40 text-gray-400 dark:text-gray-500">
+            <svg aria-hidden="true" class="w-8 h-8 mb-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+            </svg>
+            <p class="text-sm">No log entries match your filters</p>
+          </div>
+        } @else {
+          <table class="w-full text-xs">
+            <thead class="bg-gray-50 border-b border-gray-200 sticky top-0 dark:bg-gray-700 dark:border-gray-700">
+              <tr>
+                <th class="text-left px-6 py-2.5 font-semibold text-gray-500 dark:text-gray-200 uppercase tracking-wider">Timestamp</th>
+                <th class="text-left px-4 py-2.5 font-semibold text-gray-500 dark:text-gray-200 uppercase tracking-wider">URL</th>
+                <th class="text-right px-4 py-2.5 font-semibold text-gray-500 dark:text-gray-200 uppercase tracking-wider">Port</th>
+                <th class="text-right px-6 py-2.5 font-semibold text-gray-500 dark:text-gray-200 uppercase tracking-wider">Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+              @for (log of filteredLogs; track $index) {
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  <td class="px-6 py-2.5 text-gray-500 dark:text-gray-200 whitespace-nowrap">{{ formatLogTimestamp(log.timestamp) }}</td>
+                  <td class="px-4 py-2.5 text-gray-700 dark:text-gray-200 font-medium">{{ log.url }}</td>
+                  <td class="px-4 py-2.5 text-right text-gray-500 dark:text-gray-200 font-mono">{{ log.port }}</td>
+                  <td class="px-6 py-2.5 text-right">
+                    @if (log.status === 'success') {
+                      <span class="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full dark:text-green-300 dark:bg-green-900/30 dark:border-green-700">
+                        <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>Success
+                      </span>
+                    } @else {
+                      <span class="inline-flex items-center gap-1 text-xs font-medium text-red-700 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full dark:text-red-300 dark:bg-red-900/30 dark:border-red-700">
+                        <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>Failed
+                      </span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+
+    </div>
+  </div>
+}
+
+<ng-template #connSortIcon let-col="col">
+  @if (connectorSortCol === col) {
+    @if (connectorSortDir === 'asc') {
+      <svg aria-hidden="true" class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"/>
+      </svg>
+    } @else {
+      <svg aria-hidden="true" class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
+      </svg>
+    }
+  } @else {
+    <svg aria-hidden="true" class="w-3 h-3 text-gray-300 dark:text-gray-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"/>
+    </svg>
+  }
+</ng-template>

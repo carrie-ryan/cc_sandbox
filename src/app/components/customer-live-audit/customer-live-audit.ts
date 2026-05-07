@@ -3,6 +3,7 @@ import { NgTemplateOutlet, UpperCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CustomerService, CustomerIdentity } from '../../services/customer.service';
 import { NetworkMapComponent } from '../network-map/network-map';
+import { LogEntry, generateLogs, formatLogTimestamp, filterLogs } from '../../utils/log.utils';
 
 @Component({
   selector: 'app-customer-live-audit',
@@ -57,7 +58,8 @@ export class CustomerLiveAuditComponent {
   auditStatusFilter: string = '';
   auditWarningsOnly = false;
   auditPage = 1;
-  readonly auditPageSize = 10;
+  auditPageSize = 10;
+  readonly auditPageSizeOptions = [10, 25, 50, 100];
   auditSortCol: 'entity' | 'type' | 'location' | 'usage' | 'lastSeen' | 'status' | null = null;
   auditSortDir: 'asc' | 'desc' = 'asc';
 
@@ -335,4 +337,38 @@ export class CustomerLiveAuditComponent {
     this.exporting = format;
     setTimeout(() => this.exporting = null, 2500);
   }
+
+  // ── Row action menu ───────────────────────────────────────────────────────
+
+  rowMenuOpenId: string | null = null;
+
+  // ── Logs drawer ───────────────────────────────────────────────────────────
+
+  showLogsView = false;
+  activeIdentity: CustomerIdentity | null = null;
+  logsTimeframe: '24h' | '7d' | '30d' = '7d';
+  logsStatusFilter: 'all' | 'success' | 'fail' = 'all';
+  logsSearch = '';
+  private allLogs: LogEntry[] = [];
+
+  get filteredLogs(): LogEntry[] {
+    return filterLogs(this.allLogs, this.logsTimeframe, this.logsStatusFilter, this.logsSearch);
+  }
+
+  openLogs(identity: CustomerIdentity): void {
+    this.rowMenuOpenId = null;
+    this.activeIdentity = identity;
+    this.logsTimeframe = '7d';
+    this.logsStatusFilter = 'all';
+    this.logsSearch = '';
+    this.allLogs = generateLogs(identity.id);
+    this.showLogsView = true;
+  }
+
+  closeLogs(): void {
+    this.showLogsView = false;
+    this.activeIdentity = null;
+  }
+
+  readonly formatLogTimestamp = formatLogTimestamp;
 }

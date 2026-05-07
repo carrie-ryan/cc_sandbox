@@ -14,8 +14,10 @@ export interface DeployedEntry {
   email: string;
   token: string;
   connection: 'Online' | 'Offline';
-  enrollmentStatus: 'Enrolled' | 'Pending' | 'Expired Token';
+  identityStatus: 'Enrolled' | 'Pending' | 'Expired Token';
   activated: string;
+  enabled: boolean;
+  tokenExpirationWeeks: number;
   connectorAssignments?: ConnectorAssignment[];
   roles?: string[];
 }
@@ -33,40 +35,50 @@ export class IdentityService {
     {
       id: 'de-1', label: 'John Smith', email: 'jsmith@corp.com',
       token: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', connection: 'Online',
-      enrollmentStatus: 'Enrolled', activated: 'Jan 3, 2026',
+      identityStatus: 'Enrolled', activated: 'Jan 3, 2026',
+      enabled: true, tokenExpirationWeeks: 4,
       roles: ['role-it-admin'],
     },
     {
       id: 'de-2', label: 'Sarah Lee', email: 'slee@corp.com',
       token: 'b2c3d4e5-f6a7-8901-bcde-f12345678901', connection: 'Offline',
-      enrollmentStatus: 'Enrolled', activated: '--',
+      identityStatus: 'Enrolled', activated: '--',
+      enabled: true, tokenExpirationWeeks: 4,
       roles: ['role-supervisor', 'role-end-user'],
     },
     {
       id: 'de-3', label: 'Marcus Webb', email: 'mwebb@corp.com',
       token: 'c3d4e5f6-a7b8-9012-cdef-123456789012', connection: 'Offline',
-      enrollmentStatus: 'Expired Token', activated: 'Dec 10, 2025',
+      identityStatus: 'Expired Token', activated: 'Dec 10, 2025',
+      enabled: true, tokenExpirationWeeks: 4,
       roles: ['role-end-user'],
     },
   ];
 
-  add(label: string, email: string, roles?: string[]): DeployedEntry {
+  add(label: string, email: string, roles?: string[], tokenExpirationWeeks = 4): DeployedEntry {
     const entry: DeployedEntry = {
       id: 'de-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
       label,
       email,
       token: this.generateToken(),
       connection: 'Offline',
-      enrollmentStatus: 'Pending',
+      identityStatus: 'Pending',
       activated: '--',
+      enabled: true,
+      tokenExpirationWeeks,
       roles: roles ?? [],
     };
     this.entries.push(entry);
     return entry;
   }
 
-  addBulk(rows: Array<{ label: string; email: string; roles?: string[] }>): DeployedEntry[] {
-    return rows.map(row => this.add(row.label, row.email, row.roles));
+  addBulk(rows: Array<{ label: string; email: string; roles?: string[]; tokenExpirationWeeks?: number }>): DeployedEntry[] {
+    return rows.map(row => this.add(row.label, row.email, row.roles, row.tokenExpirationWeeks));
+  }
+
+  toggle(id: string): void {
+    const entry = this.entries.find(e => e.id === id);
+    if (entry) entry.enabled = !entry.enabled;
   }
 
   mergeRoles(ids: string[], roleIds: string[]): void {
@@ -87,7 +99,7 @@ export class IdentityService {
     const assignment = entry.connectorAssignments?.find(a => a.id === assignmentId);
     if (!assignment) return;
     assignment.status = 'Pending';
-    entry.enrollmentStatus = this.deriveStatus(entry.connectorAssignments!);
+    entry.identityStatus = this.deriveStatus(entry.connectorAssignments!);
   }
 
   removeConnector(entryId: string, assignmentId: string): void {
@@ -105,8 +117,8 @@ export class IdentityService {
         .filter(a => !existingIds.has(a.id))
         .map(a => ({ ...a, status: 'Pending' as const }));
       entry.connectorAssignments = [...existing, ...toAdd];
-      if (entry.enrollmentStatus !== 'Expired Token') {
-        entry.enrollmentStatus = this.deriveStatus(entry.connectorAssignments);
+      if (entry.identityStatus !== 'Expired Token') {
+        entry.identityStatus = this.deriveStatus(entry.connectorAssignments);
         entry.token = this.generateToken();
       }
     }
@@ -121,14 +133,14 @@ export class IdentityService {
   reissueToken(id: string): void {
     const entry = this.entries.find(e => e.id === id);
     if (!entry) return;
-    entry.enrollmentStatus = 'Pending';
+    entry.identityStatus = 'Pending';
     entry.token = this.generateToken();
   }
 
   reissueExpiredTokens(): void {
     for (const entry of this.entries) {
-      if (entry.enrollmentStatus === 'Expired Token') {
-        entry.enrollmentStatus = 'Pending';
+      if (entry.identityStatus === 'Expired Token') {
+        entry.identityStatus = 'Pending';
         entry.token = this.generateToken();
       }
     }
